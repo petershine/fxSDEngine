@@ -19,7 +19,7 @@ struct FXDTextEditorModifier: ViewModifier {
 }
 
 @available(iOS 17.0, *)
-struct FXDswiftuiTextEditor: View {
+public struct FXDswiftuiTextEditor: View {
 	@Environment(\.dismiss) private var dismiss
 
 	@FocusState private var focusedEditor: Int?
@@ -27,12 +27,21 @@ struct FXDswiftuiTextEditor: View {
 
 	@State var editedParagraph_0: String = ""
 	@State var editedParagraph_1: String = ""
-	@State var editedText: String
+	@State var editedText: String = ""
 
-	var finishedEditing: ((String, String, String) -> Void)
+	var finishedEditing: ((String, String, String) -> Void)? = nil
 
 
-	var body: some View {
+	public init(focusedEditor: Int? = nil, editorsVStackHeight: CGFloat = 0.0, editedParagraph_0: String = "", editedParagraph_1: String = "", editedText: String = "", finishedEditing: @escaping (String, String, String) -> Void) {
+		self.focusedEditor = focusedEditor
+		self.editorsVStackHeight = editorsVStackHeight
+		self.editedParagraph_0 = editedParagraph_0
+		self.editedParagraph_1 = editedParagraph_1
+		self.editedText = editedText
+		self.finishedEditing = finishedEditing
+	}
+
+	public var body: some View {
 		ZStack {
 			GeometryReader { outerGeometry in
 				VStack {
@@ -69,7 +78,7 @@ struct FXDswiftuiTextEditor: View {
 					Spacer()
 
 					FXDswiftuiButton(action: {
-						finishedEditing(editedParagraph_0, editedParagraph_1, editedText)
+						finishedEditing?(editedParagraph_0, editedParagraph_1, editedText)
 						dismiss()
 					}, systemImageName: "pencil.and.list.clipboard")
 				}

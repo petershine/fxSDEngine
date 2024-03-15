@@ -6,10 +6,14 @@ import fXDKit
 
 
 @available(iOS 17.0, *)
-struct FXDswiftuiMediaDisplay: View {
+public struct FXDswiftuiMediaDisplay: View {
 	@Binding var mediaImage: UIImage?
 
-    var body: some View {
+	public init(mediaImage: UIImage? = nil) {
+		_mediaImage = Binding.constant(mediaImage)
+	}
+	
+    public var body: some View {
 		Color.black
 			.overlay {
 				if let availableImage = mediaImage {
@@ -49,5 +53,5 @@ struct FXDswiftuiMediaDisplay: View {
 
 @available(iOS 17.0, *)
 #Preview {
-	FXDswiftuiMediaDisplay(mediaImage: Binding.constant(UIImage()))
+	FXDswiftuiMediaDisplay(mediaImage: UIImage())
 }

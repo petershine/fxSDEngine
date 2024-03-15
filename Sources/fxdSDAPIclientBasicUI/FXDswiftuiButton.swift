@@ -28,11 +28,16 @@ struct FXDButtonModifier: ViewModifier {
 
 
 @available(iOS 17.0, *)
-struct FXDswiftuiButton: View {
+public struct FXDswiftuiButton: View {
 	var action: () -> Void
 	var systemImageName: String
 
-	var body: some View {
+	public init(action: @escaping () -> Void, systemImageName: String) {
+		self.action = action
+		self.systemImageName = systemImageName
+	}
+	
+	public var body: some View {
 		Button(action: action) {
 			Image(systemName: systemImageName)
 				.resizable()
