@@ -25,18 +25,14 @@ public struct FXDswiftuiTextEditor: View {
 	@FocusState private var focusedEditor: Int?
 	@State private var editorsVStackHeight: CGFloat = 0.0
 
-	@State var editedParagraph_0: String = ""
-	@State var editedParagraph_1: String = ""
-	@State var editedText: String = ""
+	@State private var editedParagraph_0: String = ""
+	@State private var editedParagraph_1: String = ""
+	@State private var editedText: String = ""
 
-	var finishedEditing: ((String, String, String) -> Void)? = nil
+	var finishedEditing: ((String, String, String) -> Void)
 
 
-	public init(focusedEditor: Int? = nil, editorsVStackHeight: CGFloat = 0.0, editedParagraph_0: String = "", editedParagraph_1: String = "", editedText: String = "", finishedEditing: @escaping (String, String, String) -> Void) {
-		self.focusedEditor = focusedEditor
-		self.editorsVStackHeight = editorsVStackHeight
-		self.editedParagraph_0 = editedParagraph_0
-		self.editedParagraph_1 = editedParagraph_1
+	public init(editedText: String, finishedEditing: @escaping (String, String, String) -> Void) {
 		self.editedText = editedText
 		self.finishedEditing = finishedEditing
 	}
@@ -78,7 +74,7 @@ public struct FXDswiftuiTextEditor: View {
 					Spacer()
 
 					FXDswiftuiButton(action: {
-						finishedEditing?(editedParagraph_0, editedParagraph_1, editedText)
+						finishedEditing(editedParagraph_0, editedParagraph_1, editedText)
 						dismiss()
 					}, systemImageName: "pencil.and.list.clipboard")
 				}
