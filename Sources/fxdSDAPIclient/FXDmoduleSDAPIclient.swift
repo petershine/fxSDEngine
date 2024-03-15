@@ -22,7 +22,7 @@ extension SDError: LocalizedError {
 
 @available(iOS 17.0, *)
 open class FXDmoduleSDAPIclient: NSObject, ObservableObject {
-	private static let API_TXT2IMG = "sdapi/v1/txt2img"
+	private static let API_TXT2IMG = "api/txt2img"
 	private static let OBJKEY_IMAGES = "images"
 
 	@Published open var generatedImage: UIImage? = nil
