@@ -4,18 +4,18 @@
 import PackageDescription
 
 let package = Package(
-	name: "fxSDBackendClient",
+	name: "fxdSDAPIclient",
 	products: [
 		// Products define the executables and libraries a package produces, making them visible to other packages.
 		.library(
 			name: "fXDKit",
 			targets: ["fXDKit"]),
 		.library(
-			name: "fxSDBackendClient",
-			targets: ["fxSDBackendClient"]),
+			name: "fxdSDAPIclient",
+			targets: ["fxdSDAPIclient"]),
 		.library(
-			name: "fxSDBackendBasicUI",
-			targets: ["fxSDBackendBasicUI"]),
+			name: "fxdSDAPIclientBasicUI",
+			targets: ["fxdSDAPIclientBasicUI"]),
 	],
 	targets: [
 		// Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -24,15 +24,15 @@ let package = Package(
 			name: "fXDKit"
 		),
 		.target(
-			name: "fxSDBackendClient",
+			name: "fxdSDAPIclient",
 			dependencies: ["fXDKit"]
 		),
 		.target(
-			name: "fxSDBackendBasicUI",
-			dependencies: ["fXDKit", "fxSDBackendClient"]
+			name: "fxdSDAPIclientBasicUI",
+			dependencies: ["fXDKit", "fxdSDAPIclient"]
 		),
 		.testTarget(
-			name: "fxSDBackendClientTests",
-			dependencies: ["fxSDBackendClient"]),
+			name: "fxdSDAPIclientTests",
+			dependencies: ["fxdSDAPIclient"]),
 	]
 )

@@ -1,7 +1,7 @@
 import XCTest
-@testable import fxSDBackendClient
+@testable import fxdSDAPIclient
 
-final class fxSDBackendClientTests: XCTestCase {
+final class fxdSDAPIclientTests: XCTestCase {
     func testExample() throws {
         // XCTest Documentation
         // https://developer.apple.com/documentation/xctest
