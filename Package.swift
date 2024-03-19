@@ -11,21 +11,19 @@ let package = Package(
 	products: [
 		// Products define the executables and libraries a package produces, making them visible to other packages.
 		.library(
-			name: "fXDKit",
-			targets: ["fXDKit"]),
-		.library(
 			name: "fxdSDAPIclient",
 			targets: ["fxdSDAPIclient"]),
 		.library(
 			name: "fxdSDAPIclientBasicUI",
 			targets: ["fxdSDAPIclientBasicUI"]),
 	],
+	dependencies: [
+		// Dependencies declare other packages that this package depends on.
+		.package(url: "/Users/thckbrws/_WORK_fXceed/fXDKit", .upToNextMajor(from: "1.0.0")),
+	],
 	targets: [
 		// Targets are the basic building blocks of a package, defining a module or a test suite.
 		// Targets can depend on other targets in this package and products from dependencies.
-		.target(
-			name: "fXDKit"
-		),
 		.target(
 			name: "fxdSDAPIclient",
 			dependencies: ["fXDKit"]

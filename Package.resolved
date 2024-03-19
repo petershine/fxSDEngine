@@ -1,0 +1,15 @@
+{
+  "originHash" : "5e9a38ef05717630b199a872558c5a7fdccb30b37aef73bf3d92763ab520cf2a",
+  "pins" : [
+    {
+      "identity" : "fxdkit",
+      "kind" : "localSourceControl",
+      "location" : "/Users/thckbrws/_WORK_fXceed/fXDKit",
+      "state" : {
+        "revision" : "63a5dbdd600b6d56e3512602d53a3d8addab13aa",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 3
+}
