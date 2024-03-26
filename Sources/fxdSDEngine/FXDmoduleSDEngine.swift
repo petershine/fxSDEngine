@@ -6,6 +6,11 @@ import UIKit
 import fXDKit
 
 
+public enum SDAPIendpoint: String, CaseIterable {
+	case INTERNAL_SYSINFO = "internal/sysinfo"
+	case SDAPI_V1_TXT2IMG = "sdapi/v1/txt2img"
+}
+
 enum SDError: Error {
 	case reason(msg: String?)
 }
@@ -22,7 +27,7 @@ extension SDError: LocalizedError {
 
 @available(iOS 17.0, *)
 open class FXDmoduleSDEngine: NSObject, ObservableObject {
-	private static let API_TXT2IMG = "api/txt2img"
+	private static let API_TXT2IMG: SDAPIendpoint = .SDAPI_V1_TXT2IMG
 	private static let OBJKEY_IMAGES = "images"
 
 	@Published open var generatedImage: UIImage? = nil
@@ -40,8 +45,8 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	}
 
 
-	private func requestToSDServer(api_endpoint: String, payload: Data?, responseHandler: ((_ jsonObject: Any?, _ error: Error?) -> Void)?) {
-		let requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint)"
+	private func requestToSDServer(api_endpoint: SDAPIendpoint, payload: Data?, responseHandler: ((_ jsonObject: Any?, _ error: Error?) -> Void)?) {
+		let requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
 
 		fxdPrint("requestPath: \(requestPath)")
 		guard let requestURL = URL(string: requestPath) else {
@@ -97,7 +102,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 
 	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {
-		requestToSDServer(api_endpoint: Self.API_TXT2IMG,
+		requestToSDServer(api_endpoint: .SDAPI_V1_TXT2IMG,
 						  payload: currentPayload) {
 			[weak self] (jsonObject: Any?, error: Error?) in
 
