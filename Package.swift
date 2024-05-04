@@ -19,7 +19,7 @@ let package = Package(
 	],
 	dependencies: [
 		// Dependencies declare other packages that this package depends on.
-		.package(url: "/Users/thckbrws/_WORK_fXceed/fXDKit", .upToNextMajor(from: "1.0.1")),
+		.package(url: "https://github.com/petershine/fXDKit", .upToNextMajor(from: "1.0.1")),
 	],
 	targets: [
 		// Targets are the basic building blocks of a package, defining a module or a test suite.

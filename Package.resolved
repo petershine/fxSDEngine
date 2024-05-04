@@ -1,10 +1,10 @@
 {
-  "originHash" : "fb3965ea223b04b6dc13126418da9630b0d3ab2fe637da199e248cd2cb955dbb",
+  "originHash" : "7fd1028db97f4179e3b53c87d8140a55619e83c896febc50dd39f6bf9cd24b4a",
   "pins" : [
     {
       "identity" : "fxdkit",
-      "kind" : "localSourceControl",
-      "location" : "/Users/thckbrws/_WORK_fXceed/fXDKit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/petershine/fXDKit",
       "state" : {
         "revision" : "82af1004e01a1262ad2a0c3baf2a369af7039c75",
         "version" : "1.0.1"
