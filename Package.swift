@@ -19,7 +19,7 @@ let package = Package(
 	],
 	dependencies: [
 		// Dependencies declare other packages that this package depends on.
-		.package(url: "/Users/thckbrws/_WORK_fXceed/fXDKit", .upToNextMajor(from: "1.0.0")),
+		.package(url: "/Users/thckbrws/_WORK_fXceed/fXDKit", .upToNextMajor(from: "1.0.1")),
 	],
 	targets: [
 		// Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -30,10 +30,10 @@ let package = Package(
 		),
 		.target(
 			name: "fxdSDEngineBasicUI",
-			dependencies: ["fXDKit", "fxdSDEngine"]
+			dependencies: ["fxdSDEngine", "fXDKit"]
 		),
 		.testTarget(
 			name: "fxdSDEngineTests",
-			dependencies: ["fxdSDEngine"]),
+			dependencies: ["fxdSDEngine", "fXDKit"]),
 	]
 )

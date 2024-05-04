@@ -1,13 +1,13 @@
 {
-  "originHash" : "90105b3811ebb959fc719205e8aef408129674c971c75962884a28b7ca08f4ba",
+  "originHash" : "fb3965ea223b04b6dc13126418da9630b0d3ab2fe637da199e248cd2cb955dbb",
   "pins" : [
     {
       "identity" : "fxdkit",
       "kind" : "localSourceControl",
       "location" : "/Users/thckbrws/_WORK_fXceed/fXDKit",
       "state" : {
-        "revision" : "7369daa3aacdf46fb3ace77a96374c903bc278a0",
-        "version" : "1.0.0"
+        "revision" : "82af1004e01a1262ad2a0c3baf2a369af7039c75",
+        "version" : "1.0.1"
       }
     }
   ],
