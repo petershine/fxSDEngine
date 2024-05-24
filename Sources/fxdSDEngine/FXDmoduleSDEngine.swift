@@ -32,6 +32,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	private static let OBJKEY_CURRENT_IMAGE = "current_image"
 
 	@Published open var generatedImage: UIImage? = nil
+	@Published open var generationProgress: Double = 0.0
 	@Published open var shouldContinueRefreshing: Bool = false
 
 	open var SD_SERVER_HOSTNAME: String {
@@ -47,12 +48,12 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	}
 
 
-	private func requestToSDServer(api_endpoint: SDAPIendpoint, payload: Data?, responseHandler: ((_ jsonObject: Any?, _ error: Error?) -> Void)?) {
+	private func requestToSDServer(api_endpoint: SDAPIendpoint, payload: Data?, responseHandler: ((_ received: Data?, _ jsonObject: Any?, _ error: Error?) -> Void)?) {
 		let requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
 
 		fxdPrint("requestPath: \(requestPath)")
 		guard let requestURL = URL(string: requestPath) else {
-			responseHandler?(nil, nil)
+			responseHandler?(nil, nil, nil)
 			return
 		}
 
@@ -75,7 +76,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			fxdPrint("response: \(String(describing: response))")
 			fxdPrint("error: \(String(describing: error))")
 			guard let receivedData = data else {
-				responseHandler?(nil, error)
+				responseHandler?(nil, nil, error)
 				return
 			}
 
@@ -86,9 +87,9 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			}
 			catch let jsonError {
 				fxdPrint("jsonError: \(jsonError)")
+				fxdPrint("jsonObject: \(String(describing: jsonObject))")
 			}
 
-			fxdPrint("jsonObject: \(String(describing: jsonObject))")
 
 			var revisedError = error
 			if revisedError == nil,
@@ -97,7 +98,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				revisedError = NSError(domain: "SDEngine", code: responseCode, userInfo: [NSLocalizedDescriptionKey:jsonMessage])
 			}
 
-			responseHandler?(jsonObject, revisedError)
+			responseHandler?(receivedData, jsonObject, revisedError)
 		}
 		httpTask.resume()
 	}
@@ -106,7 +107,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(api_endpoint: .SDAPI_V1_TXT2IMG,
 						  payload: currentPayload) {
-			[weak self] (jsonObject: Any?, error: Error?) in
+			[weak self] (receivedData, jsonObject, error) in
 
 			let imagesEncoded = (jsonObject as? Dictionary<String, Any?>)?[Self.OBJKEY_IMAGES] as? Array<String>
 
@@ -124,9 +125,30 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 	open func execute_progress(completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(api_endpoint: .SDAPI_V1_PROGRESS, payload: nil) {
-			[weak self] (jsonObject, error) in
+			[weak self] (receivedData, jsonObject, error) in
 
-			let current_image = (jsonObject as? Dictionary<String, Any?>)?[Self.OBJKEY_CURRENT_IMAGE]
+			guard let receivedData else {
+				completionHandler?(error)
+				return
+			}
+
+
+			var decodedProgress: FXDdecodedProgress? = nil
+			do {
+				decodedProgress = try JSONDecoder().decode(FXDdecodedProgress.self, from: receivedData)
+				fxdPrint("[decodedProgress] \(String(describing: decodedProgress?.progress))")
+			}
+			catch let decodeException {
+				fxdPrint("decodeException: \(String(describing: decodeException))")
+			}
+
+			guard decodedProgress != nil,
+				  let current_image = decodedProgress!.current_image else {
+				completionHandler?(error)
+				return
+			}
+
+
 			let imagesEncoded = [current_image] as? Array<String>
 
 			let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [])
@@ -134,6 +156,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			if let availableImage = decodedImageArray?.first {
 				DispatchQueue.main.async {
 					self?.generatedImage = availableImage
+					self?.generationProgress = decodedProgress?.progress ?? 0.0
 				}
 			}
 
@@ -163,4 +186,15 @@ extension FXDmoduleSDEngine {
 
 		return decodedImageArray
 	}
+}
+
+
+
+struct FXDdecodedProgress: Codable {
+	var progress: Double? = 0.0
+	var eta_relative: Double? = 0.0
+
+	var textinfo: String? = nil
+
+	var current_image: String? = nil
 }
