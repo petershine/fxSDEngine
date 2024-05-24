@@ -9,6 +9,7 @@ import fXDKit
 public enum SDAPIendpoint: String, CaseIterable {
 	case INTERNAL_SYSINFO = "internal/sysinfo"
 	case SDAPI_V1_TXT2IMG = "sdapi/v1/txt2img"
+	case SDAPI_V1_PROGRESS = "sdapi/v1/progress"
 }
 
 enum SDError: Error {
@@ -27,8 +28,8 @@ extension SDError: LocalizedError {
 
 @available(iOS 17.0, *)
 open class FXDmoduleSDEngine: NSObject, ObservableObject {
-	private static let API_TXT2IMG: SDAPIendpoint = .SDAPI_V1_TXT2IMG
 	private static let OBJKEY_IMAGES = "images"
+	private static let OBJKEY_CURRENT_IMAGE = "current_image"
 
 	@Published open var generatedImage: UIImage? = nil
 
@@ -106,26 +107,11 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 						  payload: currentPayload) {
 			[weak self] (jsonObject: Any?, error: Error?) in
 
-			let images = (jsonObject as? Dictionary<String, Any?>)?[Self.OBJKEY_IMAGES]
-			fxdPrint("[STARTED DECODING]: \(String(describing: (images as? Array<Any?>)?.count)) image(s)")
+			let imagesEncoded = (jsonObject as? Dictionary<String, Any?>)?[Self.OBJKEY_IMAGES] as? Array<String>
 
-			var decodedImageArray: [UIImage] = []
-			for base64string in images as? Array<String> ?? [] {
-				guard let imageData = Data(base64Encoded: base64string) else {
-					continue
-				}
-				fxdPrint("imageData byte count: \(imageData.count)")
+			let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [])
 
-				guard let decodedImage = UIImage(data: imageData) else {
-					continue
-				}
-				fxdPrint("decodedImage: \(decodedImage)")
-
-				decodedImageArray.append(decodedImage)
-			}
-
-
-			if let availableImage = decodedImageArray.first {
+			if let availableImage = decodedImageArray?.first {
 				DispatchQueue.main.async {
 					self?.generatedImage = availableImage
 				}
@@ -133,5 +119,47 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 			completionHandler?(error)
 		}
+	}
+
+	open func execute_progress(completionHandler: ((_ error: Error?)->Void)?) {
+		requestToSDServer(api_endpoint: .SDAPI_V1_PROGRESS, payload: nil) {
+			[weak self] (jsonObject, error) in
+
+			let current_image = (jsonObject as? Dictionary<String, Any?>)?[Self.OBJKEY_CURRENT_IMAGE]
+			let imagesEncoded = [current_image] as? Array<String>
+
+			let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [])
+
+			if let availableImage = decodedImageArray?.first {
+				DispatchQueue.main.async {
+					self?.generatedImage = availableImage
+				}
+			}
+
+			completionHandler?(error)
+		}
+	}
+}
+
+extension FXDmoduleSDEngine {
+	func decodedImages(imagesEncoded: Array<String>) -> [UIImage] {
+		fxdPrint("[STARTED DECODING]: \(String(describing: imagesEncoded.count)) image(s)")
+
+		var decodedImageArray: [UIImage] = []
+		for base64string in imagesEncoded {
+			guard let imageData = Data(base64Encoded: base64string) else {
+				continue
+			}
+			fxdPrint("imageData byte count: \(imageData.count)")
+
+			guard let decodedImage = UIImage(data: imageData) else {
+				continue
+			}
+			fxdPrint("decodedImage: \(decodedImage)")
+
+			decodedImageArray.append(decodedImage)
+		}
+
+		return decodedImageArray
 	}
 }
