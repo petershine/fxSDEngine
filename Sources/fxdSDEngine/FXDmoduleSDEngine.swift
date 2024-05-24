@@ -32,6 +32,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	private static let OBJKEY_CURRENT_IMAGE = "current_image"
 
 	@Published open var generatedImage: UIImage? = nil
+	@Published open var shouldContinueRefreshing: Bool = false
 
 	open var SD_SERVER_HOSTNAME: String {
 		return "http://127.0.0.1:7860"
