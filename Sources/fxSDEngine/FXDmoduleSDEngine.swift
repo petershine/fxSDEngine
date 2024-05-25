@@ -96,24 +96,33 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			}
 
 
-			var jsonObject: Any? = nil
+			var jsonObject: Dictionary<String, Any?>? = nil
 			do {
-				jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers)
+				jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
 			}
 			catch let jsonError {
 				fxdPrint("jsonError: \(jsonError)")
+			}
+
+
+			var modifiedError = error
+			if modifiedError == nil,
+			   let responseCode = (response as? HTTPURLResponse)?.statusCode, responseCode != 200 {
 				fxdPrint("jsonObject: \(String(describing: jsonObject))")
+				
+				let responseMSG = jsonObject?["msg"] as? String
+				let responseDetail = jsonObject?["detail"] as? String
+
+
+				let responseUserInfo = [NSLocalizedDescriptionKey : "\(responseMSG ?? "")\n\(responseDetail ?? "")"]
+
+				modifiedError = NSError(
+					domain: "SDEngine",
+					code: responseCode,
+					userInfo: responseUserInfo)
 			}
 
-
-			var revisedError = error
-			if revisedError == nil,
-			   let responseCode = (response as? HTTPURLResponse)?.statusCode, responseCode != 200,
-			   let jsonMessage = ((jsonObject as? Dictionary<String, Any>)?["msg"] as? String), !(jsonMessage.isEmpty) {
-				revisedError = NSError(domain: "SDEngine", code: responseCode, userInfo: [NSLocalizedDescriptionKey:jsonMessage])
-			}
-
-			responseHandler?(receivedData, jsonObject, revisedError)
+			responseHandler?(receivedData, jsonObject, modifiedError)
 		}
 		httpTask.resume()
 	}
