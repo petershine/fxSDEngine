@@ -12,6 +12,16 @@ public enum SDAPIendpoint: String, CaseIterable {
 	case SDAPI_V1_PROGRESS = "sdapi/v1/progress"
 }
 
+public struct SDdecodedProgress: Codable {
+	var progress: Double? = 0.0
+	var eta_relative: Double? = 0.0
+
+	var textinfo: String? = nil
+
+	var current_image: String? = nil
+}
+
+
 enum SDError: Error {
 	case reason(msg: String?)
 }
@@ -133,9 +143,9 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			}
 
 
-			var decodedProgress: FXDdecodedProgress? = nil
+			var decodedProgress: SDdecodedProgress? = nil
 			do {
-				decodedProgress = try JSONDecoder().decode(FXDdecodedProgress.self, from: receivedData)
+				decodedProgress = try JSONDecoder().decode(SDdecodedProgress.self, from: receivedData)
 				fxdPrint("[decodedProgress] \(String(describing: decodedProgress?.progress))")
 			}
 			catch let decodeException {
@@ -163,7 +173,21 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			completionHandler?(error)
 		}
 	}
+
+	open func continuousProgressRefreshing() {
+		guard shouldContinueRefreshing else {
+			return
+		}
+
+
+		execute_progress {
+			[weak self] (error) in
+
+			self?.continuousProgressRefreshing()
+		}
+	}
 }
+
 
 extension FXDmoduleSDEngine {
 	func decodedImages(imagesEncoded: Array<String>) -> [UIImage] {
@@ -186,15 +210,4 @@ extension FXDmoduleSDEngine {
 
 		return decodedImageArray
 	}
-}
-
-
-
-struct FXDdecodedProgress: Codable {
-	var progress: Double? = 0.0
-	var eta_relative: Double? = 0.0
-
-	var textinfo: String? = nil
-
-	var current_image: String? = nil
 }
