@@ -10,7 +10,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 	@Environment(\.horizontalSizeClass) var horizontalSizeClass
 	@Environment(\.verticalSizeClass) var verticalSizeClass
 
-	@State var presentTextEditor: Bool = false
+	@State var shouldPresentPromptEditor: Bool = false
 
 	@ObservedObject var sdEngine: FXDmoduleSDEngine
 
@@ -43,7 +43,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 
 					VStack {
 						FXDswiftuiButton(action: {
-							presentTextEditor = true
+							shouldPresentPromptEditor = true
 						}, systemImageName: "lightbulb")
 						.padding()
 
@@ -55,18 +55,32 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 			}
 			.padding()
 		}
-		.fullScreenCover(isPresented: $presentTextEditor) {
-			if let currentPayload = sdEngine.currentPayload,
-			   let payload = String(data: currentPayload, encoding: .utf8) {
-				FXDswiftuiTextEditor(editedText: payload) {
+		.fullScreenCover(isPresented: $shouldPresentPromptEditor) {
+			promptEditor()
+		}
+	}
+}
+
+
+extension FXDswiftuiSDEngineBasicRoot {
+	@ViewBuilder
+	func promptEditor() -> some View {
+		if let currentPayload = sdEngine.currentPayload,
+		   let payload = String(data: currentPayload, encoding: .utf8) {
+
+			FXDswiftuiTextEditor(
+				editedText: payload,
+				finishedEditing: {
 					(editedParagraph_0, editedParagraph_1, editedPayload) in
 					fxdPrint("editedParagraph_0: \(editedParagraph_0)")
 					fxdPrint("editedParagraph_1: \(editedParagraph_1)")
-				}
-				.onDisappear(perform: {
-					presentTextEditor = false
+
+					sdEngine.savePayloadToFile(payload: payload)
 				})
-			}
+			.transition(AnyTransition.opacity.animation(.easeInOut(duration: 1.0)))
+			.onDisappear(perform: {
+				shouldPresentPromptEditor = false
+			})
 		}
 	}
 }

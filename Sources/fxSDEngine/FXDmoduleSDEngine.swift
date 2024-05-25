@@ -45,6 +45,11 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	@Published open var generationProgress: Double = 0.0
 	@Published open var shouldContinueRefreshing: Bool = false
 
+
+	open var savedPayloadFilename: String {
+		return ""
+	}
+
 	open var SD_SERVER_HOSTNAME: String {
 		return "http://127.0.0.1:7860"
 	}
@@ -111,6 +116,40 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			responseHandler?(receivedData, jsonObject, revisedError)
 		}
 		httpTask.resume()
+	}
+
+
+	open func savePayloadToFile(payload: String) {
+		if let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+			let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
+
+			do {
+				if let processed: Data = payload.processedJSONData() {
+					fxdPrint("payload: \(payload)")
+					try processed.write(to: fileURL)
+					fxdPrint("Text successfully saved to \(fileURL)")
+				}
+			} catch {
+				fxdPrint("Error saving text: \(error)")
+			}
+		}
+	}
+
+	open func loadPayloadFromFile() -> String? {
+		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+			fxdPrint("Document directory not found")
+			return nil
+		}
+
+
+		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
+		do {
+			let content = try String(contentsOf: fileURL, encoding: .utf8)
+			return content
+		} catch {
+			fxdPrint("Failed to load file: \(error)")
+			return nil
+		}
 	}
 
 
