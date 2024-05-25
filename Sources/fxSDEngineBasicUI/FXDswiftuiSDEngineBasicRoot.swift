@@ -6,7 +6,7 @@ import fxSDEngine
 import SwiftUI
 
 
-struct FXDswiftuiSDEngineBasicRoot: View {
+public struct FXDswiftuiSDEngineBasicRoot: View {
 	@Environment(\.horizontalSizeClass) var horizontalSizeClass
 	@Environment(\.verticalSizeClass) var verticalSizeClass
 
@@ -15,11 +15,11 @@ struct FXDswiftuiSDEngineBasicRoot: View {
 	@ObservedObject var sdEngine: FXDmoduleSDEngine
 
 
-	init(sdEngine: FXDmoduleSDEngine? = nil) {
+	public init(sdEngine: FXDmoduleSDEngine? = nil) {
 		self.sdEngine = sdEngine ?? FXDmoduleSDEngine()
 	}
 
-	var body: some View {
+	public var body: some View {
 		ZStack {
 			FXDswiftuiMediaDisplay(mediaImage: sdEngine.generatedImage)
 
