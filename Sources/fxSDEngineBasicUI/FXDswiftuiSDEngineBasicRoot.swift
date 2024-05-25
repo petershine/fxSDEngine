@@ -48,7 +48,14 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 						.padding()
 
 						FXDswiftuiButton(action: {
-							sdEngine.execute_txt2img(completionHandler: nil)
+							sdEngine.shouldContinueRefreshing = true
+							sdEngine.continuousProgressRefreshing()
+							
+							sdEngine.execute_txt2img {
+								error in
+								
+								sdEngine.shouldContinueRefreshing = false
+							}
 						}, systemImageName: "paintbrush")
 					}
 				}
