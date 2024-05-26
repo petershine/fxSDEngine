@@ -10,6 +10,7 @@ public enum SDAPIendpoint: String, CaseIterable {
 	case INTERNAL_SYSINFO = "internal/sysinfo"
 	case SDAPI_V1_TXT2IMG = "sdapi/v1/txt2img"
 	case SDAPI_V1_PROGRESS = "sdapi/v1/progress"
+	case SDAPI_V1_INTERRUPT = "sdapi/v1/interrupt"
 }
 
 public struct SDdecodedProgress: Codable {
@@ -63,7 +64,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	}
 
 
-	private func requestToSDServer(api_endpoint: SDAPIendpoint, payload: Data?, responseHandler: ((_ received: Data?, _ jsonObject: Any?, _ error: Error?) -> Void)?) {
+	private func requestToSDServer(api_endpoint: SDAPIendpoint, method: String? = nil, payload: Data?, responseHandler: ((_ received: Data?, _ jsonObject: Any?, _ error: Error?) -> Void)?) {
 		let requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
 
 		fxdPrint("requestPath: \(requestPath)")
@@ -77,13 +78,15 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 		httpRequest.timeoutInterval = .infinity
 		httpRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-		httpRequest.httpMethod = "GET"
-		if payload != nil {
+		httpRequest.httpMethod = method ?? "GET"
+		if method == nil && payload != nil {
 			httpRequest.httpMethod = "POST"
 			httpRequest.httpBody = payload
 		}
 
-
+		fxdPrint("httpRequest.allHTTPHeaderFields: \(String(describing: httpRequest.allHTTPHeaderFields))")
+		fxdPrint("httpRequest.httpMethod: \(String(describing: httpRequest.httpMethod))")
+		fxdPrint("httpRequest: \(httpRequest)")
 		let httpTask = URLSession.shared.dataTask(with: httpRequest) {
 			(data: Data?, response: URLResponse?, error: Error?) in
 
@@ -164,6 +167,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(api_endpoint: .SDAPI_V1_TXT2IMG,
+						  method: "POST",
 						  payload: currentPayload) {
 			[weak self] (receivedData, jsonObject, error) in
 
@@ -232,6 +236,16 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			[weak self] (error) in
 
 			self?.continuousProgressRefreshing()
+		}
+	}
+
+	open func interrupt(completionHandler: ((_ error: Error?)->Void)?) {
+		requestToSDServer(api_endpoint: .SDAPI_V1_INTERRUPT, payload: nil) {
+			[weak self] (receivedData, jsonObject, error) in
+
+			self?.shouldContinueRefreshing = false
+
+			completionHandler?(error)
 		}
 	}
 }
