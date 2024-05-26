@@ -84,9 +84,10 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			httpRequest.httpBody = payload
 		}
 
+		fxdPrint("httpRequest.url: \(String(describing: httpRequest.url))")
 		fxdPrint("httpRequest.allHTTPHeaderFields: \(String(describing: httpRequest.allHTTPHeaderFields))")
 		fxdPrint("httpRequest.httpMethod: \(String(describing: httpRequest.httpMethod))")
-		fxdPrint("httpRequest: \(httpRequest)")
+
 		let httpTask = URLSession.shared.dataTask(with: httpRequest) {
 			(data: Data?, response: URLResponse?, error: Error?) in
 
@@ -240,13 +241,14 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	}
 
 	open func interrupt(completionHandler: ((_ error: Error?)->Void)?) {
-		requestToSDServer(api_endpoint: .SDAPI_V1_INTERRUPT, payload: nil) {
-			[weak self] (receivedData, jsonObject, error) in
+		requestToSDServer(
+			api_endpoint: .SDAPI_V1_INTERRUPT,
+			method: "POST",
+			payload: nil) {
+				(receivedData, jsonObject, error) in
 
-			self?.shouldContinueRefreshing = false
-
-			completionHandler?(error)
-		}
+				completionHandler?(error)
+			}
 	}
 }
 
