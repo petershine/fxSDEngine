@@ -167,64 +167,66 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 
 	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {
-		requestToSDServer(api_endpoint: .SDAPI_V1_TXT2IMG,
-						  method: "POST",
-						  payload: currentPayload) {
-			[weak self] (receivedData, jsonObject, error) in
+		requestToSDServer(
+			api_endpoint: .SDAPI_V1_TXT2IMG,
+			payload: currentPayload) {
+				[weak self] (receivedData, jsonObject, error) in
 
-			let imagesEncoded = (jsonObject as? Dictionary<String, Any?>)?[Self.OBJKEY_IMAGES] as? Array<String>
+				let imagesEncoded = (jsonObject as? Dictionary<String, Any?>)?[Self.OBJKEY_IMAGES] as? Array<String>
 
-			let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [])
+				let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [])
 
-			if let availableImage = decodedImageArray?.first {
-				DispatchQueue.main.async {
-					self?.generatedImage = availableImage
+				if let availableImage = decodedImageArray?.first {
+					DispatchQueue.main.async {
+						self?.generatedImage = availableImage
+					}
 				}
-			}
 
-			completionHandler?(error)
-		}
+				completionHandler?(error)
+			}
 	}
 
 	open func execute_progress(completionHandler: ((_ error: Error?)->Void)?) {
-		requestToSDServer(api_endpoint: .SDAPI_V1_PROGRESS, payload: nil) {
-			[weak self] (receivedData, jsonObject, error) in
+		requestToSDServer(
+			api_endpoint: .SDAPI_V1_PROGRESS,
+			payload: nil) {
+				[weak self] (receivedData, jsonObject, error) in
 
-			guard let receivedData else {
-				completionHandler?(error)
-				return
-			}
-
-
-			var decodedProgress: SDdecodedProgress? = nil
-			do {
-				decodedProgress = try JSONDecoder().decode(SDdecodedProgress.self, from: receivedData)
-				fxdPrint("[decodedProgress] \(String(describing: decodedProgress?.progress))")
-			}
-			catch let decodeException {
-				fxdPrint("decodeException: \(String(describing: decodeException))")
-			}
-
-			guard decodedProgress != nil,
-				  let current_image = decodedProgress!.current_image else {
-				completionHandler?(error)
-				return
-			}
-
-
-			let imagesEncoded = [current_image] as? Array<String>
-
-			let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [])
-
-			if let availableImage = decodedImageArray?.first {
-				DispatchQueue.main.async {
-					self?.generatedImage = availableImage
-					self?.generationProgress = decodedProgress?.progress ?? 0.0
+				guard let receivedData else {
+					completionHandler?(error)
+					return
 				}
-			}
 
-			completionHandler?(error)
-		}
+
+				var decodedProgress: SDdecodedProgress? = nil
+				do {
+					decodedProgress = try JSONDecoder().decode(SDdecodedProgress.self, from: receivedData)
+					fxdPrint("[decodedProgress] \(String(describing: decodedProgress?.progress))")
+				}
+				catch let decodeException {
+					fxdPrint("decodeException: \(String(describing: decodeException))")
+				}
+
+				guard decodedProgress != nil,
+					  let current_image = decodedProgress!.current_image else {
+					completionHandler?(error)
+					return
+				}
+
+
+				let imagesEncoded = [current_image] as? Array<String>
+
+				let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [])
+
+				if let availableImage = decodedImageArray?.first {
+					DispatchQueue.main.async {
+						self?.generatedImage = availableImage
+						self?.generationProgress = decodedProgress?.progress ?? 0.0
+					}
+				}
+
+				completionHandler?(error)
+			}
 	}
 
 	open func continuousProgressRefreshing() {
