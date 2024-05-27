@@ -131,16 +131,8 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				}
 
 
-				var decodedResponse: SDdecodedResponse? = nil
-				do {
-					decodedResponse = try JSONDecoder().decode(SDdecodedResponse.self, from: receivedData)
-				}
-				catch let decodeException {
-					fxdPrint("decodeException: \(String(describing: decodeException))")
-				}
-
-				guard decodedResponse != nil,
-					  let Config = decodedResponse!.Config else {
+				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
+					  let Config = decodedResponse.Config else {
 					completionHandler?(error)
 					return
 				}
@@ -166,16 +158,8 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				}
 
 
-				var decodedResponse: SDdecodedResponse? = nil
-				do {
-					decodedResponse = try JSONDecoder().decode(SDdecodedResponse.self, from: receivedData)
-				}
-				catch let decodeException {
-					fxdPrint("decodeException: \(String(describing: decodeException))")
-				}
-
-				guard decodedResponse != nil,
-					  let images = decodedResponse!.images else {
+				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
+					  let images = decodedResponse.images else {
 					completionHandler?(error)
 					return
 				}
@@ -205,16 +189,8 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				}
 
 
-				var decodedResponse: SDdecodedResponse? = nil
-				do {
-					decodedResponse = try JSONDecoder().decode(SDdecodedResponse.self, from: receivedData)
-				}
-				catch let decodeException {
-					fxdPrint("decodeException: \(String(describing: decodeException))")
-				}
-
-				guard decodedResponse != nil,
-					  let current_image = decodedResponse!.current_image else {
+				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
+					  let current_image = decodedResponse.current_image else {
 					completionHandler?(error)
 					return
 				}
@@ -227,7 +203,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				if let availableImage = decodedImageArray?.first {
 					DispatchQueue.main.async {
 						self?.generatedImage = availableImage
-						self?.generationProgress = decodedResponse?.progress ?? 0.0
+						self?.generationProgress = decodedResponse.progress ?? 0.0
 					}
 				}
 
@@ -280,6 +256,18 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 
 extension FXDmoduleSDEngine {
+	func decodedResponse(receivedData: Data) -> SDdecodedResponse? {
+		var decodedResponse: SDdecodedResponse? = nil
+		do {
+			decodedResponse = try JSONDecoder().decode(SDdecodedResponse.self, from: receivedData)
+		}
+		catch let decodeException {
+			fxdPrint("decodeException: \(String(describing: decodeException))")
+		}
+
+		return decodedResponse
+	}
+
 	func decodedImages(imagesEncoded: [String?]) -> [UIImage] {
 		fxdPrint("[STARTED DECODING]: \(String(describing: imagesEncoded.count)) image(s)")
 
