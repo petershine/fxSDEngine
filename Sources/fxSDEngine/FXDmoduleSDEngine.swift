@@ -14,6 +14,8 @@ public enum SDAPIendpoint: String, CaseIterable {
 }
 
 public struct SDdecodedResponse: Codable {
+	var Config: SDdecodedConfig? = nil
+
 	var progress: Double? = 0.0
 	var eta_relative: Double? = 0.0
 
@@ -21,6 +23,10 @@ public struct SDdecodedResponse: Codable {
 
 	var current_image: String? = nil
 	var images: [String?]? = nil
+
+	struct SDdecodedConfig: Codable {
+		var outdir_samples: String? = nil
+	}
 }
 
 
@@ -45,6 +51,8 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 	@Published open var generatedImage: UIImage? = nil
 	@Published open var generationProgress: Double = 0.0
+	@Published open var generationFolder: String? = nil
+
 	@Published open var shouldContinueRefreshing: Bool = false
 
 
@@ -105,6 +113,29 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			payload: nil) {
 				[weak self] (receivedData, error) in
 
+				guard let receivedData else {
+					completionHandler?(error)
+					return
+				}
+
+
+				var decodedResponse: SDdecodedResponse? = nil
+				do {
+					decodedResponse = try JSONDecoder().decode(SDdecodedResponse.self, from: receivedData)
+				}
+				catch let decodeException {
+					fxdPrint("decodeException: \(String(describing: decodeException))")
+				}
+
+				guard decodedResponse != nil,
+					  let Config = decodedResponse!.Config else {
+					completionHandler?(error)
+					return
+				}
+
+
+				self?.generationFolder = Config.outdir_samples
+				fxdPrint("self?.generationFolder: \(String(describing: self?.generationFolder))")
 
 				completionHandler?(error)
 			}
@@ -126,7 +157,6 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				var decodedResponse: SDdecodedResponse? = nil
 				do {
 					decodedResponse = try JSONDecoder().decode(SDdecodedResponse.self, from: receivedData)
-					fxdPrint("[decodedResponse?.images?.count] \(String(describing: decodedResponse?.images?.count))")
 				}
 				catch let decodeException {
 					fxdPrint("decodeException: \(String(describing: decodeException))")
@@ -166,7 +196,6 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				var decodedResponse: SDdecodedResponse? = nil
 				do {
 					decodedResponse = try JSONDecoder().decode(SDdecodedResponse.self, from: receivedData)
-					fxdPrint("[decodedProgress] \(String(describing: decodedResponse?.progress))")
 				}
 				catch let decodeException {
 					fxdPrint("decodeException: \(String(describing: decodeException))")
