@@ -338,7 +338,7 @@ extension FXDmoduleSDEngine {
 				continue
 			}
 
-			
+
 			guard let imageData = Data(base64Encoded: base64string!, options: .ignoreUnknownCharacters) else {
 				continue
 			}
@@ -391,6 +391,7 @@ extension FXDmoduleSDEngine {
 			fxdPrint("httpRequest.url: \(String(describing: httpRequest.url))")
 			fxdPrint("httpRequest.allHTTPHeaderFields: \(String(describing: httpRequest.allHTTPHeaderFields))")
 			fxdPrint("httpRequest.httpMethod: \(String(describing: httpRequest.httpMethod))")
+			fxdPrint("httpRequest.httpBody: \(String(describing: httpRequest.httpBody))")
 
 			let httpTask = URLSession.shared.dataTask(with: httpRequest) {
 				(data: Data?, response: URLResponse?, error: Error?) in
