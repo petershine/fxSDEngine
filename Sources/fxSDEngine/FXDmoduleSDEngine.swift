@@ -26,8 +26,20 @@ public struct SDdecodedResponse: Codable {
 	var current_image: String? = nil
 	var images: [String?]? = nil
 
+	var files: [SDdecodedFile?]? = nil
+
 	struct SDdecodedConfig: Codable {
 		var outdir_samples: String? = nil
+	}
+
+	struct SDdecodedFile: Codable {
+		var type: String? = nil
+		var date: String? = nil
+		var created_time: String? = nil
+		var size: String? = nil
+		var name: String? = nil
+		var is_under_scanned_path: Bool = false
+		var fullpath: String? = nil
 	}
 }
 
@@ -237,21 +249,29 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 	open func execute_infiniteImageBrowsing_Files(completionHandler: ((_ error: Error?)->Void)?) {
 		guard let generationFolder = self.generationFolder else {
-			assert(self.generationFolder != nil, "[SHOULD NOT BE nil] self.generationFolder: \(self.generationFolder)")
+			assert(self.generationFolder != nil, "[SHOULD NOT BE nil] self.generationFolder: \(String(describing: self.generationFolder))")
 			return
 		}
 
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_PROGRESS,
-			query: "folder_path=\(self.generationFolder!)",
+			query: "folder_path=\(generationFolder)",
 			payload: nil) {
-				(receivedData, error) in
+				[weak self] (receivedData, error) in
 
+				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
+					  let files = decodedResponse.files,
+					  let firstFile = files.first,
+					  let firstFileFullPath = firstFile?.fullpath 
+				else {
+					completionHandler?(error)
+					return
+				}
+
+				fxdPrint("\(decodedResponse)")
 				completionHandler?(error)
 			}
 	}
-
-	//infinite_image_browsing/files?folder_path
 }
 
 
