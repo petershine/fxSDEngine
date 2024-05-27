@@ -175,10 +175,12 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 
-				self?.observable.generationFolder = Config.outdir_samples ?? ""
-				fxdPrint("self?.generationFolder: \(String(describing: self?.observable.generationFolder))")
+				DispatchQueue.main.async {
+					self?.observable.generationFolder = Config.outdir_samples ?? ""
+					fxdPrint("self?.generationFolder: \(String(describing: self?.observable.generationFolder))")
 
-				completionHandler?(error)
+					completionHandler?(error)
+				}
 			}
 	}
 
