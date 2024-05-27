@@ -104,8 +104,11 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			self.obtain_latestGenereatedImage(
 				folderPath: self.generationFolder,
 				completionHandler: {
-				(image, error) in
+				[weak self] (latestImage, error) in
 
+					DispatchQueue.main.async {
+						self?.generatedImage = latestImage
+					}
 			})
 		}
 	}
@@ -287,11 +290,17 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				self?.requestToSDServer(
 					api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
 					query: "path=\(fullpath)&t=file") {
-						[weak self] (received, error) in
+						(received, error) in
+
+						guard let receivedData = received else {
+							completionHandler?(nil, error)
+							return
+						}
 
 
+						let latestImage = UIImage(data: receivedData)
 
-						completionHandler?(nil, error)
+						completionHandler?(latestImage, error)
 					}
 			}
 	}
