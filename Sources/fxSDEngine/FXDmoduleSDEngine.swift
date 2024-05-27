@@ -64,74 +64,6 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	}
 
 
-	private func requestToSDServer(api_endpoint: SDAPIendpoint, method: String? = nil, payload: Data?, responseHandler: ((_ received: Data?, _ jsonObject: Any?, _ error: Error?) -> Void)?) {
-		let requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
-
-		fxdPrint("requestPath: \(requestPath)")
-		guard let requestURL = URL(string: requestPath) else {
-			responseHandler?(nil, nil, nil)
-			return
-		}
-
-
-		var httpRequest = URLRequest(url: requestURL)
-		httpRequest.timeoutInterval = .infinity
-		httpRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-		httpRequest.httpMethod = method ?? "GET"
-		if method == nil && payload != nil {
-			httpRequest.httpMethod = "POST"
-			httpRequest.httpBody = payload
-		}
-
-		fxdPrint("httpRequest.url: \(String(describing: httpRequest.url))")
-		fxdPrint("httpRequest.allHTTPHeaderFields: \(String(describing: httpRequest.allHTTPHeaderFields))")
-		fxdPrint("httpRequest.httpMethod: \(String(describing: httpRequest.httpMethod))")
-
-		let httpTask = URLSession.shared.dataTask(with: httpRequest) {
-			(data: Data?, response: URLResponse?, error: Error?) in
-
-			fxdPrint("data: \(String(describing: data))")
-			fxdPrint("response: \(String(describing: response))")
-			fxdPrint("error: \(String(describing: error))")
-			guard let receivedData = data else {
-				responseHandler?(nil, nil, error)
-				return
-			}
-
-
-			var jsonObject: Dictionary<String, Any?>? = nil
-			do {
-				jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
-			}
-			catch let jsonError {
-				fxdPrint("jsonError: \(jsonError)")
-			}
-
-
-			var modifiedError = error
-			if modifiedError == nil,
-			   let responseCode = (response as? HTTPURLResponse)?.statusCode, responseCode != 200 {
-				fxdPrint("jsonObject: \(String(describing: jsonObject))")
-				
-				let responseMSG = jsonObject?["msg"] as? String
-				let responseDetail = jsonObject?["detail"] as? String
-
-
-				let responseUserInfo = [NSLocalizedDescriptionKey : "\(responseMSG ?? "")\n\(responseDetail ?? "")"]
-
-				modifiedError = NSError(
-					domain: "SDEngine",
-					code: responseCode,
-					userInfo: responseUserInfo)
-			}
-
-			responseHandler?(receivedData, jsonObject, modifiedError)
-		}
-		httpTask.resume()
-	}
-
-
 	open func savePayloadToFile(payload: String) {
 		if let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
 			let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
@@ -275,5 +207,75 @@ extension FXDmoduleSDEngine {
 		}
 
 		return decodedImageArray
+	}
+}
+
+
+private extension FXDmoduleSDEngine {
+	private func requestToSDServer(api_endpoint: SDAPIendpoint, method: String? = nil, payload: Data?, responseHandler: ((_ received: Data?, _ jsonObject: Any?, _ error: Error?) -> Void)?) {
+		let requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
+
+		fxdPrint("requestPath: \(requestPath)")
+		guard let requestURL = URL(string: requestPath) else {
+			responseHandler?(nil, nil, nil)
+			return
+		}
+
+
+		var httpRequest = URLRequest(url: requestURL)
+		httpRequest.timeoutInterval = .infinity
+		httpRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+		httpRequest.httpMethod = method ?? "GET"
+		if method == nil && payload != nil {
+			httpRequest.httpMethod = "POST"
+			httpRequest.httpBody = payload
+		}
+
+		fxdPrint("httpRequest.url: \(String(describing: httpRequest.url))")
+		fxdPrint("httpRequest.allHTTPHeaderFields: \(String(describing: httpRequest.allHTTPHeaderFields))")
+		fxdPrint("httpRequest.httpMethod: \(String(describing: httpRequest.httpMethod))")
+
+		let httpTask = URLSession.shared.dataTask(with: httpRequest) {
+			(data: Data?, response: URLResponse?, error: Error?) in
+
+			fxdPrint("data: \(String(describing: data))")
+			fxdPrint("response: \(String(describing: response))")
+			fxdPrint("error: \(String(describing: error))")
+			guard let receivedData = data else {
+				responseHandler?(nil, nil, error)
+				return
+			}
+
+
+			var jsonObject: Dictionary<String, Any?>? = nil
+			do {
+				jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
+			}
+			catch let jsonError {
+				fxdPrint("jsonError: \(jsonError)")
+			}
+
+
+			var modifiedError = error
+			if modifiedError == nil,
+			   let responseCode = (response as? HTTPURLResponse)?.statusCode, responseCode != 200 {
+				fxdPrint("jsonObject: \(String(describing: jsonObject))")
+
+				let responseMSG = jsonObject?["msg"] as? String
+				let responseDetail = jsonObject?["detail"] as? String
+
+
+				let responseUserInfo = [NSLocalizedDescriptionKey : "\(responseMSG ?? "")\n\(responseDetail ?? "")"]
+
+				modifiedError = NSError(
+					domain: "SDEngine",
+					code: responseCode,
+					userInfo: responseUserInfo)
+			}
+
+			responseHandler?(receivedData, jsonObject, modifiedError)
+		}
+		httpTask.resume()
 	}
 }
