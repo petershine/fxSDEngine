@@ -137,14 +137,9 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			payload: nil) {
 				[weak self] (receivedData, error) in
 
-				guard let receivedData else {
-					completionHandler?(error)
-					return
-				}
-
-
 				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
-					  let Config = decodedResponse.Config else {
+					  let Config = decodedResponse.Config 
+				else {
 					completionHandler?(error)
 					return
 				}
@@ -164,14 +159,9 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			payload: currentPayload) {
 				[weak self] (receivedData, error) in
 
-				guard let receivedData else {
-					completionHandler?(error)
-					return
-				}
-
-
 				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
-					  let images = decodedResponse.images else {
+					  let images = decodedResponse.images 
+				else {
 					completionHandler?(error)
 					return
 				}
@@ -195,14 +185,9 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			payload: nil) {
 				[weak self] (receivedData, error) in
 
-				guard let receivedData else {
-					completionHandler?(error)
-					return
-				}
-
-
 				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
-					  let current_image = decodedResponse.current_image else {
+					  let current_image = decodedResponse.current_image
+				else {
 					completionHandler?(error)
 					return
 				}
@@ -268,6 +253,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 					return
 				}
 
+				fxdPrint("\(firstFileFullPath)")
 				fxdPrint("\(decodedResponse)")
 				completionHandler?(error)
 			}
@@ -276,7 +262,12 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 
 extension FXDmoduleSDEngine {
-	func decodedResponse(receivedData: Data) -> SDdecodedResponse? {
+	func decodedResponse(receivedData: Data?) -> SDdecodedResponse? {
+		guard let receivedData else {
+			return nil
+		}
+
+
 		var decodedResponse: SDdecodedResponse? = nil
 		do {
 			decodedResponse = try JSONDecoder().decode(SDdecodedResponse.self, from: receivedData)
