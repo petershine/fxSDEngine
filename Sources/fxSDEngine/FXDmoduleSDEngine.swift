@@ -34,12 +34,12 @@ public struct SDdecodedResponse: Codable {
 	var files: [SDdecodedFile?]? = nil
 	struct SDdecodedFile: Codable {
 		var type: String? = nil
-		var date: Date? = nil
-		var created_time: Date? = nil
 		var size: String? = nil
 		var name: String? = nil
-		var is_under_scanned_path: Bool = false
 		var fullpath: String? = nil
+		var is_under_scanned_path: Bool? = false
+		var date: String? = nil
+		var created_time: String? = nil
 	}
 }
 
