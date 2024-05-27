@@ -8,7 +8,9 @@ import fXDKit
 
 public enum SDAPIendpoint: String, CaseIterable {
 	case INTERNAL_SYSINFO = "internal/sysinfo"
+
 	case SDAPI_V1_TXT2IMG = "sdapi/v1/txt2img"
+	case SDAPI_V1_PNG_INFO = "sdapi/v1/png-info"
 	case SDAPI_V1_PROGRESS = "sdapi/v1/progress"
 	case SDAPI_V1_INTERRUPT = "sdapi/v1/interrupt"
 
@@ -16,7 +18,15 @@ public enum SDAPIendpoint: String, CaseIterable {
 	case INFINITE_IMAGE_BROWSING_FILE = "infinite_image_browsing/file"
 }
 
-public struct SDdecodedResponse: Codable {
+public struct SDencodablePayload: Encodable {
+	var image: String
+
+	public init(image: String) {
+		self.image = image
+	}
+}
+
+public struct SDcodableResponse: Codable {
 	var progress: Double? = 0.0
 	var eta_relative: Double? = 0.0
 
@@ -26,14 +36,14 @@ public struct SDdecodedResponse: Codable {
 	var images: [String?]? = nil
 
 
-	var Config: SDdecodedConfig? = nil
-	struct SDdecodedConfig: Codable {
+	var Config: SDcodableConfig? = nil
+	struct SDcodableConfig: Codable {
 		var outdir_samples: String? = nil
 	}
 
 
-	var files: [SDdecodedFile?]? = nil
-	struct SDdecodedFile: Codable {
+	var files: [SDcodableFile?]? = nil
+	struct SDcodableFile: Codable {
 		var type: String? = nil
 		var size: String? = nil
 		var name: String? = nil
@@ -248,7 +258,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 				let latestFileORfolder = filesORfolders.sorted {
 					($0?.updated_time())! > ($1?.updated_time())!
-				}.first as? SDdecodedResponse.SDdecodedFile 
+				}.first as? SDcodableResponse.SDcodableFile 
 
 				fxdPrint("latestFileORfolder?.updated_time(): \(String(describing: latestFileORfolder?.updated_time()))")
 				fxdPrint("latestFileORfolder?.fullpath: \(String(describing: latestFileORfolder?.fullpath))")
@@ -293,15 +303,15 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 
 extension FXDmoduleSDEngine {
-	func decodedResponse(receivedData: Data?) -> SDdecodedResponse? {
+	func decodedResponse(receivedData: Data?) -> SDcodableResponse? {
 		guard let receivedData else {
 			return nil
 		}
 
 
-		var decodedResponse: SDdecodedResponse? = nil
+		var decodedResponse: SDcodableResponse? = nil
 		do {
-			decodedResponse = try JSONDecoder().decode(SDdecodedResponse.self, from: receivedData)
+			decodedResponse = try JSONDecoder().decode(SDcodableResponse.self, from: receivedData)
 		}
 		catch let decodeException {
 			fxdPrint("decodeException: \(String(describing: decodeException))")
@@ -346,8 +356,8 @@ extension FXDmoduleSDEngine {
 }
 
 
-private extension FXDmoduleSDEngine {
-	private func requestToSDServer(
+extension FXDmoduleSDEngine {
+	public func requestToSDServer(
 		api_endpoint: SDAPIendpoint,
 		method: String? = nil,
 		query: String? = nil,
