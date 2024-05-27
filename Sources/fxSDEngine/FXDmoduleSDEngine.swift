@@ -34,8 +34,8 @@ public struct SDdecodedResponse: Codable {
 	var files: [SDdecodedFile?]? = nil
 	struct SDdecodedFile: Codable {
 		var type: String? = nil
-		var date: String? = nil
-		var created_time: String? = nil
+		var date: Date? = nil
+		var created_time: Date? = nil
 		var size: String? = nil
 		var name: String? = nil
 		var is_under_scanned_path: Bool = false
@@ -239,7 +239,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 		}
 
 		requestToSDServer(
-			api_endpoint: .SDAPI_V1_PROGRESS,
+			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
 			query: "folder_path=\(generationFolder)",
 			payload: nil) {
 				[weak self] (receivedData, error) in
@@ -247,14 +247,16 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
 					  let files = decodedResponse.files,
 					  let firstFile = files.first,
-					  let firstFileFullPath = firstFile?.fullpath 
+					  let firstFileFullPath = firstFile?.fullpath
 				else {
 					completionHandler?(error)
 					return
 				}
 
-				fxdPrint("\(firstFileFullPath)")
-				fxdPrint("\(decodedResponse)")
+				fxdPrint("firstFileFullPath: \(firstFileFullPath)")
+				fxdPrint("firstFile?.date: \(firstFile?.date)")
+				fxdPrint("firstFile?.created_time: \(firstFile?.created_time)")
+
 				completionHandler?(error)
 			}
 	}
