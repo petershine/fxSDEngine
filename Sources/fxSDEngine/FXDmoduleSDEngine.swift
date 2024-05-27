@@ -96,21 +96,6 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 	override public init() {
 		super.init()
-
-		execute_internalSysInfo { 
-			error in
-			
-			assert(!(self.generationFolder.isEmpty), "[SHOULD NOT BE nil or empty] self.generationFolder: \(String(describing: self.generationFolder))")
-			self.obtain_latestGenereatedImage(
-				folderPath: self.generationFolder,
-				completionHandler: {
-				[weak self] (latestImage, error) in
-
-					DispatchQueue.main.async {
-						self?.generatedImage = latestImage
-					}
-			})
-		}
 	}
 
 
