@@ -40,6 +40,16 @@ public struct SDdecodedResponse: Codable {
 		var is_under_scanned_path: Bool? = false
 		var date: String? = nil
 		var created_time: String? = nil
+
+		func updated_time() -> Date? {
+			guard date != nil else {
+				return nil
+			}
+
+			let dateFormatter = DateFormatter()
+			dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+			return dateFormatter.date(from:date!)
+		}
 	}
 }
 
@@ -63,7 +73,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	private static let OBJKEY_IMAGES = "images"
 	private static let OBJKEY_CURRENT_IMAGE = "current_image"
 
-	open var generationFolder: String? = nil
+	open var generationFolder: String = ""
 
 	@Published open var generatedImage: UIImage? = nil
 	@Published open var generationProgress: Double = 0.0
@@ -89,10 +99,13 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 		execute_internalSysInfo { 
 			error in
 			
-			self.execute_infiniteImageBrowsing_Files {
-				error in
+			assert(!(self.generationFolder.isEmpty), "[SHOULD NOT BE nil or empty] self.generationFolder: \(String(describing: self.generationFolder))")
+			self.obtain_latestGenereatedImage(
+				folderPath: self.generationFolder,
+				completionHandler: {
+				(image, error) in
 
-			}
+			})
 		}
 	}
 
@@ -145,7 +158,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				}
 
 
-				self?.generationFolder = Config.outdir_samples
+				self?.generationFolder = Config.outdir_samples ?? ""
 				fxdPrint("self?.generationFolder: \(String(describing: self?.generationFolder))")
 
 				completionHandler?(error)
@@ -232,32 +245,49 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			}
 	}
 
-	open func execute_infiniteImageBrowsing_Files(completionHandler: ((_ error: Error?)->Void)?) {
-		guard let generationFolder = self.generationFolder else {
-			assert(self.generationFolder != nil, "[SHOULD NOT BE nil] self.generationFolder: \(String(describing: self.generationFolder))")
-			return
-		}
-
+	open func obtain_latestGenereatedImage(folderPath: String, completionHandler: ((_ image: UIImage?, _ error: Error?)->Void)?) {
 		requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
-			query: "folder_path=\(generationFolder)",
+			query: "folder_path=\(folderPath)",
 			payload: nil) {
 				[weak self] (receivedData, error) in
 
 				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
-					  let files = decodedResponse.files,
-					  let firstFile = files.first,
-					  let firstFileFullPath = firstFile?.fullpath
+					  let filesORfolders = decodedResponse.files
 				else {
-					completionHandler?(error)
+					completionHandler?(nil, error)
 					return
 				}
 
-				fxdPrint("firstFileFullPath: \(firstFileFullPath)")
-				fxdPrint("firstFile?.date: \(firstFile?.date)")
-				fxdPrint("firstFile?.created_time: \(firstFile?.created_time)")
+				fxdPrint("filesORfolders: \(filesORfolders.count)")
 
-				completionHandler?(error)
+				let latestFileORfolder = filesORfolders.sorted {
+					($0?.updated_time())! > ($1?.updated_time())!
+				}.first as? SDdecodedResponse.SDdecodedFile 
+
+				fxdPrint("latestFileORfolder?.updated_time(): \(String(describing: latestFileORfolder?.updated_time()))")
+				fxdPrint("latestFileORfolder?.fullpath: \(String(describing: latestFileORfolder?.fullpath))")
+				guard latestFileORfolder != nil,
+					  let fullpath = latestFileORfolder?.fullpath
+				else {
+					completionHandler?(nil, error)
+					return
+				}
+
+
+				fxdPrint("latestFileORfolder?.type: \(String(describing: latestFileORfolder?.type))")
+				guard let type = latestFileORfolder?.type,
+						  type != "dir"
+				else {
+					//recursive
+					self?.obtain_latestGenereatedImage(
+						folderPath: fullpath,
+						completionHandler: completionHandler)
+					return
+				}
+
+
+				completionHandler?(nil, error)
 			}
 	}
 }
