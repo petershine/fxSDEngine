@@ -383,7 +383,7 @@ extension FXDmoduleSDEngine {
 			httpRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
 			httpRequest.httpMethod = method ?? "GET"
-			if method == nil && payload != nil {
+			if payload != nil {
 				httpRequest.httpMethod = "POST"
 				httpRequest.httpBody = payload
 			}
