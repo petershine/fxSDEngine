@@ -19,16 +19,16 @@ public enum SDAPIendpoint: String, CaseIterable {
 }
 
 public struct SDencodablePayload: Encodable {
-	var image: String
+	var image: String? = nil
 
-	public init(image: String) {
+	public init(image: String?) {
 		self.image = image
 	}
 }
 
 public struct SDcodableResponse: Codable {
-	var progress: Double? = 0.0
-	var eta_relative: Double? = 0.0
+	var progress: Double? = nil
+	var eta_relative: Double? = nil
 
 	var textinfo: String? = nil
 
@@ -48,7 +48,7 @@ public struct SDcodableResponse: Codable {
 		var size: String? = nil
 		var name: String? = nil
 		var fullpath: String? = nil
-		var is_under_scanned_path: Bool? = false
+		var is_under_scanned_path: Bool? = nil
 		var date: String? = nil
 		var created_time: String? = nil
 
