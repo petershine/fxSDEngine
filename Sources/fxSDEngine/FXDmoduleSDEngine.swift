@@ -316,14 +316,7 @@ extension FXDmoduleSDEngine {
 		catch let decodeException {
 			fxdPrint("decodeException: \(String(describing: decodeException))")
 
-			var jsonObject: Dictionary<String, Any?>? = nil
-			do {
-				jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
-				fxdPrint("jsonObject: \(String(describing: jsonObject))")
-			}
-			catch let jsonError {
-				fxdPrint("jsonError: \(jsonError)")
-			}
+			let _ = decodedJSONobject(receivedData: receivedData)
 		}
 
 		return decodedResponse
@@ -353,6 +346,21 @@ extension FXDmoduleSDEngine {
 		}
 
 		return decodedImageArray
+	}
+
+	public func decodedJSONobject(receivedData: Data) -> Dictionary<String, Any?>? {
+		var jsonObject: Dictionary<String, Any?>? = nil
+		do {
+			jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
+			fxdPrint("jsonObject: \(String(describing: jsonObject))")
+		}
+		catch let jsonError {
+			let receivedString = String(data: receivedData, encoding: .utf8)
+			fxdPrint("receivedString: \(String(describing: receivedString))")
+			fxdPrint("jsonError: \(jsonError)")
+		}
+
+		return jsonObject
 	}
 }
 
@@ -394,7 +402,7 @@ extension FXDmoduleSDEngine {
 			fxdPrint("httpRequest.httpBody: \(String(describing: httpRequest.httpBody))")
 
 			let httpTask = URLSession.shared.dataTask(with: httpRequest) {
-				(data: Data?, response: URLResponse?, error: Error?) in
+				[weak self] (data: Data?, response: URLResponse?, error: Error?) in
 
 				fxdPrint("data: \(String(describing: data))")
 				fxdPrint("response: \(String(describing: response))")
@@ -405,19 +413,11 @@ extension FXDmoduleSDEngine {
 				}
 
 
-				var jsonObject: Dictionary<String, Any?>? = nil
-				do {
-					jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
-				}
-				catch let jsonError {
-					fxdPrint("jsonError: \(jsonError)")
-				}
-
-
 				var modifiedError = error
 				if modifiedError == nil,
 				   let responseCode = (response as? HTTPURLResponse)?.statusCode, responseCode != 200 {
-					fxdPrint("jsonObject: \(String(describing: jsonObject))")
+
+					let jsonObject = self?.decodedJSONobject(receivedData: receivedData)
 
 					let responseMSG = jsonObject?["msg"] as? String
 					let responseDetail = jsonObject?["detail"] as? String
