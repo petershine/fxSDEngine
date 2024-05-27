@@ -11,6 +11,8 @@ public enum SDAPIendpoint: String, CaseIterable {
 	case SDAPI_V1_TXT2IMG = "sdapi/v1/txt2img"
 	case SDAPI_V1_PROGRESS = "sdapi/v1/progress"
 	case SDAPI_V1_INTERRUPT = "sdapi/v1/interrupt"
+
+	case INFINITE_IMAGE_BROWSING_FILES = "infinite_image_browsing/files"
 }
 
 public struct SDdecodedResponse: Codable {
@@ -72,7 +74,14 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	override public init() {
 		super.init()
 
-		execute_internalSysInfo(completionHandler: nil)
+		execute_internalSysInfo { 
+			error in
+			
+			self.execute_infiniteImageBrowsing_Files {
+				error in
+
+			}
+		}
 	}
 
 
@@ -249,6 +258,24 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				completionHandler?(error)
 			}
 	}
+
+	open func execute_infiniteImageBrowsing_Files(completionHandler: ((_ error: Error?)->Void)?) {
+		guard let generationFolder = self.generationFolder else {
+			assert(self.generationFolder != nil, "[SHOULD NOT BE nil] self.generationFolder: \(self.generationFolder)")
+			return
+		}
+
+		requestToSDServer(
+			api_endpoint: .SDAPI_V1_PROGRESS,
+			query: "folder_path=\(self.generationFolder!)",
+			payload: nil) {
+				(receivedData, error) in
+
+				completionHandler?(error)
+			}
+	}
+
+	//infinite_image_browsing/files?folder_path
 }
 
 
@@ -284,12 +311,17 @@ private extension FXDmoduleSDEngine {
 	private func requestToSDServer(
 		api_endpoint: SDAPIendpoint,
 		method: String? = nil,
+		query: String? = nil,
 		payload: Data?,
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?) {
 
-		let requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
+			var requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
+			if !(query?.isEmpty ?? true),
+			   let escapedQuery = query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+				requestPath += "?\(escapedQuery)"
+			}
+			fxdPrint("requestPath: \(requestPath)")
 
-		fxdPrint("requestPath: \(requestPath)")
 		guard let requestURL = URL(string: requestPath) else {
 			responseHandler?(nil, nil)
 			return
