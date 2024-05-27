@@ -20,9 +20,14 @@ public enum SDAPIendpoint: String, CaseIterable {
 
 public struct SDencodablePayload: Encodable {
 	var image: String? = nil
+	
+	var prompt: String? = nil
+	var negative_prompt: String? = nil
 
-	public init(image: String?) {
+	public init(image: String? = nil, prompt: String? = nil, negative_prompt: String? = nil) {
 		self.image = image
+		self.prompt = prompt
+		self.negative_prompt = negative_prompt
 	}
 }
 
