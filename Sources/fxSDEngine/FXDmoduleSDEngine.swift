@@ -49,9 +49,10 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	private static let OBJKEY_IMAGES = "images"
 	private static let OBJKEY_CURRENT_IMAGE = "current_image"
 
+	open var generationFolder: String? = nil
+
 	@Published open var generatedImage: UIImage? = nil
 	@Published open var generationProgress: Double = 0.0
-	@Published open var generationFolder: String? = nil
 
 	@Published open var shouldContinueRefreshing: Bool = false
 
@@ -70,6 +71,8 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 	override public init() {
 		super.init()
+
+		execute_internalSysInfo(completionHandler: nil)
 	}
 
 
