@@ -20,9 +20,39 @@ public enum SDAPIendpoint: String, CaseIterable {
 
 public struct SDencodablePayload: Encodable {
 	var image: String? = nil
-	
+
 	var prompt: String? = nil
 	var negative_prompt: String? = nil
+
+	var sampler_name: String = "DPM++ 2M SDE"
+	var scheduler: String = "Karras"
+	var steps: Int = 30
+	var cfg_scale: Int = 7
+
+	var width: Int = 512
+	var height: Int = 768
+
+	var enable_hr: Bool = true
+	var hr_scale: Double = 1.5
+	var hr_second_pass_steps: Int = 10
+	var hr_upscaler: String = "4x-UltraSharp"
+	var hr_scheduler: String = "Karras"
+
+	var n_iter: Int = 1	//batch count
+	var batch_size: Int = 1
+
+
+	var alwayson_scripts: SDencodableScript? = nil
+	struct SDencodableScript: Encodable {
+
+		var ADetailer: SDencodableADetailer? = nil
+		struct SDencodableADetailer: Encodable {
+			var args: [Bool] = [
+				true,
+				false
+			]
+		}
+	}
 
 	public init(image: String? = nil, prompt: String? = nil, negative_prompt: String? = nil) {
 		self.image = image
