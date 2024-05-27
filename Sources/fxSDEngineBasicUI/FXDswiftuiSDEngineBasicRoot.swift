@@ -13,15 +13,17 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 	@State var shouldPresentPromptEditor: Bool = false
 
 	var sdEngine: FXDmoduleSDEngine
+	@ObservedObject private var sdObservable: FXDobservableSDProperties
 
 
 	public init(sdEngine: FXDmoduleSDEngine?) {
 		self.sdEngine = sdEngine ?? FXDmoduleSDEngine()
+		self.sdObservable = self.sdEngine.observable
 	}
 
 	public var body: some View {
 		ZStack {
-			FXDswiftuiMediaDisplay(mediaImage: sdEngine.observable.generatedImage)
+			FXDswiftuiMediaDisplay(mediaImage: sdObservable.generatedImage)
 
 			VStack {
 				Spacer()
@@ -38,7 +40,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 									error in
 
 									Task {	@MainActor in
-										sdEngine.observable.shouldContinueRefreshing = false
+										sdObservable.shouldContinueRefreshing = false
 
 										let localizedDescription = error?.localizedDescription ?? "Interrupted"
 										UIAlertController.simpleAlert(withTitle: localizedDescription, message: nil)
@@ -52,15 +54,15 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 					VStack {
 						Spacer()
 
-						if sdEngine.observable.shouldContinueRefreshing {
-							Text("\(sdEngine.observable.generationProgress)")
+						if sdObservable.shouldContinueRefreshing {
+							Text("\(sdObservable.generationProgress)")
 								.padding()
 						}
 
 						FXDswiftuiButton(
-							systemImageName: (sdEngine.observable.shouldContinueRefreshing ? "pause.fill" : "play.fill"),
+							systemImageName: (sdObservable.shouldContinueRefreshing ? "pause.fill" : "play.fill"),
 							action: {
-								sdEngine.observable.shouldContinueRefreshing.toggle()
+								sdObservable.shouldContinueRefreshing.toggle()
 								sdEngine.continuousProgressRefreshing()
 							})
 						.padding()
@@ -81,13 +83,13 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 						FXDswiftuiButton(
 							systemImageName: "paintbrush",
 							action: {
-								sdEngine.observable.shouldContinueRefreshing = true
+								sdObservable.shouldContinueRefreshing = true
 								sdEngine.continuousProgressRefreshing()
 
 								sdEngine.execute_txt2img {
 									error in
 
-									sdEngine.observable.shouldContinueRefreshing = false
+									sdObservable.shouldContinueRefreshing = false
 								}
 							})
 					}
