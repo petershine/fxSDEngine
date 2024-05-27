@@ -16,8 +16,6 @@ public enum SDAPIendpoint: String, CaseIterable {
 }
 
 public struct SDdecodedResponse: Codable {
-	var Config: SDdecodedConfig? = nil
-
 	var progress: Double? = 0.0
 	var eta_relative: Double? = 0.0
 
@@ -26,12 +24,14 @@ public struct SDdecodedResponse: Codable {
 	var current_image: String? = nil
 	var images: [String?]? = nil
 
-	var files: [SDdecodedFile?]? = nil
 
+	var Config: SDdecodedConfig? = nil
 	struct SDdecodedConfig: Codable {
 		var outdir_samples: String? = nil
 	}
 
+
+	var files: [SDdecodedFile?]? = nil
 	struct SDdecodedFile: Codable {
 		var type: String? = nil
 		var date: String? = nil
@@ -274,6 +274,15 @@ extension FXDmoduleSDEngine {
 		}
 		catch let decodeException {
 			fxdPrint("decodeException: \(String(describing: decodeException))")
+
+			var jsonObject: Dictionary<String, Any?>? = nil
+			do {
+				jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
+				fxdPrint("jsonObject: \(String(describing: jsonObject))")
+			}
+			catch let jsonError {
+				fxdPrint("jsonError: \(jsonError)")
+			}
 		}
 
 		return decodedResponse
