@@ -97,6 +97,13 @@ open class FXDobservableProperties: SDobservableProperties {
 	@Published open var generationProgress: Double = 0.0
 
 	@Published open var shouldContinueRefreshing: Bool = false
+
+	public init(generationFolder: String? = nil, generatedImage: UIImage? = nil, generationProgress: Double = 0.0, shouldContinueRefreshing: Bool = false) {
+		self.generationFolder = generationFolder
+		self.generatedImage = generatedImage
+		self.generationProgress = generationProgress
+		self.shouldContinueRefreshing = shouldContinueRefreshing
+	}
 }
 
 open class FXDmoduleSDEngine: NSObject {
