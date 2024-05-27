@@ -13,13 +13,14 @@ public enum SDAPIendpoint: String, CaseIterable {
 	case SDAPI_V1_INTERRUPT = "sdapi/v1/interrupt"
 }
 
-public struct SDdecodedProgress: Codable {
+public struct SDdecodedResponse: Codable {
 	var progress: Double? = 0.0
 	var eta_relative: Double? = 0.0
 
 	var textinfo: String? = nil
 
 	var current_image: String? = nil
+	var images: [String?]? = nil
 }
 
 
@@ -98,15 +99,47 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	}
 
 
+	open func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?) {
+		requestToSDServer(
+			api_endpoint: .INTERNAL_SYSINFO,
+			payload: nil) {
+				[weak self] (receivedData, error) in
+
+
+				completionHandler?(error)
+			}
+	}
+
+
 	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			payload: currentPayload) {
-				[weak self] (receivedData, jsonObject, error) in
+				[weak self] (receivedData, error) in
 
-				let imagesEncoded = (jsonObject as? Dictionary<String, Any?>)?[Self.OBJKEY_IMAGES] as? Array<String>
+				guard let receivedData else {
+					completionHandler?(error)
+					return
+				}
 
-				let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [])
+
+				var decodedResponse: SDdecodedResponse? = nil
+				do {
+					decodedResponse = try JSONDecoder().decode(SDdecodedResponse.self, from: receivedData)
+					fxdPrint("[decodedResponse?.images?.count] \(String(describing: decodedResponse?.images?.count))")
+				}
+				catch let decodeException {
+					fxdPrint("decodeException: \(String(describing: decodeException))")
+				}
+
+				guard decodedResponse != nil,
+					  let images = decodedResponse!.images else {
+					completionHandler?(error)
+					return
+				}
+
+
+				let decodedImageArray = self?.decodedImages(imagesEncoded: images)
 
 				if let availableImage = decodedImageArray?.first {
 					DispatchQueue.main.async {
@@ -122,7 +155,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_PROGRESS,
 			payload: nil) {
-				[weak self] (receivedData, jsonObject, error) in
+				[weak self] (receivedData, error) in
 
 				guard let receivedData else {
 					completionHandler?(error)
@@ -130,17 +163,17 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				}
 
 
-				var decodedProgress: SDdecodedProgress? = nil
+				var decodedResponse: SDdecodedResponse? = nil
 				do {
-					decodedProgress = try JSONDecoder().decode(SDdecodedProgress.self, from: receivedData)
-					fxdPrint("[decodedProgress] \(String(describing: decodedProgress?.progress))")
+					decodedResponse = try JSONDecoder().decode(SDdecodedResponse.self, from: receivedData)
+					fxdPrint("[decodedProgress] \(String(describing: decodedResponse?.progress))")
 				}
 				catch let decodeException {
 					fxdPrint("decodeException: \(String(describing: decodeException))")
 				}
 
-				guard decodedProgress != nil,
-					  let current_image = decodedProgress!.current_image else {
+				guard decodedResponse != nil,
+					  let current_image = decodedResponse!.current_image else {
 					completionHandler?(error)
 					return
 				}
@@ -153,7 +186,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				if let availableImage = decodedImageArray?.first {
 					DispatchQueue.main.async {
 						self?.generatedImage = availableImage
-						self?.generationProgress = decodedProgress?.progress ?? 0.0
+						self?.generationProgress = decodedResponse?.progress ?? 0.0
 					}
 				}
 
@@ -179,7 +212,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 			api_endpoint: .SDAPI_V1_INTERRUPT,
 			method: "POST",
 			payload: nil) {
-				(receivedData, jsonObject, error) in
+				(receivedData, error) in
 
 				completionHandler?(error)
 			}
@@ -188,12 +221,16 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 
 extension FXDmoduleSDEngine {
-	func decodedImages(imagesEncoded: Array<String>) -> [UIImage] {
+	func decodedImages(imagesEncoded: [String?]) -> [UIImage] {
 		fxdPrint("[STARTED DECODING]: \(String(describing: imagesEncoded.count)) image(s)")
 
 		var decodedImageArray: [UIImage] = []
 		for base64string in imagesEncoded {
-			guard let imageData = Data(base64Encoded: base64string) else {
+			guard base64string != nil, !(base64string!.isEmpty) else {
+				continue
+			}
+
+			guard let imageData = Data(base64Encoded: base64string!) else {
 				continue
 			}
 			fxdPrint("imageData byte count: \(imageData.count)")
@@ -212,12 +249,17 @@ extension FXDmoduleSDEngine {
 
 
 private extension FXDmoduleSDEngine {
-	private func requestToSDServer(api_endpoint: SDAPIendpoint, method: String? = nil, payload: Data?, responseHandler: ((_ received: Data?, _ jsonObject: Any?, _ error: Error?) -> Void)?) {
+	private func requestToSDServer(
+		api_endpoint: SDAPIendpoint,
+		method: String? = nil,
+		payload: Data?,
+		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?) {
+
 		let requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
 
 		fxdPrint("requestPath: \(requestPath)")
 		guard let requestURL = URL(string: requestPath) else {
-			responseHandler?(nil, nil, nil)
+			responseHandler?(nil, nil)
 			return
 		}
 
@@ -243,7 +285,7 @@ private extension FXDmoduleSDEngine {
 			fxdPrint("response: \(String(describing: response))")
 			fxdPrint("error: \(String(describing: error))")
 			guard let receivedData = data else {
-				responseHandler?(nil, nil, error)
+				responseHandler?(nil, error)
 				return
 			}
 
@@ -274,7 +316,7 @@ private extension FXDmoduleSDEngine {
 					userInfo: responseUserInfo)
 			}
 
-			responseHandler?(receivedData, jsonObject, modifiedError)
+			responseHandler?(receivedData, modifiedError)
 		}
 		httpTask.resume()
 	}
