@@ -13,6 +13,7 @@ public enum SDAPIendpoint: String, CaseIterable {
 	case SDAPI_V1_INTERRUPT = "sdapi/v1/interrupt"
 
 	case INFINITE_IMAGE_BROWSING_FILES = "infinite_image_browsing/files"
+	case INFINITE_IMAGE_BROWSING_FILE = "infinite_image_browsing/file"
 }
 
 public struct SDdecodedResponse: Codable {
@@ -245,8 +246,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	open func obtain_latestGenereatedImage(folderPath: String, completionHandler: ((_ image: UIImage?, _ error: Error?)->Void)?) {
 		requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
-			query: "folder_path=\(folderPath)",
-			payload: nil) {
+			query: "folder_path=\(folderPath)") {
 				[weak self] (receivedData, error) in
 
 				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
@@ -284,7 +284,15 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				}
 
 
-				completionHandler?(nil, error)
+				self?.requestToSDServer(
+					api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
+					query: "path=\(fullpath)&t=file") {
+						[weak self] (received, error) in
+
+
+
+						completionHandler?(nil, error)
+					}
 			}
 	}
 }
