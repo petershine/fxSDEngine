@@ -107,8 +107,7 @@ open class FXDobservableSDProperties: SDobservableProperties {
 }
 
 open class FXDmoduleSDEngine: NSObject {
-	@Published open var observable: FXDobservableSDProperties = FXDobservableSDProperties()
-
+	@Published public var observable: FXDobservableSDProperties = FXDobservableSDProperties()
 
 	open var savedPayloadFilename: String {
 		return ""
@@ -122,8 +121,10 @@ open class FXDmoduleSDEngine: NSObject {
 		return nil
 	}
 
-	override public init() {
+	public init(observable: FXDobservableSDProperties? = nil) {
 		super.init()
+
+		self.observable = observable ?? FXDobservableSDProperties()
 	}
 
 
@@ -197,9 +198,9 @@ open class FXDmoduleSDEngine: NSObject {
 
 				let decodedImageArray = self?.decodedImages(imagesEncoded: images)
 
-				if let availableImage = decodedImageArray?.first {
+				if let generated = decodedImageArray?.first {
 					DispatchQueue.main.async {
-						self?.observable.generatedImage = availableImage
+						self?.observable.generatedImage = generated
 					}
 				}
 
@@ -224,9 +225,9 @@ open class FXDmoduleSDEngine: NSObject {
 
 				let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [])
 
-				if let availableImage = decodedImageArray?.first {
+				if let progrssing = decodedImageArray?.first {
 					DispatchQueue.main.async {
-						self?.observable.generatedImage = availableImage
+						self?.observable.generatedImage = progrssing
 						self?.observable.generationProgress = decodedResponse.progress ?? 0.0
 					}
 				}
