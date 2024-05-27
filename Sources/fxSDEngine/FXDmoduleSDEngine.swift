@@ -338,7 +338,8 @@ extension FXDmoduleSDEngine {
 				continue
 			}
 
-			guard let imageData = Data(base64Encoded: base64string!) else {
+			
+			guard let imageData = Data(base64Encoded: base64string!, options: .ignoreUnknownCharacters) else {
 				continue
 			}
 			fxdPrint("imageData byte count: \(imageData.count)")
