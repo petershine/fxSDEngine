@@ -88,6 +88,8 @@ public protocol SDobservableProperties: ObservableObject {
 	var shouldContinueRefreshing: Bool { get set }
 }
 
+
+
 open class FXDobservableProperties: SDobservableProperties {
 	@Published open var generationFolder: String? = nil
 
@@ -171,7 +173,6 @@ open class FXDmoduleSDEngine: NSObject {
 				completionHandler?(error)
 			}
 	}
-
 
 	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(
@@ -341,7 +342,7 @@ extension FXDmoduleSDEngine {
 			}
 
 
-			guard let imageData = Data(base64Encoded: base64string!, options: .ignoreUnknownCharacters) else {
+			guard let imageData = Data(base64Encoded: base64string!) else {
 				continue
 			}
 			fxdPrint("imageData byte count: \(imageData.count)")
