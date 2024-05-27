@@ -90,7 +90,7 @@ public protocol SDobservableProperties: ObservableObject {
 
 
 
-open class FXDobservableProperties: SDobservableProperties {
+open class FXDobservableSDProperties: SDobservableProperties {
 	@Published open var generationFolder: String? = nil
 
 	@Published open var generatedImage: UIImage? = nil
@@ -107,7 +107,7 @@ open class FXDobservableProperties: SDobservableProperties {
 }
 
 open class FXDmoduleSDEngine: NSObject {
-	@Published open var observable: FXDobservableProperties = FXDobservableProperties()
+	@Published open var observable: FXDobservableSDProperties = FXDobservableSDProperties()
 
 
 	open var savedPayloadFilename: String {
