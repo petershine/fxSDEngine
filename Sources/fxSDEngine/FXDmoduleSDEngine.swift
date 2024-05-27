@@ -205,13 +205,17 @@ open class FXDmoduleSDEngine: NSObject {
 
 				let decodedImageArray = self?.decodedImages(imagesEncoded: images)
 
-				if let generated = decodedImageArray?.first {
-					DispatchQueue.main.async {
-						self?.observable.generatedImage = generated
-					}
+				guard let generated = decodedImageArray?.first else {
+					completionHandler?(error)
+					return
 				}
 
-				completionHandler?(error)
+
+				DispatchQueue.main.async {
+					self?.observable.generatedImage = generated
+
+					completionHandler?(error)
+				}
 			}
 	}
 
@@ -232,14 +236,18 @@ open class FXDmoduleSDEngine: NSObject {
 
 				let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [])
 
-				if let progrssing = decodedImageArray?.first {
-					DispatchQueue.main.async {
-						self?.observable.generatedImage = progrssing
-						self?.observable.generationProgress = decodedResponse.progress ?? 0.0
-					}
+				guard let progrssing = decodedImageArray?.first else {
+					completionHandler?(error)
+					return
 				}
 
-				completionHandler?(error)
+
+				DispatchQueue.main.async {
+					self?.observable.generatedImage = progrssing
+					self?.observable.generationProgress = decodedResponse.progress ?? 0.0
+
+					completionHandler?(error)
+				}
 			}
 	}
 
