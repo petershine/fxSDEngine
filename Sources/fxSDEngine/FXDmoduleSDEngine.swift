@@ -79,17 +79,33 @@ extension SDError: LocalizedError {
 }
 
 
-@available(iOS 17.0, *)
-open class FXDmoduleSDEngine: NSObject, ObservableObject {
-	private static let OBJKEY_IMAGES = "images"
-	private static let OBJKEY_CURRENT_IMAGE = "current_image"
+public protocol SDobservableProperties: ObservableObject {
+	var generationFolder: String? { get set }
 
-	open var generationFolder: String? = nil
+	var generatedImage: UIImage? { get set }
+	var generationProgress: Double? { get set }
+
+	var shouldContinueRefreshing: Bool? { get set }
+}
+
+open class FXDobservableProperties: SDobservableProperties {
+	@Published open var generationFolder: String? = nil
 
 	@Published open var generatedImage: UIImage? = nil
-	@Published open var generationProgress: Double = 0.0
+	@Published open var generationProgress: Double? = nil
 
-	@Published open var shouldContinueRefreshing: Bool = false
+	@Published open var shouldContinueRefreshing: Bool? = nil
+
+	public init(generationFolder: String? = nil, generatedImage: UIImage? = nil, generationProgress: Double? = nil, shouldContinueRefreshing: Bool? = nil) {
+		self.generationFolder = generationFolder
+		self.generatedImage = generatedImage
+		self.generationProgress = generationProgress
+		self.shouldContinueRefreshing = shouldContinueRefreshing
+	}
+}
+
+open class FXDmoduleSDEngine: NSObject {
+	@Published open var observable: FXDobservableProperties? = FXDobservableProperties()
 
 
 	open var savedPayloadFilename: String {
@@ -156,8 +172,8 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 				}
 
 
-				self?.generationFolder = Config.outdir_samples ?? ""
-				fxdPrint("self?.generationFolder: \(String(describing: self?.generationFolder))")
+				self?.observable?.generationFolder = Config.outdir_samples ?? ""
+				fxdPrint("self?.generationFolder: \(String(describing: self?.observable?.generationFolder))")
 
 				completionHandler?(error)
 			}
@@ -182,7 +198,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 				if let availableImage = decodedImageArray?.first {
 					DispatchQueue.main.async {
-						self?.generatedImage = availableImage
+						self?.observable?.generatedImage = availableImage
 					}
 				}
 
@@ -209,8 +225,8 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 				if let availableImage = decodedImageArray?.first {
 					DispatchQueue.main.async {
-						self?.generatedImage = availableImage
-						self?.generationProgress = decodedResponse.progress ?? 0.0
+						self?.observable?.generatedImage = availableImage
+						self?.observable?.generationProgress = decodedResponse.progress ?? 0.0
 					}
 				}
 
@@ -219,7 +235,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	}
 
 	open func continuousProgressRefreshing() {
-		guard shouldContinueRefreshing else {
+		guard (observable?.shouldContinueRefreshing ?? false) else {
 			return
 		}
 
