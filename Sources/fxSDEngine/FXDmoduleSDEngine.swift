@@ -146,8 +146,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 	open func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(
-			api_endpoint: .INTERNAL_SYSINFO,
-			payload: nil) {
+			api_endpoint: .INTERNAL_SYSINFO) {
 				[weak self] (receivedData, error) in
 
 				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
@@ -194,8 +193,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 
 	open func execute_progress(completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(
-			api_endpoint: .SDAPI_V1_PROGRESS,
-			payload: nil) {
+			api_endpoint: .SDAPI_V1_PROGRESS) {
 				[weak self] (receivedData, error) in
 
 				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
@@ -237,8 +235,7 @@ open class FXDmoduleSDEngine: NSObject, ObservableObject {
 	open func interrupt(completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_INTERRUPT,
-			method: "POST",
-			payload: nil) {
+			method: "POST") {
 				(receivedData, error) in
 
 				completionHandler?(error)
@@ -352,7 +349,7 @@ private extension FXDmoduleSDEngine {
 		api_endpoint: SDAPIendpoint,
 		method: String? = nil,
 		query: String? = nil,
-		payload: Data?,
+		payload: Data? = nil,
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?) {
 
 			var requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
