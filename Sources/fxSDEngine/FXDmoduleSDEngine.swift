@@ -10,12 +10,12 @@ public enum SDAPIendpoint: String, CaseIterable {
 	case INTERNAL_SYSINFO = "internal/sysinfo"
 
 	case SDAPI_V1_TXT2IMG = "sdapi/v1/txt2img"
-	case SDAPI_V1_PNG_INFO = "sdapi/v1/png-info"
 	case SDAPI_V1_PROGRESS = "sdapi/v1/progress"
 	case SDAPI_V1_INTERRUPT = "sdapi/v1/interrupt"
 
 	case INFINITE_IMAGE_BROWSING_FILES = "infinite_image_browsing/files"
 	case INFINITE_IMAGE_BROWSING_FILE = "infinite_image_browsing/file"
+	case INFINITE_IMAGE_BROWSING_GENINFO = "infinite_image_browsing/image_geninfo"
 }
 
 public struct SDencodablePayload: Encodable {
@@ -261,7 +261,7 @@ open class FXDmoduleSDEngine: NSObject {
 			}
 	}
 
-	open func obtain_latestGenereatedImage(folderPath: String, completionHandler: ((_ image: UIImage?, _ error: Error?)->Void)?) {
+	open func obtain_latestGenereatedImage(folderPath: String, completionHandler: ((_ image: UIImage?, _ path: String?, _ error: Error?)->Void)?) {
 		requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
 			query: "folder_path=\(folderPath)") {
@@ -270,22 +270,27 @@ open class FXDmoduleSDEngine: NSObject {
 				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
 					  let filesORfolders = decodedResponse.files
 				else {
-					completionHandler?(nil, error)
+					completionHandler?(nil, nil, error)
 					return
 				}
 
 				fxdPrint("filesORfolders: \(filesORfolders.count)")
 
-				let latestFileORfolder = filesORfolders.sorted {
-					($0?.updated_time())! > ($1?.updated_time())!
-				}.first as? SDcodableResponse.SDcodableFile 
+				let latestFileORfolder = filesORfolders
+					.sorted {
+						($0?.updated_time())! > ($1?.updated_time())!
+					}
+					.filter { 
+						!($0?.fullpath?.contains("DS_Store") ?? false)
+					}
+					.first as? SDcodableResponse.SDcodableFile
 
 				fxdPrint("latestFileORfolder?.updated_time(): \(String(describing: latestFileORfolder?.updated_time()))")
 				fxdPrint("latestFileORfolder?.fullpath: \(String(describing: latestFileORfolder?.fullpath))")
 				guard latestFileORfolder != nil,
 					  let fullpath = latestFileORfolder?.fullpath
 				else {
-					completionHandler?(nil, error)
+					completionHandler?(nil, nil, error)
 					return
 				}
 
@@ -308,14 +313,14 @@ open class FXDmoduleSDEngine: NSObject {
 						(received, error) in
 
 						guard let receivedData = received else {
-							completionHandler?(nil, error)
+							completionHandler?(nil, fullpath, error)
 							return
 						}
 
 
 						let latestImage = UIImage(data: receivedData)
 
-						completionHandler?(latestImage, error)
+						completionHandler?(latestImage, fullpath, error)
 					}
 			}
 	}
