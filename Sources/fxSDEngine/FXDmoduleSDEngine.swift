@@ -246,7 +246,7 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 
-				let encodablePayload = self?.parseGenerationInformation(receivedData: receivedData)
+				let encodablePayload = self?.encodeGenerationPayload(receivedData: receivedData)
 				var generationInfo: Data? = nil
 				do {
 					generationInfo = try JSONEncoder().encode(encodablePayload)
@@ -492,10 +492,9 @@ extension FXDmoduleSDEngine {
 		return jsonObject
 	}
 
-	public func parseGenerationInformation(receivedData: Data) -> SDencodablePayload {
+	public func encodeGenerationPayload(receivedData: Data) -> SDencodablePayload {
 		var receivedString = String(data: receivedData, encoding: .utf8)
 		receivedString = receivedString?.replacingOccurrences(of: "\\n", with: "\n")
-		fxdPrint("receivedString:\n\n\(receivedString!)\n\n")
 
 		let separators = [
 			("Negative prompt:", false, false),
@@ -521,7 +520,7 @@ extension FXDmoduleSDEngine {
 			negative_prompt: parsed[1]
 		)
 
-		debugPrint("[encodablePayload]:\n\n\(encodablePayload)")
+		debugPrint("[encodablePayload]: \(encodablePayload)")
 
 		return encodablePayload
 	}
