@@ -26,7 +26,18 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 			FXDswiftuiMediaDisplay(mediaImage: sdObservable.generatedImage)
 
 			VStack {
-				Spacer()
+				HStack {
+					VStack {
+						FXDswiftuiButton(
+							systemImageName: "arrow.clockwise",
+							foregroundStyle: .white,
+							action: {
+								sdEngine.refresh_LastPayload(completionHandler: nil)
+						})
+					}
+					Spacer()
+				}
+
 
 				HStack {
 					VStack {
@@ -61,6 +72,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 
 						FXDswiftuiButton(
 							systemImageName: (sdObservable.shouldContinueRefreshing ? "pause.fill" : "play.fill"),
+							foregroundStyle: .white,
 							action: {
 								sdObservable.shouldContinueRefreshing.toggle()
 								sdEngine.continuousProgressRefreshing()
@@ -75,6 +87,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 
 						FXDswiftuiButton(
 							systemImageName: "lightbulb",
+							foregroundStyle: .white,
 							action: {
 								shouldPresentPromptEditor = true
 							})
@@ -82,6 +95,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 
 						FXDswiftuiButton(
 							systemImageName: "paintbrush",
+							foregroundStyle: .white,
 							action: {
 								sdObservable.shouldContinueRefreshing = true
 								sdEngine.continuousProgressRefreshing()
