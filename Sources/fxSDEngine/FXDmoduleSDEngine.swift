@@ -491,7 +491,16 @@ extension FXDmoduleSDEngine {
 
 	public func encodeGenerationPayload(receivedData: Data) -> SDencodablePayload? {
 		var receivedString = String(data: receivedData, encoding: .utf8)
-		receivedString = receivedString?.replacingOccurrences(of: "\\n", with: "\n")
+		receivedString = receivedString?.replacingOccurrences(of: "\\n", with: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+		fxdPrint("receivedString?.count: \(String(describing: receivedString?.count))")
+
+		guard !(receivedString?.isEmpty ?? true)
+				&& (receivedString?.contains("Negative prompt:") ?? false)
+		else {
+			fxdPrint("receivedString: \(String(describing: receivedString))")
+			return nil
+		}
+
 
 		let separators = [
 			("Negative prompt:", false, false),
@@ -516,7 +525,7 @@ extension FXDmoduleSDEngine {
 			negative_prompt: parsed[1]
 		)
 
-		guard !(encodablePayload.prompt?.isEmpty ?? false) else {
+		guard !(parsed[0].isEmpty) else {
 			fxdPrint("receivedString: \(String(describing: receivedString))")
 			return nil
 		}
