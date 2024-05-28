@@ -39,7 +39,6 @@ public struct SDencodablePayload: Encodable {
 	var hr_prompt: String? = nil
 	var hr_negative_prompt: String? = nil
 
-
 	var n_iter: Int = 1	//batch count
 	var batch_size: Int = 1
 
@@ -50,19 +49,6 @@ public struct SDencodablePayload: Encodable {
 		self.hr_prompt = self.prompt
 		self.hr_negative_prompt = self.negative_prompt
 	}
-
-
-	//TODO: need substructure handling
-//	var alwayson_scripts: SDencodableScript? = nil
-//	struct SDencodableScript: Encodable {
-//		var ADetailer: SDencodableADetailer? = nil
-//		struct SDencodableADetailer: Encodable {
-//			var args: [Bool] = [
-//				true,
-//				false
-//			]
-//		}
-//	}
 }
 
 public struct SDcodableResponse: Codable {
@@ -247,15 +233,26 @@ open class FXDmoduleSDEngine: NSObject {
 
 
 				let encodablePayload = self?.encodeGenerationPayload(receivedData: receivedData)
-				var generationInfo: Data? = nil
+				var generationInfo: Data = Data()
 				do {
 					generationInfo = try JSONEncoder().encode(encodablePayload)
+
+					if let encodableADetailer = Bundle.main.url(forResource: "encodableADetailer", withExtension: "json") {
+						let ADetailerData = try Data(contentsOf: encodableADetailer)
+						let ADetailerDictionary = try JSONSerialization.jsonObject(with: ADetailerData) as? Dictionary<String, Any>
+
+						var generationDictionary = try JSONSerialization.jsonObject(with: generationInfo) as? Dictionary<String, Any>
+						generationDictionary?["alwayson_scripts"] = ADetailerDictionary
+
+						generationInfo = try JSONSerialization.data(withJSONObject: generationDictionary!)
+					}
 				}
 				catch {
 					fxdPrint("\(error)")
 				}
 
 				DispatchQueue.main.async {
+					fxdPrint(String(data: generationInfo, encoding: .utf8) as Any)
 					self?.observable.lastPayloadData = generationInfo
 					completionHandler?(error)
 				}
@@ -514,13 +511,10 @@ extension FXDmoduleSDEngine {
 		}
 
 
-
 		let encodablePayload = SDencodablePayload(
 			prompt: parsed[0],
 			negative_prompt: parsed[1]
 		)
-
-		debugPrint("[encodablePayload]: \(encodablePayload)")
 
 		return encodablePayload
 	}
