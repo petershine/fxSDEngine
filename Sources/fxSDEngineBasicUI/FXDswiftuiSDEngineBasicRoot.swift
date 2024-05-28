@@ -60,11 +60,14 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 				Spacer()
 
 				HStack {
-					VStack {
+					VStack(alignment: .leading,
+						   spacing: nil,
+						   content: {
 						Spacer()
 
 						if sdObservable.shouldContinueRefreshing {
-							Text("\(sdObservable.generationProgress)")
+							Text(String(format: "%0.1f%%", sdObservable.generationProgress * 100.0))
+								.multilineTextAlignment(.leading)
 								.padding()
 						}
 
@@ -75,7 +78,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 								sdObservable.shouldContinueRefreshing.toggle()
 								sdEngine.continuousProgressRefreshing()
 							})
-					}
+					})
 
 					Spacer()
 
