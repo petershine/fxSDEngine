@@ -29,21 +29,6 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 				HStack {
 					VStack {
 						FXDswiftuiButton(
-							systemImageName: "arrow.clockwise",
-							foregroundStyle: .white,
-							action: {
-								sdEngine.refresh_LastPayload(completionHandler: nil)
-						})
-					}
-					Spacer()
-				}
-
-
-				HStack {
-					VStack {
-						Spacer()
-
-						FXDswiftuiButton(
 							systemImageName: "xmark",
 							foregroundStyle: .red,
 							action: {
@@ -63,6 +48,19 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 					Spacer()
 
 					VStack {
+						FXDswiftuiButton(
+							systemImageName: "arrow.clockwise",
+							foregroundStyle: .white,
+							action: {
+								sdEngine.refresh_LastPayload(completionHandler: nil)
+							})
+					}
+				}
+
+				Spacer()
+
+				HStack {
+					VStack {
 						Spacer()
 
 						if sdObservable.shouldContinueRefreshing {
@@ -77,14 +75,13 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 								sdObservable.shouldContinueRefreshing.toggle()
 								sdEngine.continuousProgressRefreshing()
 							})
-						.padding()
 					}
 
 					Spacer()
 
 					VStack {
 						Spacer()
-
+						
 						FXDswiftuiButton(
 							systemImageName: "lightbulb",
 							foregroundStyle: .white,
