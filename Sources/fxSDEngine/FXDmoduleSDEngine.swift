@@ -221,15 +221,13 @@ open class FXDmoduleSDEngine: NSObject {
 				completionHandler: {
 				[weak self] (latestImage, fullpath, error) in
 
+					if let path = fullpath {
+						self?.obtain_GenInfo(path: path, completionHandler: completionHandler)
+					}
+
 					DispatchQueue.main.async {
 						self?.observable.generatedImage = latestImage
-
-						if let path = fullpath {
-							self?.obtain_GenInfo(path: path, completionHandler: completionHandler)
-						}
-						else {
-							completionHandler?(error)
-						}
+						completionHandler?(error)
 					}
 			})
 		}
@@ -243,22 +241,23 @@ open class FXDmoduleSDEngine: NSObject {
 				[weak self] (received, error) in
 
 				guard let receivedData = received else {
+					completionHandler?(error)
 					return
 				}
 
 
 				let encodablePayload = self?.parseGenerationInformation(receivedData: receivedData)
+				var generationInfo: Data? = nil
+				do {
+					generationInfo = try JSONEncoder().encode(encodablePayload)
+				}
+				catch {
+					fxdPrint("\(error)")
+				}
 
 				DispatchQueue.main.async {
-					var generationInfo: Data? = nil
-					do {
-						generationInfo = try JSONEncoder().encode(encodablePayload)
-					}
-					catch {
-						fxdPrint("\(error)")
-					}
-
 					self?.observable.lastPayloadData = generationInfo
+					completionHandler?(error)
 				}
 		})
 	}
@@ -277,9 +276,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 
 				DispatchQueue.main.async {
-					self?.observable.generationFolder = Config.outdir_samples ?? ""
-					fxdPrint("self?.generationFolder: \(String(describing: self?.observable.generationFolder))")
-
+					self?.observable.generationFolder = Config.outdir_samples
 					completionHandler?(error)
 				}
 			}
@@ -309,7 +306,6 @@ open class FXDmoduleSDEngine: NSObject {
 
 				DispatchQueue.main.async {
 					self?.observable.generatedImage = generated
-
 					completionHandler?(error)
 				}
 			}
@@ -341,7 +337,6 @@ open class FXDmoduleSDEngine: NSObject {
 				DispatchQueue.main.async {
 					self?.observable.generatedImage = progrssing
 					self?.observable.generationProgress = decodedResponse.progress ?? 0.0
-
 					completionHandler?(error)
 				}
 			}
