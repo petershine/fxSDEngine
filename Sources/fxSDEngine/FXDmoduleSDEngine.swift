@@ -111,8 +111,6 @@ public protocol SDobservableProperties: ObservableObject {
 	var generationProgress: Double { get set }
 
 	var shouldContinueRefreshing: Bool { get set }
-
-	var lastPayloadData: Data? { get set }
 }
 
 
@@ -125,14 +123,11 @@ open class FXDobservableSDProperties: SDobservableProperties {
 
 	@Published open var shouldContinueRefreshing: Bool = false
 
-	@Published open var lastPayloadData: Data? = nil
-
-	public init(generationFolder: String? = nil, generatedImage: UIImage? = nil, generationProgress: Double = 0.0, shouldContinueRefreshing: Bool = false, lastPayloadData: Data? = nil) {
+	public init(generationFolder: String? = nil, generatedImage: UIImage? = nil, generationProgress: Double = 0.0, shouldContinueRefreshing: Bool = false) {
 		self.generationFolder = generationFolder
 		self.generatedImage = generatedImage
 		self.generationProgress = generationProgress
 		self.shouldContinueRefreshing = shouldContinueRefreshing
-		self.lastPayloadData = lastPayloadData
 	}
 }
 
@@ -164,11 +159,11 @@ open class FXDmoduleSDEngine: NSObject {
 
 			do {
 				if let processed: Data = payload.processedJSONData() {
-					fxdPrint("payload: \(payload)")
 					try processed.write(to: fileURL)
 					fxdPrint("Text successfully saved to \(fileURL)")
 				}
 			} catch {
+				fxdPrint("payload: \(payload)")
 				fxdPrint("Error saving text: \(error)")
 			}
 		}
@@ -231,8 +226,12 @@ open class FXDmoduleSDEngine: NSObject {
 					return
 				}
 
+				guard let encodablePayload = self?.encodeGenerationPayload(receivedData: receivedData) else {
+					completionHandler?(error)
+					return
+				}
 
-				let encodablePayload = self?.encodeGenerationPayload(receivedData: receivedData)
+
 				var generationInfo: Data = Data()
 				do {
 					generationInfo = try JSONEncoder().encode(encodablePayload)
@@ -251,9 +250,10 @@ open class FXDmoduleSDEngine: NSObject {
 					fxdPrint("\(error)")
 				}
 
+
 				DispatchQueue.main.async {
 					fxdPrint(String(data: generationInfo, encoding: .utf8) as Any)
-					self?.observable.lastPayloadData = generationInfo
+					self?.savePayloadToFile(payload: String(data: generationInfo, encoding: .utf8) ?? "")
 					completionHandler?(error)
 				}
 		})
@@ -489,7 +489,7 @@ extension FXDmoduleSDEngine {
 		return jsonObject
 	}
 
-	public func encodeGenerationPayload(receivedData: Data) -> SDencodablePayload {
+	public func encodeGenerationPayload(receivedData: Data) -> SDencodablePayload? {
 		var receivedString = String(data: receivedData, encoding: .utf8)
 		receivedString = receivedString?.replacingOccurrences(of: "\\n", with: "\n")
 
@@ -515,6 +515,11 @@ extension FXDmoduleSDEngine {
 			prompt: parsed[0],
 			negative_prompt: parsed[1]
 		)
+
+		guard !(encodablePayload.prompt?.isEmpty ?? false) else {
+			fxdPrint("receivedString: \(String(describing: receivedString))")
+			return nil
+		}
 
 		return encodablePayload
 	}

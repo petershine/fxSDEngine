@@ -130,8 +130,6 @@ extension FXDswiftuiSDEngineBasicRoot {
 					(editedParagraph_0, editedParagraph_1, editedPayload) in
 					fxdPrint("editedParagraph_0: \(editedParagraph_0)")
 					fxdPrint("editedParagraph_1: \(editedParagraph_1)")
-
-					sdEngine.savePayloadToFile(payload: payload)
 				})
 			.transition(AnyTransition.opacity.animation(.easeInOut(duration: 1.0)))
 			.onDisappear(perform: {
