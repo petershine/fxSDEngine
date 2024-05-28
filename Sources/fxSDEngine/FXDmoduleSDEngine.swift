@@ -125,6 +125,8 @@ public protocol SDobservableProperties: ObservableObject {
 	var generationProgress: Double { get set }
 
 	var shouldContinueRefreshing: Bool { get set }
+
+	var lastPayloadData: Data? { get set }
 }
 
 
@@ -137,11 +139,14 @@ open class FXDobservableSDProperties: SDobservableProperties {
 
 	@Published open var shouldContinueRefreshing: Bool = false
 
-	public init(generationFolder: String? = nil, generatedImage: UIImage? = nil, generationProgress: Double = 0.0, shouldContinueRefreshing: Bool = false) {
+	@Published open var lastPayloadData: Data? = nil
+
+	public init(generationFolder: String? = nil, generatedImage: UIImage? = nil, generationProgress: Double = 0.0, shouldContinueRefreshing: Bool = false, lastPayloadData: Data? = nil) {
 		self.generationFolder = generationFolder
 		self.generatedImage = generatedImage
 		self.generationProgress = generationProgress
 		self.shouldContinueRefreshing = shouldContinueRefreshing
+		self.lastPayloadData = lastPayloadData
 	}
 }
 
@@ -200,6 +205,63 @@ open class FXDmoduleSDEngine: NSObject {
 		}
 	}
 
+
+	open func refresh_LastPayload(completionHandler: ((_ error: Error?)->Void)?) {
+		execute_internalSysInfo {
+			[weak self] (error) in
+
+			guard let folderPath = self?.observable.generationFolder else {
+				completionHandler?(error)
+				return
+			}
+
+
+			self?.obtain_latestGenereatedImage(
+				folderPath: folderPath,
+				completionHandler: {
+				[weak self] (latestImage, fullpath, error) in
+
+					DispatchQueue.main.async {
+						self?.observable.generatedImage = latestImage
+
+						if let path = fullpath {
+							self?.obtain_GenInfo(path: path, completionHandler: completionHandler)
+						}
+						else {
+							completionHandler?(error)
+						}
+					}
+			})
+		}
+	}
+
+	open func obtain_GenInfo(path: String, completionHandler: ((_ error: Error?)->Void)?) {
+		requestToSDServer(
+			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
+			query: "path=\(path)",
+			responseHandler: {
+				[weak self] (received, error) in
+
+				guard let receivedData = received else {
+					return
+				}
+
+
+				let encodablePayload = self?.parseGenerationInformation(receivedData: receivedData)
+
+				DispatchQueue.main.async {
+					var generationInfo: Data? = nil
+					do {
+						generationInfo = try JSONEncoder().encode(encodablePayload)
+					}
+					catch {
+						fxdPrint("\(error)")
+					}
+
+					self?.observable.lastPayloadData = generationInfo
+				}
+		})
+	}
 
 	open func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(
@@ -433,6 +495,40 @@ extension FXDmoduleSDEngine {
 		}
 
 		return jsonObject
+	}
+
+	public func parseGenerationInformation(receivedData: Data) -> SDencodablePayload {
+		var receivedString = String(data: receivedData, encoding: .utf8)
+		receivedString = receivedString?.replacingOccurrences(of: "\\n", with: "\n")
+		fxdPrint("receivedString:\n\n\(receivedString!)\n\n")
+
+		let separators = [
+			("Negative prompt:", false, false),
+			("Steps:", false, true),
+			("Wildcard prompt:", false, true),
+			("Hires upscale:", true, true),
+		]
+
+		var modifiedString: String = receivedString ?? ""
+		var parsed: [String] = []
+		for (separator, shouldPickLast, shouldPrefix) in separators {
+			let components = modifiedString.components(separatedBy: separator)
+			let picked = (shouldPickLast ? components.last : components.first)?.trimmingCharacters(in: .whitespacesAndNewlines)
+			parsed.append("\(shouldPrefix ? (separator+" ") : "")\(picked ?? "")")
+
+			modifiedString = components.last ?? ""
+		}
+
+
+
+		let encodablePayload = SDencodablePayload(
+			prompt: parsed[0],
+			negative_prompt: parsed[1]
+		)
+
+		debugPrint("[encodablePayload]:\n\n\(encodablePayload)")
+
+		return encodablePayload
 	}
 }
 
