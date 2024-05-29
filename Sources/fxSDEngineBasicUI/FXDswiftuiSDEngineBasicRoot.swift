@@ -26,7 +26,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 			FXDswiftuiMediaDisplay(mediaImage: sdObservable.generatedImage)
 
 			VStack {
-				GROUP_resetting
+				GROUP_resetting.padding()
 
 				Spacer()
 
@@ -37,6 +37,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 
 					GROUP_generating
 				}
+				.padding()
 			}
 		}
 		.fullScreenCover(isPresented: $shouldPresentPromptEditor) {
@@ -80,8 +81,6 @@ extension FXDswiftuiSDEngineBasicRoot {
 		}
 	}
 
-
-	@ViewBuilder
 	var GROUP_progress: some View {
 		VStack(alignment: .leading,
 			   spacing: nil,
@@ -103,8 +102,6 @@ extension FXDswiftuiSDEngineBasicRoot {
 		})
 	}
 
-
-	@ViewBuilder
 	var GROUP_generating: some View {
 		VStack {
 			Spacer()
@@ -115,6 +112,7 @@ extension FXDswiftuiSDEngineBasicRoot {
 				action: {
 					shouldPresentPromptEditor = true
 				})
+			.padding(.bottom)
 
 			FXDswiftuiButton(
 				systemImageName: "paintbrush",
