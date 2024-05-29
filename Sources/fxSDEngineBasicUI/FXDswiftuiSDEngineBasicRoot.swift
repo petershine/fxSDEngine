@@ -26,93 +26,109 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 			FXDswiftuiMediaDisplay(mediaImage: sdObservable.generatedImage)
 
 			VStack {
-				HStack {
-					VStack {
-						FXDswiftuiButton(
-							systemImageName: "xmark",
-							foregroundStyle: .red,
-							action: {
-								sdEngine.interrupt{
-									error in
-
-									Task {	@MainActor in
-										sdObservable.shouldContinueRefreshing = false
-
-										let localizedDescription = error?.localizedDescription ?? "Interrupted"
-										UIAlertController.simpleAlert(withTitle: localizedDescription, message: nil)
-									}
-								}
-							})
-					}
-
-					Spacer()
-
-					VStack {
-						FXDswiftuiButton(
-							systemImageName: "arrow.clockwise",
-							foregroundStyle: .white,
-							action: {
-								sdEngine.refresh_LastPayload(completionHandler: nil)
-							})
-					}
-				}
+				GROUP_resetting
 
 				Spacer()
 
 				HStack {
-					VStack(alignment: .leading,
-						   spacing: nil,
-						   content: {
-						Spacer()
-
-						if sdObservable.shouldContinueRefreshing {
-							Text(String(format: "%0.1f%%", sdObservable.generationProgress * 100.0))
-								.multilineTextAlignment(.leading)
-								.padding()
-						}
-
-						FXDswiftuiButton(
-							systemImageName: (sdObservable.shouldContinueRefreshing ? "pause.fill" : "play.fill"),
-							foregroundStyle: .white,
-							action: {
-								sdObservable.shouldContinueRefreshing.toggle()
-								sdEngine.continuousProgressRefreshing()
-							})
-					})
+					GROUP_progress
 
 					Spacer()
 
-					VStack {
-						Spacer()
-						
-						FXDswiftuiButton(
-							systemImageName: "lightbulb",
-							foregroundStyle: .white,
-							action: {
-								shouldPresentPromptEditor = true
-							})
-						.padding()
-
-						FXDswiftuiButton(
-							systemImageName: "paintbrush",
-							foregroundStyle: .white,
-							action: {
-								sdObservable.shouldContinueRefreshing = true
-								sdEngine.continuousProgressRefreshing()
-
-								sdEngine.execute_txt2img {
-									error in
-
-									sdObservable.shouldContinueRefreshing = false
-								}
-							})
-					}
+					GROUP_generating
 				}
 			}
-			.padding()
 		}
 		.fullScreenCover(isPresented: $shouldPresentPromptEditor) {
-			promptEditor()
+			OVERLAY_promptEditor
+		}
+	}
+}
+
+
+extension FXDswiftuiSDEngineBasicRoot {
+	var GROUP_resetting: some View {
+		HStack {
+			VStack {
+				FXDswiftuiButton(
+					systemImageName: "xmark",
+					foregroundStyle: .red,
+					action: {
+						sdEngine.interrupt{
+							error in
+
+							Task {	@MainActor in
+								sdObservable.shouldContinueRefreshing = false
+
+								let localizedDescription = error?.localizedDescription ?? "Interrupted"
+								UIAlertController.simpleAlert(withTitle: localizedDescription, message: nil)
+							}
+						}
+					})
+			}
+
+			Spacer()
+
+			VStack {
+				FXDswiftuiButton(
+					systemImageName: "arrow.clockwise",
+					foregroundStyle: .white,
+					action: {
+						sdEngine.refresh_LastPayload(completionHandler: nil)
+					})
+			}
+		}
+	}
+
+
+	@ViewBuilder
+	var GROUP_progress: some View {
+		VStack(alignment: .leading,
+			   spacing: nil,
+			   content: {
+			Spacer()
+
+			if sdObservable.shouldContinueRefreshing {
+				Text(String(format: "%0.1f%%", sdObservable.generationProgress * 100.0))
+					.multilineTextAlignment(.leading)
+			}
+
+			FXDswiftuiButton(
+				systemImageName: (sdObservable.shouldContinueRefreshing ? "pause.fill" : "play.fill"),
+				foregroundStyle: .white,
+				action: {
+					sdObservable.shouldContinueRefreshing.toggle()
+					sdEngine.continuousProgressRefreshing()
+				})
+		})
+	}
+
+
+	@ViewBuilder
+	var GROUP_generating: some View {
+		VStack {
+			Spacer()
+
+			FXDswiftuiButton(
+				systemImageName: "lightbulb",
+				foregroundStyle: .white,
+				action: {
+					shouldPresentPromptEditor = true
+				})
+
+			FXDswiftuiButton(
+				systemImageName: "paintbrush",
+				foregroundStyle: .white,
+				action: {
+					sdObservable.shouldContinueRefreshing = true
+					sdEngine.continuousProgressRefreshing()
+
+					sdEngine.execute_txt2img {
+						error in
+
+						sdObservable.shouldContinueRefreshing = false
+					}
+				})
 		}
 	}
 }
@@ -120,7 +136,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 
 extension FXDswiftuiSDEngineBasicRoot {
 	@ViewBuilder
-	func promptEditor() -> some View {
+	var OVERLAY_promptEditor: some View {
 		if let currentPayload = sdEngine.currentPayload,
 		   let payload = String(data: currentPayload, encoding: .utf8) {
 
