@@ -484,21 +484,28 @@ extension FXDmoduleSDEngine {
 		}
 
 
-		let separators = [
+		var separators = [
 			("Negative prompt:", false, false),
-			("Steps:", false, true),
-			("Wildcard prompt:", false, true),
-			("Hires upscale:", true, true),
+			("Steps:", false, true)
 		]
+
+		if receivedString?.contains("Wildcard prompt:") ?? false {
+			separators.append(("Wildcard prompt:", false, true))
+		}
+
+		if receivedString?.contains("Hires upscale:") ?? false {
+			separators.append(("Hires upscale:", true, true))
+		}
+		fxdPrint("separators: \(separators)")
 
 		var modifiedString: String = receivedString ?? ""
 		var parsed: [String] = []
 		for (separator, shouldPickLast, shouldPrefix) in separators {
 			let components = modifiedString.components(separatedBy: separator)
 			let picked = (shouldPickLast ? components.last : components.first)?.trimmingCharacters(in: .whitespacesAndNewlines)
-			parsed.append("\(shouldPrefix ? (separator+" ") : "")\(picked ?? "")")
+			parsed.append(picked ?? "")
 
-			modifiedString = components.last ?? ""
+			modifiedString = "\(shouldPrefix ? (separator+" ") : "")\(components.last ?? "")"
 		}
 
 
