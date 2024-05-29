@@ -288,7 +288,9 @@ open class FXDmoduleSDEngine: NSObject {
 
 				#if DEBUG
 				if data != nil {
-					fxdPrint("[TXT2IMG]:\n\(String(describing: self?.decodedJSONobject(receivedData: data!)))")
+					var jsonObject = self?.decodedJSONobject(receivedData: data!, quiet: true)
+					jsonObject?["images"] = "[IMAGE base64 string]"
+					fxdPrint("[TXT2IMG]:\n\(String(describing: jsonObject))")
 				}
 				#endif
 
@@ -456,11 +458,11 @@ extension FXDmoduleSDEngine {
 		return decodedResponse
 	}
 
-	func decodedJSONobject(receivedData: Data) -> Dictionary<String, Any?>? {
+	func decodedJSONobject(receivedData: Data, quiet: Bool = false) -> Dictionary<String, Any?>? {
 		var jsonObject: Dictionary<String, Any?>? = nil
 		do {
 			jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
-			fxdPrint("jsonObject: \(String(describing: jsonObject))")
+			fxdPrint("jsonObject: \(String(describing: jsonObject))", quiet:quiet)
 		}
 		catch let jsonError {
 			let receivedString = String(data: receivedData, encoding: .utf8)
