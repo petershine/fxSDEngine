@@ -575,7 +575,6 @@ extension FXDmoduleSDEngine {
 				[weak self] (data: Data?, response: URLResponse?, error: Error?) in
 
 				fxdPrint("data: \(String(describing: data))")
-				fxdPrint("response: \(String(describing: response))")
 				fxdPrint("error: \(String(describing: error))")
 				guard let receivedData = data else {
 					responseHandler?(nil, error)
@@ -586,6 +585,7 @@ extension FXDmoduleSDEngine {
 				var modifiedError = error
 				if modifiedError == nil,
 				   let responseCode = (response as? HTTPURLResponse)?.statusCode, responseCode != 200 {
+					fxdPrint("response: \(String(describing: response))")
 
 					let jsonObject = self?.decodedJSONobject(receivedData: receivedData)
 
