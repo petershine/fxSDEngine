@@ -573,10 +573,6 @@ extension FXDmoduleSDEngine {
 				httpRequest.httpBody = payload
 			}
 
-			fxdPrint("httpRequest.url: \(String(describing: httpRequest.url))")
-			fxdPrint("httpRequest.allHTTPHeaderFields: \(String(describing: httpRequest.allHTTPHeaderFields))")
-			fxdPrint("httpRequest.httpMethod: \(String(describing: httpRequest.httpMethod))")
-			fxdPrint("httpRequest.httpBody: \(String(describing: httpRequest.httpBody))")
 
 			let httpTask = URLSession.shared.dataTask(with: httpRequest) {
 				[weak self] (data: Data?, response: URLResponse?, error: Error?) in
@@ -584,6 +580,10 @@ extension FXDmoduleSDEngine {
 				fxdPrint("data: \(String(describing: data))")
 				fxdPrint("error: \(String(describing: error))")
 				guard let receivedData = data else {
+					fxdPrint("httpRequest.url: \(String(describing: httpRequest.url))")
+					fxdPrint("httpRequest.allHTTPHeaderFields: \(String(describing: httpRequest.allHTTPHeaderFields))")
+					fxdPrint("httpRequest.httpMethod: \(String(describing: httpRequest.httpMethod))")
+					fxdPrint("httpRequest.httpBody: \(String(describing: httpRequest.httpBody))")
 					responseHandler?(nil, error)
 					return
 				}
