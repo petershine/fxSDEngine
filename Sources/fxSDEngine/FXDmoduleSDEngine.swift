@@ -262,10 +262,11 @@ open class FXDmoduleSDEngine: NSObject {
 	open func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(
 			api_endpoint: .INTERNAL_SYSINFO) {
-				[weak self] (receivedData, error) in
+				[weak self] (data, error) in
 
-				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
-					  let Config = decodedResponse.Config 
+				guard let receivedData = data,
+					  let decodedResponse = self?.decodedResponse(receivedData: receivedData),
+					  let Config = decodedResponse.Config
 				else {
 					completionHandler?(error)
 					return
@@ -283,10 +284,17 @@ open class FXDmoduleSDEngine: NSObject {
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			payload: currentPayload) {
-				[weak self] (receivedData, error) in
+				[weak self] (data, error) in
 
-				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
-					  let images = decodedResponse.images 
+				#if DEBUG
+				if data != nil {
+					fxdPrint("[TXT2IMG]:\n\(String(describing: self?.decodedJSONobject(receivedData: data!)))")
+				}
+				#endif
+
+				guard let receivedData = data,
+					  let decodedResponse = self?.decodedResponse(receivedData: receivedData),
+					  let images = decodedResponse.images
 				else {
 					completionHandler?(error)
 					return
@@ -311,9 +319,10 @@ open class FXDmoduleSDEngine: NSObject {
 	open func execute_progress(completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_PROGRESS) {
-				[weak self] (receivedData, error) in
+				[weak self] (data, error) in
 
-				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
+				guard let receivedData = data,
+					  let decodedResponse = self?.decodedResponse(receivedData: receivedData),
 					  let current_image = decodedResponse.current_image
 				else {
 					completionHandler?(error)
@@ -366,9 +375,10 @@ open class FXDmoduleSDEngine: NSObject {
 		requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
 			query: "folder_path=\(folderPath)") {
-				[weak self] (receivedData, error) in
+				[weak self] (data, error) in
 
-				guard let decodedResponse = self?.decodedResponse(receivedData: receivedData),
+				guard let receivedData = data,
+					  let decodedResponse = self?.decodedResponse(receivedData: receivedData),
 					  let filesORfolders = decodedResponse.files
 				else {
 					completionHandler?(nil, nil, error)
@@ -429,12 +439,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 
 extension FXDmoduleSDEngine {
-	func decodedResponse(receivedData: Data?) -> SDcodableResponse? {
-		guard let receivedData else {
-			return nil
-		}
-
-
+	func decodedResponse(receivedData: Data) -> SDcodableResponse? {
 		var decodedResponse: SDcodableResponse? = nil
 		do {
 			decodedResponse = try JSONDecoder().decode(SDcodableResponse.self, from: receivedData)
