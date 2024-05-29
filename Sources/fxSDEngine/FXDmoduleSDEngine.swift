@@ -316,8 +316,9 @@ open class FXDmoduleSDEngine: NSObject {
 			}
 	}
 
-	open func execute_progress(completionHandler: ((_ error: Error?)->Void)?) {
+	open func execute_progress(quiet: Bool = false, completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(
+			quiet: quiet,
 			api_endpoint: .SDAPI_V1_PROGRESS) {
 				[weak self] (data, error) in
 
@@ -332,7 +333,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 				let imagesEncoded = [current_image] as? Array<String>
 
-				let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [])
+				let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [], quiet:quiet)
 
 				guard let progrssing = decodedImageArray?.first else {
 					completionHandler?(error)
@@ -354,11 +355,13 @@ open class FXDmoduleSDEngine: NSObject {
 		}
 
 
-		execute_progress {
+		execute_progress(
+			quiet: true,
+			completionHandler: {
 			[weak self] (error) in
 
 			self?.continuousProgressRefreshing()
-		}
+		})
 	}
 
 	open func interrupt(completionHandler: ((_ error: Error?)->Void)?) {
@@ -514,8 +517,8 @@ extension FXDmoduleSDEngine {
 }
 
 extension FXDmoduleSDEngine {
-	func decodedImages(imagesEncoded: [String?]) -> [UIImage] {
-		fxdPrint("[STARTED DECODING]: \(String(describing: imagesEncoded.count)) image(s)")
+	func decodedImages(imagesEncoded: [String?], quiet: Bool = false) -> [UIImage] {
+		fxdPrint("[STARTED DECODING]: \(String(describing: imagesEncoded.count)) image(s)", quiet:quiet)
 
 		var decodedImageArray: [UIImage] = []
 		for base64string in imagesEncoded {
@@ -527,12 +530,12 @@ extension FXDmoduleSDEngine {
 			guard let imageData = Data(base64Encoded: base64string!) else {
 				continue
 			}
-			fxdPrint("imageData byte count: \(imageData.count)")
+			fxdPrint("imageData byte count: \(imageData.count)", quiet:quiet)
 
 			guard let decodedImage = UIImage(data: imageData) else {
 				continue
 			}
-			fxdPrint("decodedImage: \(decodedImage)")
+			fxdPrint("decodedImage: \(decodedImage)", quiet:quiet)
 
 			decodedImageArray.append(decodedImage)
 		}
@@ -542,8 +545,17 @@ extension FXDmoduleSDEngine {
 }
 
 
+public func fxdPrint(_ items: Any..., separator: String = " ", terminator: String = "\n", quiet: Bool = false) {
+	guard !quiet else {
+		return
+	}
+
+	fxdPrint(items, separator: separator, terminator: terminator)
+}
+
 extension FXDmoduleSDEngine {
 	func requestToSDServer(
+		quiet: Bool = false,
 		api_endpoint: SDAPIendpoint,
 		method: String? = nil,
 		query: String? = nil,
@@ -555,7 +567,7 @@ extension FXDmoduleSDEngine {
 			   let escapedQuery = query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
 				requestPath += "?\(escapedQuery)"
 			}
-			fxdPrint("requestPath: \(requestPath)")
+			fxdPrint("requestPath: \(requestPath)", quiet:quiet)
 
 			guard let requestURL = URL(string: requestPath) else {
 				responseHandler?(nil, nil)
@@ -577,8 +589,8 @@ extension FXDmoduleSDEngine {
 			let httpTask = URLSession.shared.dataTask(with: httpRequest) {
 				[weak self] (data: Data?, response: URLResponse?, error: Error?) in
 
-				fxdPrint("data: \(String(describing: data))")
-				fxdPrint("error: \(String(describing: error))")
+				fxdPrint("data: \(String(describing: data))", quiet:quiet)
+				fxdPrint("error: \(String(describing: error))", quiet:quiet)
 				guard let receivedData = data else {
 					fxdPrint("httpRequest.url: \(String(describing: httpRequest.url))")
 					fxdPrint("httpRequest.allHTTPHeaderFields: \(String(describing: httpRequest.allHTTPHeaderFields))")
