@@ -448,33 +448,7 @@ extension FXDmoduleSDEngine {
 		return decodedResponse
 	}
 
-	func decodedImages(imagesEncoded: [String?]) -> [UIImage] {
-		fxdPrint("[STARTED DECODING]: \(String(describing: imagesEncoded.count)) image(s)")
-
-		var decodedImageArray: [UIImage] = []
-		for base64string in imagesEncoded {
-			guard base64string != nil, !(base64string!.isEmpty) else {
-				continue
-			}
-
-
-			guard let imageData = Data(base64Encoded: base64string!) else {
-				continue
-			}
-			fxdPrint("imageData byte count: \(imageData.count)")
-
-			guard let decodedImage = UIImage(data: imageData) else {
-				continue
-			}
-			fxdPrint("decodedImage: \(decodedImage)")
-
-			decodedImageArray.append(decodedImage)
-		}
-
-		return decodedImageArray
-	}
-
-	public func decodedJSONobject(receivedData: Data) -> Dictionary<String, Any?>? {
+	func decodedJSONobject(receivedData: Data) -> Dictionary<String, Any?>? {
 		var jsonObject: Dictionary<String, Any?>? = nil
 		do {
 			jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
@@ -489,7 +463,7 @@ extension FXDmoduleSDEngine {
 		return jsonObject
 	}
 
-	public func encodeGenerationPayload(receivedData: Data) -> SDencodablePayload? {
+	func encodeGenerationPayload(receivedData: Data) -> SDencodablePayload? {
 		var receivedString = String(data: receivedData, encoding: .utf8)
 		receivedString = receivedString?.replacingOccurrences(of: "\\n", with: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
 		fxdPrint("receivedString?.count: \(String(describing: receivedString?.count))")
@@ -534,9 +508,37 @@ extension FXDmoduleSDEngine {
 	}
 }
 
+extension FXDmoduleSDEngine {
+	func decodedImages(imagesEncoded: [String?]) -> [UIImage] {
+		fxdPrint("[STARTED DECODING]: \(String(describing: imagesEncoded.count)) image(s)")
+
+		var decodedImageArray: [UIImage] = []
+		for base64string in imagesEncoded {
+			guard base64string != nil, !(base64string!.isEmpty) else {
+				continue
+			}
+
+
+			guard let imageData = Data(base64Encoded: base64string!) else {
+				continue
+			}
+			fxdPrint("imageData byte count: \(imageData.count)")
+
+			guard let decodedImage = UIImage(data: imageData) else {
+				continue
+			}
+			fxdPrint("decodedImage: \(decodedImage)")
+
+			decodedImageArray.append(decodedImage)
+		}
+
+		return decodedImageArray
+	}
+}
+
 
 extension FXDmoduleSDEngine {
-	public func requestToSDServer(
+	func requestToSDServer(
 		api_endpoint: SDAPIendpoint,
 		method: String? = nil,
 		query: String? = nil,
