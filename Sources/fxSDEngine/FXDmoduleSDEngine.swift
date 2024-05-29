@@ -554,14 +554,6 @@ extension FXDmoduleSDEngine {
 }
 
 
-public func fxdPrint(_ items: Any..., separator: String = " ", terminator: String = "\n", quiet: Bool = false) {
-	guard !quiet else {
-		return
-	}
-
-	fxdPrint(items, separator: separator, terminator: terminator)
-}
-
 extension FXDmoduleSDEngine {
 	func requestToSDServer(
 		quiet: Bool = false,
