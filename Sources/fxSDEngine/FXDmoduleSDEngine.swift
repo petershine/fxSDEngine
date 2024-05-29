@@ -108,8 +108,9 @@ public protocol SDobservableProperties: ObservableObject {
 	var generationFolder: String? { get set }
 
 	var generatedImage: UIImage? { get set }
-	var generationProgress: Double { get set }
 
+	var generationProgress: Double? { get set }
+	var inProgressImage: UIImage? { get set }
 	var shouldContinueRefreshing: Bool { get set }
 }
 
@@ -119,15 +120,20 @@ open class FXDobservableSDProperties: SDobservableProperties {
 	@Published open var generationFolder: String? = nil
 
 	@Published open var generatedImage: UIImage? = nil
-	@Published open var generationProgress: Double = 0.0
 
-	@Published open var shouldContinueRefreshing: Bool = false
+	@Published open var generationProgress: Double? = nil
+	@Published open var inProgressImage: UIImage? = nil
+	@Published open var shouldContinueRefreshing: Bool {
+		didSet {
+			if shouldContinueRefreshing == false {
+				generationProgress = nil
+				inProgressImage = nil
+			}
+		}
+	}
 
-	public init(generationFolder: String? = nil, generatedImage: UIImage? = nil, generationProgress: Double = 0.0, shouldContinueRefreshing: Bool = false) {
-		self.generationFolder = generationFolder
-		self.generatedImage = generatedImage
-		self.generationProgress = generationProgress
-		self.shouldContinueRefreshing = shouldContinueRefreshing
+	public init() {
+		self.shouldContinueRefreshing = false
 	}
 }
 
@@ -289,7 +295,7 @@ open class FXDmoduleSDEngine: NSObject {
 				#if DEBUG
 				if data != nil {
 					var jsonObject = self?.decodedJSONobject(receivedData: data!, quiet: true)
-					jsonObject?["images"] = "[IMAGE base64 string]"
+					jsonObject?["images"] = ["<IMAGE base64 string>"]
 					fxdPrint("[TXT2IMG]:\n\(String(describing: jsonObject))")
 				}
 				#endif
@@ -324,6 +330,16 @@ open class FXDmoduleSDEngine: NSObject {
 			api_endpoint: .SDAPI_V1_PROGRESS) {
 				[weak self] (data, error) in
 
+				#if DEBUG
+				/*
+				if data != nil {
+					var jsonObject = self?.decodedJSONobject(receivedData: data!, quiet: true)
+					jsonObject?["current_image"] = "<IMAGE base64 string>"
+					fxdPrint("[PROGRESS]:\n\(String(describing: jsonObject))")
+				}
+				 */
+				#endif
+
 				guard let receivedData = data,
 					  let decodedResponse = self?.decodedResponse(receivedData: receivedData),
 					  let current_image = decodedResponse.current_image
@@ -337,15 +353,17 @@ open class FXDmoduleSDEngine: NSObject {
 
 				let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [], quiet:quiet)
 
-				guard let progrssing = decodedImageArray?.first else {
+				guard let inProgressImage = decodedImageArray?.first else {
 					completionHandler?(error)
 					return
 				}
 
 
 				DispatchQueue.main.async {
-					self?.observable.generatedImage = progrssing
-					self?.observable.generationProgress = decodedResponse.progress ?? 0.0
+					self?.observable.generatedImage = inProgressImage
+
+					self?.observable.generationProgress = decodedResponse.progress
+					self?.observable.inProgressImage = inProgressImage
 					completionHandler?(error)
 				}
 			}

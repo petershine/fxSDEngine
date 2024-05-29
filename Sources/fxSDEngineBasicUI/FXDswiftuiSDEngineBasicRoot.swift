@@ -85,11 +85,14 @@ extension FXDswiftuiSDEngineBasicRoot {
 		VStack(alignment: .leading,
 			   spacing: nil,
 			   content: {
+			
 			Spacer()
 
-			if sdObservable.shouldContinueRefreshing {
-				Text(String(format: "%0.1f%%", sdObservable.generationProgress * 100.0))
+			if sdObservable.shouldContinueRefreshing,
+			   let progress = sdObservable.generationProgress {
+				Text(String(format: "%0.1f %%", progress * 100.0))
 					.multilineTextAlignment(.leading)
+					.foregroundStyle(.white)
 			}
 
 			FXDswiftuiButton(
