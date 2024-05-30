@@ -7,6 +7,8 @@ import SwiftUI
 
 
 public struct FXDswiftuiSDEngineBasicRoot: View {
+	@Environment(\.colorScheme) var colorScheme
+
 	@Environment(\.horizontalSizeClass) var horizontalSizeClass
 	@Environment(\.verticalSizeClass) var verticalSizeClass
 
@@ -24,6 +26,10 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 	public var body: some View {
 		ZStack {
 			FXDswiftuiMediaDisplay(mediaImage: sdObservable.displayedImage)
+
+			if sdObservable.informationConfiguration != nil {
+				FXDswiftuiInformation(configuration: sdObservable.informationConfiguration!)
+			}
 
 			VStack {
 				GROUP_resetting.padding()
