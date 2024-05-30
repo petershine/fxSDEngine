@@ -28,7 +28,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 			FXDswiftuiMediaDisplay(mediaImage: sdObservable.displayedImage)
 
 			if sdObservable.layerConfiguration != nil {
-				FXDswiftuiInProgressLayer(configuration: sdObservable.layerConfiguration!)
+				FXDswiftuiOverlay(observable: sdObservable.layerConfiguration!)
 			}
 
 			VStack {
