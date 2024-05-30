@@ -27,8 +27,8 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 		ZStack {
 			FXDswiftuiMediaDisplay(mediaImage: sdObservable.displayedImage)
 
-			if sdObservable.informationConfiguration != nil {
-				FXDswiftuiInformation(configuration: sdObservable.informationConfiguration!)
+			if sdObservable.layerConfiguration != nil {
+				FXDswiftuiInProgressLayer(configuration: sdObservable.layerConfiguration!)
 			}
 
 			VStack {
@@ -162,3 +162,28 @@ extension FXDswiftuiSDEngineBasicRoot {
 	}
 }
 
+
+public struct FXDswiftuiInProgressLayer: View {
+	@Environment(\.colorScheme) var colorScheme
+
+	@ObservedObject var configuration: FXDconfigurationInformation
+
+
+	public init(configuration: FXDconfigurationInformation = FXDconfigurationInformation()) {
+		self.configuration = configuration
+	}
+
+	public var body: some View {
+		ZStack {
+			Color(configuration.overlayColor ?? (colorScheme == .dark ? .black : .white))
+				.opacity(configuration.overlayAlpha)
+			ProgressView()
+				.controlSize(.large)
+				.frame(alignment: .center)
+		}
+		.ignoresSafeArea(.all)
+		.frame(maxWidth: .infinity, maxHeight: .infinity)
+		.allowsHitTesting(false)
+		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+	}
+}
