@@ -23,7 +23,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 
 	public var body: some View {
 		ZStack {
-			FXDswiftuiMediaDisplay(mediaImage: sdObservable.generatedImage)
+			FXDswiftuiMediaDisplay(mediaImage: sdObservable.displayedImage)
 
 			VStack {
 				GROUP_resetting.padding()
@@ -89,7 +89,7 @@ extension FXDswiftuiSDEngineBasicRoot {
 			Spacer()
 
 			if sdObservable.shouldContinueRefreshing,
-			   let progress = sdObservable.generationProgress {
+			   let progress = sdObservable.progress {
 				Text(String(format: "%0.1f %%", progress * 100.0))
 					.multilineTextAlignment(.leading)
 					.foregroundStyle(.white)

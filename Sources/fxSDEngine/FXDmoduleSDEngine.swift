@@ -107,9 +107,9 @@ extension SDError: LocalizedError {
 public protocol SDobservableProperties: ObservableObject {
 	var generationFolder: String? { get set }
 
-	var generatedImage: UIImage? { get set }
+	var displayedImage: UIImage? { get set }
 
-	var generationProgress: Double? { get set }
+	var progress: Double? { get set }
 	var inProgressImage: UIImage? { get set }
 	var shouldContinueRefreshing: Bool { get set }
 }
@@ -119,14 +119,14 @@ public protocol SDobservableProperties: ObservableObject {
 open class FXDobservableSDProperties: SDobservableProperties {
 	@Published open var generationFolder: String? = nil
 
-	@Published open var generatedImage: UIImage? = nil
+	@Published open var displayedImage: UIImage? = nil
 
-	@Published open var generationProgress: Double? = nil
+	@Published open var progress: Double? = nil
 	@Published open var inProgressImage: UIImage? = nil
 	@Published open var shouldContinueRefreshing: Bool {
 		didSet {
 			if shouldContinueRefreshing == false {
-				generationProgress = nil
+				progress = nil
 				inProgressImage = nil
 			}
 		}
@@ -213,7 +213,7 @@ open class FXDmoduleSDEngine: NSObject {
 					}
 
 					DispatchQueue.main.async {
-						self?.observable.generatedImage = latestImage
+						self?.observable.displayedImage = latestImage
 						completionHandler?(error)
 					}
 			})
@@ -318,7 +318,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 
 				DispatchQueue.main.async {
-					self?.observable.generatedImage = generated
+					self?.observable.displayedImage = generated
 					completionHandler?(error)
 				}
 			}
@@ -360,9 +360,9 @@ open class FXDmoduleSDEngine: NSObject {
 
 
 				DispatchQueue.main.async {
-					self?.observable.generatedImage = inProgressImage
+					self?.observable.displayedImage = inProgressImage
 
-					self?.observable.generationProgress = decodedResponse.progress
+					self?.observable.progress = decodedResponse.progress
 					self?.observable.inProgressImage = inProgressImage
 					completionHandler?(error)
 				}
