@@ -27,8 +27,8 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 		ZStack {
 			FXDswiftuiMediaDisplay(mediaImage: sdObservable.displayedImage)
 
-			if sdObservable.layerConfiguration != nil {
-				FXDswiftuiOverlay(observable: sdObservable.layerConfiguration!)
+			if sdObservable.overlayObservable != nil {
+				FXDswiftuiOverlay(observable: sdObservable.overlayObservable!)
 			}
 
 			VStack {
@@ -95,7 +95,7 @@ extension FXDswiftuiSDEngineBasicRoot {
 			Spacer()
 
 			if sdObservable.shouldContinueRefreshing,
-			   let progress = sdObservable.progress {
+			   let progress = sdObservable.progressValue {
 				Text(String(format: "%0.1f %%", progress * 100.0))
 					.multilineTextAlignment(.leading)
 					.foregroundStyle(.white)

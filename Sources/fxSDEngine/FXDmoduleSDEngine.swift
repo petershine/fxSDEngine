@@ -109,10 +109,10 @@ public protocol SDobservableProperties: ObservableObject {
 
 	var displayedImage: UIImage? { get set }
 
-	var layerConfiguration: FXDobservableOverlay? { get set }
+	var overlayObservable: FXDobservableOverlay? { get set }
 
-	var progress: Double? { get set }
-	var inProgressImage: UIImage? { get set }
+	var progressValue: Double? { get set }
+	var progressImage: UIImage? { get set }
 	var shouldContinueRefreshing: Bool { get set }
 }
 
@@ -123,16 +123,16 @@ open class FXDobservableSDProperties: SDobservableProperties {
 
 	@Published open var displayedImage: UIImage? = nil
 
-	@Published open var layerConfiguration: FXDobservableOverlay? = nil
+	@Published open var overlayObservable: FXDobservableOverlay? = nil
 
-	@Published open var progress: Double? = nil
-	@Published open var inProgressImage: UIImage? = nil
+	@Published open var progressValue: Double? = nil
+	@Published open var progressImage: UIImage? = nil
 	@Published open var shouldContinueRefreshing: Bool {
 		didSet {
 			if shouldContinueRefreshing == false {
-				layerConfiguration = nil
-				progress = nil
-				inProgressImage = nil
+				overlayObservable = nil
+				progressValue = nil
+				progressImage = nil
 			}
 		}
 	}
@@ -358,17 +358,17 @@ open class FXDmoduleSDEngine: NSObject {
 
 				let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [], quiet:quiet)
 
-				guard let inProgressImage = decodedImageArray?.first else {
+				guard let progressImage = decodedImageArray?.first else {
 					completionHandler?(error)
 					return
 				}
 
 
 				DispatchQueue.main.async {
-					self?.observable.displayedImage = inProgressImage
+					self?.observable.displayedImage = progressImage
 
-					self?.observable.progress = decodedResponse.progress
-					self?.observable.inProgressImage = inProgressImage
+					self?.observable.progressValue = decodedResponse.progress
+					self?.observable.progressImage = progressImage
 					completionHandler?(error)
 				}
 			}
