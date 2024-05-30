@@ -109,7 +109,7 @@ public protocol SDobservableProperties: ObservableObject {
 
 	var displayedImage: UIImage? { get set }
 
-	var layerConfiguration: FXDconfigurationInformation? { get set }
+	var layerConfiguration: FXDobservableOverlay? { get set }
 
 	var progress: Double? { get set }
 	var inProgressImage: UIImage? { get set }
@@ -123,7 +123,7 @@ open class FXDobservableSDProperties: SDobservableProperties {
 
 	@Published open var displayedImage: UIImage? = nil
 
-	@Published open var layerConfiguration: FXDconfigurationInformation? = nil
+	@Published open var layerConfiguration: FXDobservableOverlay? = nil
 
 	@Published open var progress: Double? = nil
 	@Published open var inProgressImage: UIImage? = nil

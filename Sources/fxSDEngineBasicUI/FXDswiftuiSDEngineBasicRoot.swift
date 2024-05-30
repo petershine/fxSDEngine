@@ -166,10 +166,10 @@ extension FXDswiftuiSDEngineBasicRoot {
 public struct FXDswiftuiInProgressLayer: View {
 	@Environment(\.colorScheme) var colorScheme
 
-	@ObservedObject var configuration: FXDconfigurationInformation
+	@ObservedObject var configuration: FXDobservableOverlay
 
 
-	public init(configuration: FXDconfigurationInformation = FXDconfigurationInformation()) {
+	public init(configuration: FXDobservableOverlay = FXDobservableOverlay()) {
 		self.configuration = configuration
 	}
 
