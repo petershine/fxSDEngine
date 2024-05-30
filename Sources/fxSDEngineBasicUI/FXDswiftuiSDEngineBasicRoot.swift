@@ -162,28 +162,3 @@ extension FXDswiftuiSDEngineBasicRoot {
 	}
 }
 
-
-public struct FXDswiftuiInProgressLayer: View {
-	@Environment(\.colorScheme) var colorScheme
-
-	@ObservedObject var configuration: FXDobservableOverlay
-
-
-	public init(configuration: FXDobservableOverlay = FXDobservableOverlay()) {
-		self.configuration = configuration
-	}
-
-	public var body: some View {
-		ZStack {
-			Color(configuration.overlayColor ?? (colorScheme == .dark ? .black : .white))
-				.opacity(configuration.overlayAlpha)
-			ProgressView()
-				.controlSize(.large)
-				.frame(alignment: .center)
-		}
-		.ignoresSafeArea(.all)
-		.frame(maxWidth: .infinity, maxHeight: .infinity)
-		.allowsHitTesting(false)
-		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
-	}
-}
