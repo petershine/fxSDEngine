@@ -33,9 +33,7 @@ extension SDError: LocalizedError {
 }
 
 
-public protocol SDobservableProperties: ObservableObject {
-	var generationFolder: String? { get set }
-
+public protocol SDprotocolProperties {
 	var displayedImage: UIImage? { get set }
 
 	var overlayObservable: FXDobservableOverlay? { get set }
@@ -47,9 +45,7 @@ public protocol SDobservableProperties: ObservableObject {
 
 
 
-open class FXDobservableSDProperties: SDobservableProperties {
-	@Published open var generationFolder: String? = nil
-
+open class FXDobservableSDProperties: SDprotocolProperties, ObservableObject {
 	@Published open var displayedImage: UIImage? = nil
 
 	@Published open var overlayObservable: FXDobservableOverlay? = nil
@@ -73,6 +69,8 @@ open class FXDobservableSDProperties: SDobservableProperties {
 
 open class FXDmoduleSDEngine: NSObject {
 	@Published public var observable: FXDobservableSDProperties = FXDobservableSDProperties()
+
+	open var generationFolder: String? = nil
 
 	open var savedPayloadFilename: String {
 		return ""
@@ -131,7 +129,7 @@ open class FXDmoduleSDEngine: NSObject {
 		execute_internalSysInfo {
 			[weak self] (error) in
 
-			guard let folderPath = self?.observable.generationFolder else {
+			guard let folderPath = self?.generationFolder else {
 				completionHandler?(error)
 				return
 			}
@@ -221,7 +219,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 
 				DispatchQueue.main.async {
-					self?.observable.generationFolder = Config.outdir_samples
+					self?.generationFolder = Config.outdir_samples
 					completionHandler?(error)
 				}
 			}
