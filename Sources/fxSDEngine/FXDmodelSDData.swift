@@ -37,6 +37,41 @@ public struct SDencodablePayload: Encodable {
 		self.hr_prompt = self.prompt
 		self.hr_negative_prompt = self.negative_prompt
 	}
+
+	public func generationInfo() -> Data? {
+		var generationInfo: Data? = nil
+		do {
+			generationInfo = try JSONEncoder().encode(self)
+		}
+		catch {
+			fxdPrint("\(error)")
+		}
+		guard generationInfo != nil else {
+			return nil
+		}
+
+
+		guard let encodableADetailer = Bundle.main.url(forResource: "encodableADetailer", withExtension: "json") else {
+			return nil
+		}
+
+		do {
+			let ADetailerData = try Data(contentsOf: encodableADetailer)
+			let ADetailerDictionary = try JSONSerialization.jsonObject(with: ADetailerData) as? Dictionary<String, Any>
+
+			var generationDictionary = try JSONSerialization.jsonObject(with: generationInfo!) as? Dictionary<String, Any>
+
+			if generationDictionary != nil {
+				generationDictionary?["alwayson_scripts"] = ADetailerDictionary
+				generationInfo = try JSONSerialization.data(withJSONObject: generationDictionary!)
+			}
+		}
+		catch {
+			fxdPrint("\(error)")
+		}
+
+		return generationInfo
+	}
 }
 
 public struct SDcodableResponse: Codable {
@@ -188,3 +223,46 @@ extension FXDmoduleSDEngine {
 	}
 }
 
+
+#if DEBUG
+extension FXDmoduleSDEngine {
+	func fxdebug(data: Data) {
+		var jsonObject = self.decodedJSONobject(receivedData: data, quiet: true)
+		jsonObject?["images"] = ["<IMAGE base64 string>"]
+
+		let keys = [
+			"info",
+			"infotexts",
+		]
+
+		var extracted: Any? = nil
+		var caughError: Bool = false
+		for key in keys {
+			extracted = jsonObject?[key] as? String
+			jsonObject?[key] = "[EXTRACTED]"
+
+			fxdPrint("[jsonObject extracted: \(key)]:\n\(jsonObject)\n")
+
+			var extractedJSONobject: [String:Any?] = [:]
+			if let extractedJSONdata = (extracted as? String)?.processedJSONData() {
+				do {
+					extractedJSONobject = try JSONSerialization.jsonObject(with: extractedJSONdata) as! [String:Any?]
+					jsonObject = extractedJSONobject
+				}
+				catch {
+					caughError = true
+					fxdPrint("[ERROR]: \(error)\n[extracted]:\n\(extracted)\n")
+				}
+			}
+			else {
+				caughError = true
+				fxdPrint("[ERROR][extracted]:\n\(extracted)\n")
+			}
+		}
+
+		if !caughError {
+			fxdPrint("[\(keys.last)]:\n\(extracted)\n")
+		}
+	}
+}
+#endif
