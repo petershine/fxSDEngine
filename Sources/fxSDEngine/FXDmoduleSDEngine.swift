@@ -235,9 +235,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 				#if DEBUG
 				if data != nil {
-					var jsonObject = self?.decodedJSONobject(receivedData: data!, quiet: true)
-					jsonObject?["images"] = ["<IMAGE base64 string>"]
-					fxdPrint("[TXT2IMG]:\n\(String(describing: jsonObject))")
+					self?.fxdebug(data: data!)
 				}
 				#endif
 
@@ -474,3 +472,47 @@ extension FXDmoduleSDEngine {
 			httpTask.resume()
 		}
 }
+
+
+#if DEBUG
+fileprivate extension FXDmoduleSDEngine {
+	func fxdebug(data: Data) {
+		var jsonObject = self.decodedJSONobject(receivedData: data, quiet: true)
+		jsonObject?["images"] = ["<IMAGE base64 string>"]
+
+		let keys = [
+			"info",
+			"infotexts",
+		]
+
+		var extracted: Any? = nil
+		var caughError: Bool = false
+		for key in keys {
+			extracted = jsonObject?[key] as? String
+			jsonObject?[key] = "[EXTRACTED]"
+
+			fxdPrint("[jsonObject extracted: \(key)]:\n\(jsonObject)\n")
+
+			var extractedJSONobject: [String:Any?] = [:]
+			if let extractedJSONdata = (extracted as? String)?.processedJSONData() {
+				do {
+					extractedJSONobject = try JSONSerialization.jsonObject(with: extractedJSONdata) as! [String:Any?]
+					jsonObject = extractedJSONobject
+				}
+				catch {
+					caughError = true
+					fxdPrint("[ERROR]: \(error)\n[extracted]:\n\(extracted)\n")
+				}
+			}
+			else {
+				caughError = true
+				fxdPrint("[ERROR][extracted]:\n\(extracted)\n")
+			}
+		}
+
+		if !caughError {
+			fxdPrint("[\(keys.last)]:\n\(extracted)\n")
+		}
+	}
+}
+#endif
