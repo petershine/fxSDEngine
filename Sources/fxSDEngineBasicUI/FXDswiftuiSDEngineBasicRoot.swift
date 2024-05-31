@@ -29,6 +29,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 
 			if sdObservable.overlayObservable != nil {
 				FXDswiftuiOverlay(observable: sdObservable.overlayObservable!)
+					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.5)))
 			}
 
 			VStack {
