@@ -204,6 +204,13 @@ open class FXDmoduleSDEngine: NSObject {
 			api_endpoint: .INTERNAL_SYSINFO) {
 				[weak self] (data, error) in
 
+				#if DEBUG
+				if data != nil {
+					let jsonObject = self?.decodedJSONobject(receivedData: data!, quiet: true)
+					fxdPrint("[INTERNAL_SYSINFO]:\n\(String(describing: jsonObject))")
+				}
+				#endif
+
 				guard let receivedData = data,
 					  let decodedResponse = self?.decodedResponse(receivedData: receivedData),
 					  let Config = decodedResponse.Config
