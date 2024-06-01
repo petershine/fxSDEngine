@@ -162,14 +162,18 @@ extension FXDmoduleSDEngine {
 	}
 
 	func encodeGenerationPayload(receivedData: Data) -> SDencodablePayload? {
-		var receivedString = String(data: receivedData, encoding: .utf8)
-		receivedString = receivedString?.replacingOccurrences(of: "\\n", with: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
-		fxdPrint("receivedString?.count: \(String(describing: receivedString?.count))")
-
-		guard !(receivedString?.isEmpty ?? true)
-				&& (receivedString?.contains("Negative prompt:") ?? false)
+		guard let processedData = String(data: receivedData, encoding: .utf8)?.processedJSONData(),
+			  let processedString = String(data: processedData, encoding: .utf8)
 		else {
-			fxdPrint("receivedString: \(String(describing: receivedString))")
+			fxdPrint("receivedString: \(String(describing: String(data: receivedData, encoding: .utf8)))")
+			return nil
+		}
+
+
+		guard !(processedString.isEmpty)
+				&& (processedString.contains("Negative prompt:"))
+		else {
+			fxdPrint("processedString: \(String(describing: processedString))")
 			return nil
 		}
 
@@ -179,16 +183,16 @@ extension FXDmoduleSDEngine {
 			("Steps:", false, true)
 		]
 
-		if receivedString?.contains("Wildcard prompt:") ?? false {
+		if processedString.contains("Wildcard prompt:") {
 			separators.append(("Wildcard prompt:", false, true))
 		}
 
-		if receivedString?.contains("Hires upscale:") ?? false {
+		if processedString.contains("Hires upscale:") {
 			separators.append(("Hires upscale:", true, true))
 		}
 		fxdPrint("separators: \(separators)")
 
-		var modifiedString: String = receivedString ?? ""
+		var modifiedString: String = processedString
 		var parsed: [String] = []
 		for (separator, shouldPickLast, shouldPrefix) in separators {
 			let components = modifiedString.components(separatedBy: separator)
@@ -205,7 +209,7 @@ extension FXDmoduleSDEngine {
 		)
 
 		guard !(parsed[0].isEmpty) else {
-			fxdPrint("receivedString: \(String(describing: receivedString))")
+			fxdPrint("processedString: \(String(describing: processedString))")
 			return nil
 		}
 
