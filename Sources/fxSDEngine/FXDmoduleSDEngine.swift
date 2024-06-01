@@ -293,7 +293,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 					self?.observable.progressValue = decodedResponse.progress
 
-					self?.observable.isJobRunning = !((decodedResponse.state?.job ?? "" as String).isEmpty)
+					self?.observable.isJobRunning = decodedResponse.state?.isJobRunning() ?? false
 				}
 				completionHandler?(decodedResponse, error)
 			}
@@ -327,6 +327,7 @@ open class FXDmoduleSDEngine: NSObject {
 					completionHandler: {
 						lastProgress, error in
 
+						fxdPrint("[lastProgress?.state]: \(lastProgress?.state)")
 						completionHandler?(error)
 					})
 			}
