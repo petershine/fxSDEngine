@@ -83,17 +83,17 @@ public struct SDcodableResponse: Codable {
 	var eta_relative: Date? = nil
 	var textinfo: String? = nil
 	var current_image: String? = nil
-	var state: SDcodableState? = nil
-	struct SDcodableState: Codable {
-		var interrupted: Bool? = nil
-		var job: String? = nil
-		var job_count: Int? = nil
-		var job_no: Int? = nil
-		var job_timestamp: String? = nil
-		var sampling_step: Int? = nil
-		var sampling_steps: Int? = nil
-		var skipped: Bool? = nil
-		var stopping_generation: Bool? = nil
+	public var state: SDcodableState? = nil
+	public struct SDcodableState: Codable {
+		public var interrupted: Bool? = nil
+		public var job: String? = nil
+		public var job_count: Int? = nil
+		public var job_no: Int? = nil
+		public var job_timestamp: String? = nil
+		public var sampling_step: Int? = nil
+		public var sampling_steps: Int? = nil
+		public var skipped: Bool? = nil
+		public var stopping_generation: Bool? = nil
 	}
 
 	// sysinfo
