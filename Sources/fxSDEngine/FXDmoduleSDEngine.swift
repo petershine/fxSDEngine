@@ -148,7 +148,7 @@ open class FXDmoduleSDEngine: NSObject {
 				[weak self] (latestImage, fullpath, error) in
 
 					if let path = fullpath {
-						self?.obtain_GenInfo(path: path, completionHandler: completionHandler)
+						self?.obtain_GenInfo(path: path, completionHandler: nil)
 					}
 
 					DispatchQueue.main.async {
