@@ -266,27 +266,19 @@ extension FXDmoduleSDEngine {
 		var jsonObject = self.decodedJSONobject(receivedData: data, quiet: true)
 		jsonObject?["images"] = ["<IMAGE base64 string>"]
 
-		let keys = [
-			"info",
-			"infotexts",
-		]
-
-		var extracted: Any? = nil
-		var caughError: Bool = false
-		for key in keys {
-			extracted = jsonObject?[key]
-			jsonObject?[key] = "[EXTRACTED]"
-
-			fxdPrint("[without extracted: \(key)]:\n\(jsonObject)\n")
-
-			guard let extractedDictionary = extracted as? [String:Any?] else {
-				break
-			}
-
-			jsonObject = extractedDictionary
+		//fxdPrint("[TXT2IMG] jsonObject:\n\(jsonObject)\n")
+		for (key, value) in jsonObject?.enumerated() ?? [:].enumerated() {
+			fxdPrint("[TXT2IMG] \(key):\n\(value)\n")
 		}
 
-		fxdPrint("[\(keys.last)]:\n\(extracted)\n")
+		let infoDictionary = jsonObject?["info"]
+		fxdPrint("[TXT2IMG] info:\n\(infoDictionary)\n")
+
+		let infotexts = (infoDictionary as? [String:Any?])?["infotexts"]
+		fxdPrint("[TXT2IMG] infotexts:\n\(infotexts)\n")
+
+		let encodedPayload = encodeGenerationPayload(infotext: infotexts as? String ?? "")
+		fxdPrint("[TXT2IMG] encodedPayload:\n\(encodedPayload)")
 	}
 }
 #endif
