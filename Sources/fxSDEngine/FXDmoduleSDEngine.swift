@@ -73,7 +73,7 @@ open class FXDmoduleSDEngine: NSObject {
 	open var generationFolder: String? = nil
 
 	open var savedPayloadFilename: String {
-		return ""
+		return "savedPayload.json"
 	}
 
 	open var SD_SERVER_HOSTNAME: String {
@@ -81,7 +81,14 @@ open class FXDmoduleSDEngine: NSObject {
 	}
 
 	open var currentPayload: Data? {
-		return nil
+		do {
+			let payload = try loadPayloadFromFile()
+			fxdPrint(String(data: payload!, encoding: .utf8) as Any)
+			return payload
+		} catch {
+			fxdPrint("Error reading JSON object: \(error)")
+			return nil
+		}
 	}
 
 	public init(observable: FXDobservableSDProperties? = nil) {
@@ -91,23 +98,25 @@ open class FXDmoduleSDEngine: NSObject {
 	}
 
 
-	open func savePayloadToFile(payload: String) {
-		if let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-			let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
+	open func savePayloadToFile(payload: Data) {
+		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+			fxdPrint("Document directory not found")
+			return
+		}
 
-			do {
-				if let processed: Data = payload.processedJSONData() {
-					try processed.write(to: fileURL)
-					fxdPrint("Text successfully saved to \(fileURL)")
-				}
-			} catch {
-				fxdPrint("payload: \(payload)")
-				fxdPrint("Error saving text: \(error)")
+		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
+		do {
+			if let processed: Data = (payload as? Data) {	//payload.processedJSONData() {
+				try processed.write(to: fileURL)
+				fxdPrint("Text successfully saved to \(fileURL)")
 			}
+		} catch {
+			fxdPrint("payload: \(payload)")
+			fxdPrint("Error saving text: \(error)")
 		}
 	}
 
-	open func loadPayloadFromFile() -> String? {
+	open func loadPayloadFromFile() throws -> Data? {
 		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
 			fxdPrint("Document directory not found")
 			return nil
@@ -116,11 +125,11 @@ open class FXDmoduleSDEngine: NSObject {
 
 		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
 		do {
-			let content = try String(contentsOf: fileURL, encoding: .utf8)
-			return content
+			let payloadData = try Data(contentsOf: fileURL) //String(contentsOf: fileURL, encoding: .utf8)
+			return payloadData
 		} catch {
 			fxdPrint("Failed to load file: \(error)")
-			return nil
+			throw error
 		}
 	}
 
@@ -177,7 +186,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 				DispatchQueue.main.async {
 					fxdPrint(String(data: generationInfo, encoding: .utf8) as Any, quiet: true)
-					self?.savePayloadToFile(payload: String(data: generationInfo, encoding: .utf8) ?? "")
+					self?.savePayloadToFile(payload: generationInfo)
 					completionHandler?(error)
 				}
 		})
