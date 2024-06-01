@@ -25,10 +25,10 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 
 	public var body: some View {
 		ZStack {
-			FXDswiftuiMediaDisplay(mediaImage: sdObservable.displayedImage)
+			FXDswiftuiMediaDisplay(displayedImage: sdObservable.displayedImage)
 
 			if sdObservable.overlayObservable != nil {
-				FXDswiftuiOverlay(observable: sdObservable.overlayObservable!)
+				FXDswiftuiOverlay(observable: sdObservable.overlayObservable)
 					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.5)))
 			}
 
