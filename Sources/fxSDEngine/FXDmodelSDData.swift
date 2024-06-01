@@ -138,7 +138,7 @@ extension FXDmoduleSDEngine {
 			decodedResponse = try JSONDecoder().decode(SDcodableResponse.self, from: receivedData)
 		}
 		catch let decodeException {
-			fxdPrint("decodeException: \(String(describing: decodeException))")
+			fxdPrint("decodeException: \(decodeException)")
 
 			let _ = decodedJSONobject(receivedData: receivedData)
 		}
@@ -150,11 +150,11 @@ extension FXDmoduleSDEngine {
 		var jsonObject: Dictionary<String, Any?>? = nil
 		do {
 			jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
-			fxdPrint("jsonObject: \(String(describing: jsonObject))", quiet:quiet)
+			fxdPrint("jsonObject: \(jsonObject)", quiet:quiet)
 		}
 		catch let jsonError {
 			let receivedString = String(data: receivedData, encoding: .utf8)
-			fxdPrint("receivedString: \(String(describing: receivedString))")
+			fxdPrint("receivedString: \(receivedString)")
 			fxdPrint("jsonError: \(jsonError)")
 		}
 
@@ -163,7 +163,7 @@ extension FXDmoduleSDEngine {
 
 	func encodeGenerationPayload(receivedData: Data) -> SDencodablePayload? {
 		guard let receivedString = String(data: receivedData, encoding: .utf8) else {
-			fxdPrint("receivedString: \(String(describing: String(data: receivedData, encoding: .utf8)))")
+			fxdPrint("receivedString: \(String(data: receivedData, encoding: .utf8))")
 			return nil
 		}
 
@@ -175,7 +175,7 @@ extension FXDmoduleSDEngine {
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Negative prompt:"))
 		else {
-			fxdPrint("infotext: \(String(describing: infotext))")
+			fxdPrint("infotext: \(infotext)")
 			return nil
 		}
 
@@ -199,14 +199,14 @@ extension FXDmoduleSDEngine {
 		for (separator, shouldPickLast, shouldPrefix) in separators {
 			let components = modifiedString.components(separatedBy: separator)
 			let extracted = (shouldPickLast ? components.last : components.first)?.trimmingCharacters(in: .whitespacesAndNewlines)
-			let processed = extracted?.replacingOccurrences(of: "\\n", with: "\n")
+			let processed = extracted?.lineReBroken()
 			parsed.append(processed ?? "")
 
 			modifiedString = "\(shouldPrefix ? (separator+" ") : "")\(components.last ?? "")"
 		}
 
 		guard !(parsed[0].isEmpty) else {
-			fxdPrint("infotext: \(String(describing: infotext))")
+			fxdPrint("infotext: \(infotext)")
 			return nil
 		}
 
@@ -233,7 +233,7 @@ extension FXDmoduleSDEngine {
 
 extension FXDmoduleSDEngine {
 	func decodedImages(imagesEncoded: [String?], quiet: Bool = false) -> [UIImage] {
-		fxdPrint("[STARTED DECODING]: \(String(describing: imagesEncoded.count)) image(s)", quiet:quiet)
+		fxdPrint("[STARTED DECODING]: \(imagesEncoded.count) image(s)", quiet:quiet)
 
 		var decodedImageArray: [UIImage] = []
 		for base64string in imagesEncoded {
