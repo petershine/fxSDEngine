@@ -202,16 +202,27 @@ extension FXDmoduleSDEngine {
 			modifiedString = "\(shouldPrefix ? (separator+" ") : "")\(components.last ?? "")"
 		}
 
+		guard !(parsed[0].isEmpty) else {
+			fxdPrint("processedString: \(String(describing: processedString))")
+			return nil
+		}
+
+		var modifiedPrompt = parsed[0]
+		if modifiedPrompt.first == "\"" {
+			modifiedPrompt.removeFirst()
+			parsed[0] = modifiedPrompt
+		}
+
+		#if DEBUG
+		fxdPrint("parsed[0]:\n\(parsed[0])\n\n")
+		fxdPrint("parsed[1]:\n\(parsed[1])\n\n")
+		#endif
 
 		let encodablePayload = SDencodablePayload(
 			prompt: parsed[0],
 			negative_prompt: parsed[1]
 		)
 
-		guard !(parsed[0].isEmpty) else {
-			fxdPrint("processedString: \(String(describing: processedString))")
-			return nil
-		}
 
 		return encodablePayload
 	}
