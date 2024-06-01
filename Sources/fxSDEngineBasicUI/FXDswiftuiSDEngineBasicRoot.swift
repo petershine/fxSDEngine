@@ -76,8 +76,7 @@ extension FXDswiftuiSDEngineBasicRoot {
 								Task {	@MainActor in
 									sdObservable.shouldContinueRefreshing = false
 
-									let localizedDescription = error?.localizedDescription ?? "Interrupted"
-									UIAlertController.simpleAlert(withTitle: localizedDescription, message: nil)
+									UIAlertController.errorAlert(error: error, title: "Interrupted")
 								}
 							}
 						})

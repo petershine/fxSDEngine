@@ -183,7 +183,6 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 
-				fxdPrint(String(data: generationInfo, encoding: .utf8) as Any, quiet: true)
 				self?.savePayloadToFile(payload: generationInfo)
 				completionHandler?(error)
 		})
@@ -446,16 +445,28 @@ extension FXDmoduleSDEngine {
 
 				var modifiedError = error
 				if modifiedError == nil,
-				   let responseCode = (response as? HTTPURLResponse)?.statusCode, responseCode != 200 {
+				   let responseCode = (response as? HTTPURLResponse)?.statusCode, 
+					responseCode != 200 {
 					fxdPrint("response: \(String(describing: response))")
 
 					let jsonObject = self?.decodedJSONobject(receivedData: receivedData)
 
-					let responseMSG = jsonObject?["msg"] as? String
-					let responseDetail = jsonObject?["detail"] as? String
+					var errorDescription = "Problem with server"
+					switch responseCode {
+						case 404:
+							errorDescription = "Possibly, your Stable Diffusion server is not operating."
+						default:
+							break
+					}
+
+					let errorFailureReason = jsonObject?["msg"] as? String
+					let errorDetail = jsonObject?["detail"] as? String
 
 
-					let responseUserInfo = [NSLocalizedDescriptionKey : "\(responseMSG ?? "")\n\(responseDetail ?? "")"]
+					let responseUserInfo = [
+						NSLocalizedDescriptionKey : errorDescription,
+						NSLocalizedFailureReasonErrorKey : "\(errorFailureReason ?? "")\n\(errorDetail ?? "")"
+					]
 
 					modifiedError = NSError(
 						domain: "SDEngine",
