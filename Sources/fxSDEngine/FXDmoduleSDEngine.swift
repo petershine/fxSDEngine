@@ -39,7 +39,6 @@ public protocol SDprotocolProperties {
 	var overlayObservable: FXDobservableOverlay? { get set }
 
 	var progressValue: Double? { get set }
-	var progressImage: UIImage? { get set }
 	var shouldContinueRefreshing: Bool { get set }
 
 	var isJobRunning: Bool { get set }
@@ -53,13 +52,11 @@ open class FXDobservableSDProperties: SDprotocolProperties, ObservableObject {
 	@Published open var overlayObservable: FXDobservableOverlay? = nil
 
 	@Published open var progressValue: Double? = nil
-	@Published open var progressImage: UIImage? = nil
 	@Published open var shouldContinueRefreshing: Bool {
 		didSet {
 			if shouldContinueRefreshing == false {
 				overlayObservable = nil
 				progressValue = nil
-				progressImage = nil
 			}
 		}
 	}
@@ -288,7 +285,6 @@ open class FXDmoduleSDEngine: NSObject {
 				DispatchQueue.main.async {
 					if progressImage != nil {
 						self?.observable.displayedImage = progressImage
-						self?.observable.progressImage = progressImage
 					}
 
 					self?.observable.progressValue = decodedResponse.progress
