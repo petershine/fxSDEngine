@@ -103,7 +103,7 @@ extension FXDswiftuiSDEngineBasicRoot {
 			}
 
 			FXDswiftuiButton(
-				systemImageName: (sdObservable.shouldContinueRefreshing ? "pause.fill" : "play.fill"),
+				systemImageName: (sdObservable.shouldContinueRefreshing ? "tv.slash" : "tv"),
 				foregroundStyle: .white,
 				action: {
 					sdObservable.shouldContinueRefreshing.toggle()
