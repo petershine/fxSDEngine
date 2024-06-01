@@ -106,13 +106,11 @@ open class FXDmoduleSDEngine: NSObject {
 
 		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
 		do {
-			if let processed: Data = (payload as? Data) {	//payload.processedJSONData() {
-				try processed.write(to: fileURL)
-				fxdPrint("Text successfully saved to \(fileURL)")
-			}
+			try payload.write(to: fileURL)
+			fxdPrint("[DATA SAVED]: \(fileURL)")
 		} catch {
 			fxdPrint("payload: \(payload)")
-			fxdPrint("Error saving text: \(error)")
+			fxdPrint("Failed to save: \(error)")
 		}
 	}
 
@@ -125,10 +123,10 @@ open class FXDmoduleSDEngine: NSObject {
 
 		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
 		do {
-			let payloadData = try Data(contentsOf: fileURL) //String(contentsOf: fileURL, encoding: .utf8)
+			let payloadData = try Data(contentsOf: fileURL)
 			return payloadData
 		} catch {
-			fxdPrint("Failed to load file: \(error)")
+			fxdPrint("Failed to load: \(error)")
 			throw error
 		}
 	}
