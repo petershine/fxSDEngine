@@ -254,7 +254,7 @@ open class FXDmoduleSDEngine: NSObject {
 			}
 	}
 
-	open func execute_progress(quiet: Bool = false, completionHandler: ((_ error: Error?)->Void)?) {
+	open func execute_progress(quiet: Bool = false, completionHandler: ((_ lastProgress: SDcodableResponse?, _ error: Error?)->Void)?) {
 		requestToSDServer(
 			quiet: quiet,
 			api_endpoint: .SDAPI_V1_PROGRESS) {
@@ -264,35 +264,34 @@ open class FXDmoduleSDEngine: NSObject {
 				if data != nil {
 					var jsonObject = self?.decodedJSONobject(receivedData: data!, quiet: true)
 					jsonObject?["current_image"] = "<IMAGE base64 string>"
-					fxdPrint("[PROGRESS]:\n\(String(describing: jsonObject))")
+					fxdPrint("[PROGRESS]:\n\(String(describing: jsonObject))", quiet: true)
 				}
 				#endif
 
 				guard let receivedData = data,
-					  let decodedResponse = self?.decodedResponse(receivedData: receivedData),
-					  let current_image = decodedResponse.current_image
+					  let decodedResponse = self?.decodedResponse(receivedData: receivedData)
 				else {
-					completionHandler?(error)
+					completionHandler?(nil, error)
 					return
 				}
 
 
-				let imagesEncoded = [current_image] as? Array<String>
-
-				let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded ?? [], quiet:quiet)
-
-				guard let progressImage = decodedImageArray?.first else {
-					completionHandler?(error)
-					return
+				var progressImage: UIImage? = nil
+				if let current_image = decodedResponse.current_image,
+				   let imagesEncoded = [current_image] as? Array<String>,
+				   let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded, quiet:quiet) {
+					progressImage = decodedImageArray.first
 				}
 
 
 				DispatchQueue.main.async {
-					self?.observable.displayedImage = progressImage
+					if progressImage != nil {
+						self?.observable.displayedImage = progressImage
+					}
 
 					self?.observable.progressValue = decodedResponse.progress
 					self?.observable.progressImage = progressImage
-					completionHandler?(error)
+					completionHandler?(decodedResponse, error)
 				}
 			}
 	}
@@ -306,7 +305,7 @@ open class FXDmoduleSDEngine: NSObject {
 		execute_progress(
 			quiet: true,
 			completionHandler: {
-			[weak self] (error) in
+			[weak self] (lastProgress, error) in
 
 			self?.continuousProgressRefreshing()
 		})
