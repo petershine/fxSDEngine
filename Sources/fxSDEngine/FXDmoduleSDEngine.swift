@@ -153,8 +153,8 @@ open class FXDmoduleSDEngine: NSObject {
 
 					DispatchQueue.main.async {
 						self?.observable.displayedImage = latestImage
-						completionHandler?(error)
 					}
+					completionHandler?(error)
 			})
 		}
 	}
@@ -182,11 +182,9 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 
-				DispatchQueue.main.async {
-					fxdPrint(String(data: generationInfo, encoding: .utf8) as Any, quiet: true)
-					self?.savePayloadToFile(payload: generationInfo)
-					completionHandler?(error)
-				}
+				fxdPrint(String(data: generationInfo, encoding: .utf8) as Any, quiet: true)
+				self?.savePayloadToFile(payload: generationInfo)
+				completionHandler?(error)
 		})
 	}
 
@@ -211,10 +209,8 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 
-				DispatchQueue.main.async {
-					self?.generationFolder = Config.outdir_samples
-					completionHandler?(error)
-				}
+				self?.generationFolder = Config.outdir_samples
+				completionHandler?(error)
 			}
 	}
 
@@ -249,8 +245,8 @@ open class FXDmoduleSDEngine: NSObject {
 
 				DispatchQueue.main.async {
 					self?.observable.displayedImage = generated
-					completionHandler?(error)
 				}
+				completionHandler?(error)
 			}
 	}
 
@@ -292,8 +288,8 @@ open class FXDmoduleSDEngine: NSObject {
 
 					self?.observable.progressValue = decodedResponse.progress
 					self?.observable.progressImage = progressImage
-					completionHandler?(decodedResponse, error)
 				}
+				completionHandler?(decodedResponse, error)
 			}
 	}
 

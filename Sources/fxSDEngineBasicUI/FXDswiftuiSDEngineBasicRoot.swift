@@ -134,7 +134,9 @@ extension FXDswiftuiSDEngineBasicRoot {
 					sdEngine.execute_txt2img {
 						error in
 
-						sdObservable.shouldContinueRefreshing = false
+						Task {	@MainActor in
+							sdObservable.shouldContinueRefreshing = false
+						}
 					}
 				})
 		}
