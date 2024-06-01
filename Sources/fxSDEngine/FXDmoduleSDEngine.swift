@@ -254,7 +254,7 @@ open class FXDmoduleSDEngine: NSObject {
 			}
 	}
 
-	open func execute_progress(quiet: Bool = false, completionHandler: ((_ lastProgress: SDcodableResponse?, _ error: Error?)->Void)?) {
+	open func execute_progress(skipImageDecoding: Bool, quiet: Bool = false, completionHandler: ((_ lastProgress: SDcodableResponse?, _ error: Error?)->Void)?) {
 		requestToSDServer(
 			quiet: quiet,
 			api_endpoint: .SDAPI_V1_PROGRESS) {
@@ -277,7 +277,8 @@ open class FXDmoduleSDEngine: NSObject {
 
 
 				var progressImage: UIImage? = nil
-				if let current_image = decodedResponse.current_image,
+				if !skipImageDecoding,
+				   let current_image = decodedResponse.current_image,
 				   let imagesEncoded = [current_image] as? Array<String>,
 				   let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded, quiet:quiet) {
 					progressImage = decodedImageArray.first
@@ -303,6 +304,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 
 		execute_progress(
+			skipImageDecoding: false,
 			quiet: true,
 			completionHandler: {
 			[weak self] (lastProgress, error) in
