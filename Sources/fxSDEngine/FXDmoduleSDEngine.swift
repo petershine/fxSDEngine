@@ -261,13 +261,11 @@ open class FXDmoduleSDEngine: NSObject {
 				[weak self] (data, error) in
 
 				#if DEBUG
-				/*
 				if data != nil {
 					var jsonObject = self?.decodedJSONobject(receivedData: data!, quiet: true)
 					jsonObject?["current_image"] = "<IMAGE base64 string>"
 					fxdPrint("[PROGRESS]:\n\(String(describing: jsonObject))")
 				}
-				 */
 				#endif
 
 				guard let receivedData = data,

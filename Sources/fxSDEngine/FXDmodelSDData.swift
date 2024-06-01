@@ -75,21 +75,35 @@ public struct SDencodablePayload: Encodable {
 }
 
 public struct SDcodableResponse: Codable {
-	var progress: Double? = nil
-	var eta_relative: Double? = nil
-
-	var textinfo: String? = nil
-
-	var current_image: String? = nil
+	// txt2img
 	var images: [String?]? = nil
 
+	// progress
+	var progress: Double? = nil
+	var eta_relative: Date? = nil
+	var textinfo: String? = nil
+	var current_image: String? = nil
+	var state: SDcodableState? = nil
+	struct SDcodableState: Codable {
+		var interrupted: Bool? = nil
+		var job: String? = nil
+		var job_count: Int? = nil
+		var job_no: Int? = nil
+		var job_timestamp: String? = nil
+		var sampling_step: Int? = nil
+		var sampling_steps: Int? = nil
+		var skipped: Bool? = nil
+		var stopping_generation: Bool? = nil
+	}
 
+	// sysinfo
 	var Config: SDcodableConfig? = nil
 	struct SDcodableConfig: Codable {
 		var outdir_samples: String? = nil
 	}
 
 
+	// file
 	var files: [SDcodableFile?]? = nil
 	struct SDcodableFile: Codable {
 		var type: String? = nil
