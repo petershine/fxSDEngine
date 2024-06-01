@@ -162,18 +162,16 @@ extension FXDmoduleSDEngine {
 	}
 
 	func encodeGenerationPayload(receivedData: Data) -> SDencodablePayload? {
-		guard let processedData = String(data: receivedData, encoding: .utf8)?.processedJSONData(),
-			  let processedString = String(data: processedData, encoding: .utf8)
-		else {
+		guard let receivedString = String(data: receivedData, encoding: .utf8) else {
 			fxdPrint("receivedString: \(String(describing: String(data: receivedData, encoding: .utf8)))")
 			return nil
 		}
 
 
-		guard !(processedString.isEmpty)
-				&& (processedString.contains("Negative prompt:"))
+		guard !(receivedString.isEmpty)
+				&& (receivedString.contains("Negative prompt:"))
 		else {
-			fxdPrint("processedString: \(String(describing: processedString))")
+			fxdPrint("receivedString: \(String(describing: receivedString))")
 			return nil
 		}
 
@@ -183,27 +181,28 @@ extension FXDmoduleSDEngine {
 			("Steps:", false, true)
 		]
 
-		if processedString.contains("Wildcard prompt:") {
+		if receivedString.contains("Wildcard prompt:") {
 			separators.append(("Wildcard prompt:", false, true))
 		}
 
-		if processedString.contains("Hires upscale:") {
+		if receivedString.contains("Hires upscale:") {
 			separators.append(("Hires upscale:", true, true))
 		}
 		fxdPrint("separators: \(separators)")
 
-		var modifiedString: String = processedString
+		var modifiedString: String = receivedString
 		var parsed: [String] = []
 		for (separator, shouldPickLast, shouldPrefix) in separators {
 			let components = modifiedString.components(separatedBy: separator)
-			let picked = (shouldPickLast ? components.last : components.first)?.trimmingCharacters(in: .whitespacesAndNewlines)
-			parsed.append(picked ?? "")
+			let extracted = (shouldPickLast ? components.last : components.first)?.trimmingCharacters(in: .whitespacesAndNewlines)
+			let processed = extracted?.replacingOccurrences(of: "\\n", with: "\n")
+			parsed.append(processed ?? "")
 
 			modifiedString = "\(shouldPrefix ? (separator+" ") : "")\(components.last ?? "")"
 		}
 
 		guard !(parsed[0].isEmpty) else {
-			fxdPrint("processedString: \(String(describing: processedString))")
+			fxdPrint("receivedString: \(String(describing: receivedString))")
 			return nil
 		}
 
@@ -271,31 +270,19 @@ extension FXDmoduleSDEngine {
 		var extracted: Any? = nil
 		var caughError: Bool = false
 		for key in keys {
-			extracted = jsonObject?[key] as? String
+			extracted = jsonObject?[key]
 			jsonObject?[key] = "[EXTRACTED]"
 
-			fxdPrint("[jsonObject extracted: \(key)]:\n\(jsonObject)\n")
+			fxdPrint("[without extracted: \(key)]:\n\(jsonObject)\n")
 
-			var extractedJSONobject: [String:Any?] = [:]
-			if let extractedJSONdata = (extracted as? String)?.processedJSONData() {
-				do {
-					extractedJSONobject = try JSONSerialization.jsonObject(with: extractedJSONdata) as! [String:Any?]
-					jsonObject = extractedJSONobject
-				}
-				catch {
-					caughError = true
-					fxdPrint("[ERROR]: \(error)\n[extracted]:\n\(extracted)\n")
-				}
+			guard let extractedDictionary = extracted as? [String:Any?] else {
+				break
 			}
-			else {
-				caughError = true
-				fxdPrint("[ERROR][extracted]:\n\(extracted)\n")
-			}
+
+			jsonObject = extractedDictionary
 		}
 
-		if !caughError {
-			fxdPrint("[\(keys.last)]:\n\(extracted)\n")
-		}
+		fxdPrint("[\(keys.last)]:\n\(extracted)\n")
 	}
 }
 #endif
