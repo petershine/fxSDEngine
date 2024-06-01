@@ -33,16 +33,23 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 			}
 
 			VStack {
-				GROUP_resetting.padding()
+				GROUP_resetting
+					.padding()
 
 				Spacer()
 
 				HStack {
-					GROUP_progress
+					if sdObservable.isJobRunning {
+						GROUP_progress
+							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+					}
 
 					Spacer()
 
-					GROUP_generating
+					if !sdObservable.isJobRunning {
+						GROUP_generating
+							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+					}
 				}
 				.padding()
 			}
@@ -58,32 +65,38 @@ extension FXDswiftuiSDEngineBasicRoot {
 	var GROUP_resetting: some View {
 		HStack {
 			VStack {
-				FXDswiftuiButton(
-					systemImageName: "xmark",
-					foregroundStyle: .red,
-					action: {
-						sdEngine.interrupt{
-							error in
+				if sdObservable.isJobRunning {
+					FXDswiftuiButton(
+						systemImageName: "xmark",
+						foregroundStyle: .red,
+						action: {
+							sdEngine.interrupt{
+								(error) in
 
-							Task {	@MainActor in
-								sdObservable.shouldContinueRefreshing = false
+								Task {	@MainActor in
+									sdObservable.shouldContinueRefreshing = false
 
-								let localizedDescription = error?.localizedDescription ?? "Interrupted"
-								UIAlertController.simpleAlert(withTitle: localizedDescription, message: nil)
+									let localizedDescription = error?.localizedDescription ?? "Interrupted"
+									UIAlertController.simpleAlert(withTitle: localizedDescription, message: nil)
+								}
 							}
-						}
-					})
+						})
+					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+				}
 			}
 
 			Spacer()
 
 			VStack {
-				FXDswiftuiButton(
-					systemImageName: "arrow.clockwise",
-					foregroundStyle: .white,
-					action: {
-						sdEngine.refresh_LastPayload(completionHandler: nil)
-					})
+				if !sdObservable.isJobRunning {
+					FXDswiftuiButton(
+						systemImageName: "arrow.clockwise",
+						foregroundStyle: .white,
+						action: {
+							sdEngine.refresh_LastPayload(completionHandler: nil)
+						})
+					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+				}
 			}
 		}
 	}
