@@ -41,6 +41,8 @@ public protocol SDprotocolProperties {
 	var progressValue: Double? { get set }
 	var progressImage: UIImage? { get set }
 	var shouldContinueRefreshing: Bool { get set }
+
+	var isJobRunning: Bool { get set }
 }
 
 
@@ -61,6 +63,8 @@ open class FXDobservableSDProperties: SDprotocolProperties, ObservableObject {
 			}
 		}
 	}
+
+	@Published open var isJobRunning: Bool = false
 
 	public init() {
 		self.shouldContinueRefreshing = false
@@ -284,10 +288,12 @@ open class FXDmoduleSDEngine: NSObject {
 				DispatchQueue.main.async {
 					if progressImage != nil {
 						self?.observable.displayedImage = progressImage
+						self?.observable.progressImage = progressImage
 					}
 
 					self?.observable.progressValue = decodedResponse.progress
-					self?.observable.progressImage = progressImage
+
+					self?.observable.isJobRunning = !((decodedResponse.state?.job ?? "" as String).isEmpty)
 				}
 				completionHandler?(decodedResponse, error)
 			}
@@ -313,9 +319,16 @@ open class FXDmoduleSDEngine: NSObject {
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_INTERRUPT,
 			method: "POST") {
-				(receivedData, error) in
+				[weak self] (receivedData, error) in
 
-				completionHandler?(error)
+				self?.execute_progress(
+					skipImageDecoding: true,
+					quiet: true,
+					completionHandler: {
+						lastProgress, error in
+
+						completionHandler?(error)
+					})
 			}
 	}
 
