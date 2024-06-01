@@ -167,11 +167,15 @@ extension FXDmoduleSDEngine {
 			return nil
 		}
 
+		return encodeGenerationPayload(infotext: receivedString)
+	}
 
-		guard !(receivedString.isEmpty)
-				&& (receivedString.contains("Negative prompt:"))
+
+	func encodeGenerationPayload(infotext: String) -> SDencodablePayload? {
+		guard !(infotext.isEmpty)
+				&& (infotext.contains("Negative prompt:"))
 		else {
-			fxdPrint("receivedString: \(String(describing: receivedString))")
+			fxdPrint("infotext: \(String(describing: infotext))")
 			return nil
 		}
 
@@ -181,16 +185,16 @@ extension FXDmoduleSDEngine {
 			("Steps:", false, true)
 		]
 
-		if receivedString.contains("Wildcard prompt:") {
+		if infotext.contains("Wildcard prompt:") {
 			separators.append(("Wildcard prompt:", false, true))
 		}
 
-		if receivedString.contains("Hires upscale:") {
+		if infotext.contains("Hires upscale:") {
 			separators.append(("Hires upscale:", true, true))
 		}
 		fxdPrint("separators: \(separators)")
 
-		var modifiedString: String = receivedString
+		var modifiedString: String = infotext
 		var parsed: [String] = []
 		for (separator, shouldPickLast, shouldPrefix) in separators {
 			let components = modifiedString.components(separatedBy: separator)
@@ -202,7 +206,7 @@ extension FXDmoduleSDEngine {
 		}
 
 		guard !(parsed[0].isEmpty) else {
-			fxdPrint("receivedString: \(String(describing: receivedString))")
+			fxdPrint("infotext: \(String(describing: infotext))")
 			return nil
 		}
 
