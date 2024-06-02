@@ -30,7 +30,10 @@ public struct SDcodablePayload: Codable {
 	var n_iter: Int = 1	//batch count
 	var batch_size: Int = 1
 
-	public init(prompt: String, negative_prompt: String) {
+	public init(prompt: String, negative_prompt: String) {	fxd_log()
+		fxdPrint("[prompt]:\n\(prompt)")
+		fxdPrint("[negative_prompt]:\n\(negative_prompt)")
+
 		self.prompt = prompt
 		self.negative_prompt = negative_prompt
 
@@ -173,57 +176,44 @@ extension FXDmoduleSDEngine {
 
 	func encodeGenerationPayload(infotext: String) -> SDcodablePayload? {	fxd_log()
 		guard !(infotext.isEmpty)
-				&& (infotext.contains("Negative prompt:"))
+				&& (infotext.contains("Steps:"))
 		else {
-			fxdPrint("infotext: \(infotext)")
 			return nil
 		}
 
 
-		var separators = [
-			("Negative prompt:", false, false),
-			("Steps:", false, true)
-		]
-
-		if infotext.contains("Wildcard prompt:") {
-			separators.append(("Wildcard prompt:", false, true))
-		}
-
-		if infotext.contains("Hires upscale:") {
-			separators.append(("Hires upscale:", true, true))
-		}
-		fxdPrint("separators: \(separators)")
-
-		var modifiedString: String = infotext
-		var parsed: [String] = []
-		for (separator, shouldPickLast, shouldPrefix) in separators {
-			let components = modifiedString.components(separatedBy: separator)
-			let extracted = (shouldPickLast ? components.last : components.first)?.trimmingCharacters(in: .whitespacesAndNewlines)
-			let processed = extracted?.lineReBroken()
-			parsed.append(processed ?? "")
-
-			modifiedString = "\(shouldPrefix ? (separator+" ") : "")\(components.last ?? "")"
-		}
-
-		guard !(parsed[0].isEmpty) else {
-			fxdPrint("infotext: \(infotext)")
-			return nil
-		}
-
-		var modifiedPrompt = parsed[0]
-		if modifiedPrompt.first == "\"" {
-			modifiedPrompt.removeFirst()
-			parsed[0] = modifiedPrompt
-		}
+		let infoComponents = infotext.components(separatedBy: "Steps:")
+		let parametersString = "{Steps: \(infoComponents.last?.trimmingCharacters(in: .whitespacesAndNewlines).lineReBroken() ?? "")}"
 
 		#if DEBUG
-		fxdPrint("parsed[0]:\n\(parsed[0])\n\n")
-		fxdPrint("parsed[1]:\n\(parsed[1])\n\n")
+		if let parametersData = parametersString.processedJSONData() {
+			do {
+				let parametersObject = try JSONSerialization.jsonObject(with: parametersData) as? Dictionary<String, Any?>
+				fxdPrint("[parametersObject]:\n\(parametersObject!)\n")
+			}
+			catch {
+				fxdPrint("[parametersString]:\n\(parametersString)\n")
+				fxdPrint(error)
+			}
+		}
 		#endif
 
+
+		let promptPair: String = infoComponents.first ?? ""
+
+		let promptComponents = promptPair.components(separatedBy: "Negative prompt:")
+		let promptString = promptComponents.first?.trimmingCharacters(in: .whitespacesAndNewlines).lineReBroken() ?? ""
+		let negativePromptString = promptComponents.last?.trimmingCharacters(in: .whitespacesAndNewlines).lineReBroken() ?? ""
+
+		guard !(promptString.isEmpty) else {
+			fxdPrint(infotext)
+			return nil
+		}
+
+
 		let encodablePayload = SDcodablePayload(
-			prompt: parsed[0],
-			negative_prompt: parsed[1]
+			prompt: promptString,
+			negative_prompt: negativePromptString
 		)
 
 
