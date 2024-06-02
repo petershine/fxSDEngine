@@ -54,19 +54,3 @@ extension SDcodableGeneration {
 		return decodedImageArray
 	}
 }
-
-
-extension String {
-	func decodedImage() -> UIImage? {
-		guard let imageData = Data(base64Encoded: self) else {
-			return nil
-		}
-
-		guard let decoded = UIImage(data: imageData) else {
-			return nil
-		}
-
-		return decoded
-	}
-}
-

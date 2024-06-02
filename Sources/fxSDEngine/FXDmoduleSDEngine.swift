@@ -214,9 +214,12 @@ open class FXDmoduleSDEngine: NSObject {
 				[weak self] (data, error) in
 
 				#if DEBUG
-				if data != nil {
-					let jsonObject = data!.jsonObject(quiet: true)
+				do {
+					let jsonObject = try data?.jsonObject(quiet: true)
 					os_log("[INTERNAL_SYSINFO]:\n%@", String(describing: jsonObject))
+				}
+				catch {
+					
 				}
 				#endif
 
@@ -461,7 +464,13 @@ extension FXDmoduleSDEngine {
 					responseCode != 200 {
 					fxdPrint("response: \(response)")
 
-					let jsonObject = receivedData.jsonObject()
+					var jsonObject: [String:Any?]? = nil
+					do {
+						jsonObject = try receivedData.jsonObject()
+					}
+					catch {
+
+					}
 
 					var errorDescription = "Problem with server"
 					switch responseCode {
@@ -490,22 +499,4 @@ extension FXDmoduleSDEngine {
 			}
 			httpTask.resume()
 		}
-}
-
-
-extension Data {
-	func jsonObject(quiet: Bool = false) -> Dictionary<String, Any?>? {
-		var jsonObject: Dictionary<String, Any?>? = nil
-		do {
-			jsonObject = try JSONSerialization.jsonObject(with: self, options: .mutableContainers) as? Dictionary<String, Any?>
-			fxdPrint(jsonObject, quiet:quiet)
-		}
-		catch {	fxd_log()
-			fxdPrint(error)
-			let stringObject = String(data: self, encoding: .utf8)
-			fxdPrint(stringObject)
-		}
-
-		return jsonObject
-	}
 }
