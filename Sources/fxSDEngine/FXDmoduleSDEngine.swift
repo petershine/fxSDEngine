@@ -90,7 +90,15 @@ open class FXDobservableSDProperties: SDprotocolProperties, ObservableObject {
 open class FXDmoduleSDEngine: NSObject {
 	@Published public var observable: FXDobservableSDProperties = FXDobservableSDProperties()
 
-	open var generationFolder: String? = nil
+	fileprivate var systemInfo: SDcodableSysInfo? = nil
+	fileprivate var currentGenerationPayload: SDcodablePayload? {
+		didSet {
+			if let encodedPayload = currentGenerationPayload?.encodedPayload() {
+				savePayloadToFile(payload: encodedPayload)
+			}
+		}
+	}
+
 
 	open var savedPayloadFilename: String {
 		return "savedPayload.json"
@@ -100,15 +108,6 @@ open class FXDmoduleSDEngine: NSObject {
 		return "http://127.0.0.1:7860"
 	}
 
-	open var currentPayload: Data? {
-		do {
-			let payload = try loadPayloadFromFile()
-			return payload
-		} catch {
-			fxdPrint("Error reading JSON object: \(error)")
-			return nil
-		}
-	}
 
 	public init(observable: FXDobservableSDProperties? = nil) {
 		super.init()
@@ -117,45 +116,11 @@ open class FXDmoduleSDEngine: NSObject {
 	}
 
 
-	open func savePayloadToFile(payload: Data) {
-		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-			fxdPrint("Document directory not found")
-			return
-		}
-
-		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
-		do {
-			try payload.write(to: fileURL)
-			fxdPrint("[DATA SAVED]: \(fileURL)")
-		} catch {
-			fxdPrint("payload: \(payload)")
-			fxdPrint("Failed to save: \(error)")
-		}
-	}
-
-	open func loadPayloadFromFile() throws -> Data? {
-		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-			fxdPrint("Document directory not found")
-			return nil
-		}
-
-
-		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
-		do {
-			let payloadData = try Data(contentsOf: fileURL)
-			return payloadData
-		} catch {
-			fxdPrint("Failed to load: \(error)")
-			throw error
-		}
-	}
-
-
 	open func refresh_LastPayload(completionHandler: ((_ error: Error?)->Void)?) {
 		execute_internalSysInfo {
 			[weak self] (error) in
 
-			guard let folderPath = self?.generationFolder else {
+			guard let folderPath = self?.systemInfo?.generationFolder() else {
 				completionHandler?(error)
 				return
 			}
@@ -197,13 +162,7 @@ open class FXDmoduleSDEngine: NSObject {
 					return
 				}
 
-				guard let encodedPayload = decodedPayload.encodedPayload() else {
-					completionHandler?(error)
-					return
-				}
-
-
-				self?.savePayloadToFile(payload: encodedPayload)
+				self?.currentGenerationPayload = decodedPayload
 				completionHandler?(error)
 		})
 	}
@@ -224,23 +183,22 @@ open class FXDmoduleSDEngine: NSObject {
 				#endif
 
 				guard let receivedData = data,
-					  let decodedResponse = SDcodableSysInfo.decoded(receivedData) as? SDcodableSysInfo,
-					  let Config = decodedResponse.Config
+					  let decodedResponse = SDcodableSysInfo.decoded(receivedData) as? SDcodableSysInfo
 				else {
 					completionHandler?(error)
 					return
 				}
 
-
-				self?.generationFolder = Config.outdir_samples
+				self?.systemInfo = decodedResponse
 				completionHandler?(error)
 			}
 	}
 
 	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
+		let payload: Data? = currentGenerationPayload?.evaluatedPayload(extensions: systemInfo?.Extensions)
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
-			payload: currentPayload) {
+			payload: payload) {
 				[weak self] (data, error) in
 
 				guard let receivedData = data,
@@ -264,9 +222,8 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 				if let infotext = decodedResponse.infotext(),
-				   let decodedPayload = SDcodablePayload.decoded(infotext: infotext),
-				   let encodedPayload = decodedPayload.encodedPayload() {
-					self?.savePayloadToFile(payload: encodedPayload)
+				   let decodedPayload = SDcodablePayload.decoded(infotext: infotext) {
+					self?.currentGenerationPayload = decodedPayload
 				}
 
 				completionHandler?(error)
@@ -436,7 +393,7 @@ extension FXDmoduleSDEngine {
 			httpRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
 			httpRequest.httpMethod = method ?? "GET"
-			if payload != nil {
+			if payload != nil {	fxd_log()
 				fxdPrint("[payload]:\n\(String(data: payload!, encoding: .utf8)!.lineReBroken())")
 				httpRequest.httpMethod = "POST"
 				httpRequest.httpBody = payload
@@ -499,4 +456,41 @@ extension FXDmoduleSDEngine {
 			}
 			httpTask.resume()
 		}
+}
+
+
+extension FXDmoduleSDEngine {
+	@objc open func savePayloadToFile(payload: Data) {
+		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+			fxdPrint("Document directory not found")
+			return
+		}
+
+		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
+		do {
+			try payload.write(to: fileURL)
+			fxdPrint("[DATA SAVED]: \(fileURL)")
+		} catch {
+			fxdPrint("payload: \(payload)")
+			fxdPrint("Failed to save: \(error)")
+		}
+	}
+
+	@objc open func loadPayloadFromFile() -> Data? {
+		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+			fxdPrint("Document directory not found")
+			return nil
+		}
+
+
+		var payloadData: Data? = nil
+		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
+		do {
+			payloadData = try Data(contentsOf: fileURL)
+		} catch {
+			fxdPrint("Failed to load: \(error)")
+		}
+
+		return payloadData
+	}
 }

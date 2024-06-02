@@ -91,11 +91,28 @@ extension SDcodablePayload {
 		catch {
 			fxdPrint("\(error)")
 		}
-		guard payload != nil else {
+
+		return payload
+	}
+}
+
+extension SDcodablePayload {
+	func evaluatedPayload(extensions: [SDcodableExtension?]?) -> Data? {
+		guard let filtered = extensions?.filter({ $0?.name?.lowercased() == "adetailer"}),
+			  filtered.count > 0 else {
+			return encodedPayload()
+		}
+
+		return extendedPayload(extensions: extensions)
+	}
+
+	func extendedPayload(extensions: [SDcodableExtension?]?) -> Data? {
+		guard let payload: Data = encodedPayload() else {
 			return nil
 		}
 
 
+		var extendedPayload: Data? = nil
 		guard let scriptJSONfilename = Bundle.main.url(forResource: "encodableADetailer", withExtension: "json") else {
 			return nil
 		}
@@ -104,18 +121,18 @@ extension SDcodablePayload {
 			let scriptData = try Data(contentsOf: scriptJSONfilename)
 			let alwayson_scripts = try JSONSerialization.jsonObject(with: scriptData) as? Dictionary<String, Any>
 
-			var payloadDictionary = try JSONSerialization.jsonObject(with: payload!) as? Dictionary<String, Any>
+			var payloadDictionary = try JSONSerialization.jsonObject(with: payload) as? Dictionary<String, Any>
 
 			if payloadDictionary != nil {
 				payloadDictionary?["alwayson_scripts"] = alwayson_scripts
-				payload = try JSONSerialization.data(withJSONObject: payloadDictionary!)
+				extendedPayload = try JSONSerialization.data(withJSONObject: payloadDictionary!)
 			}
 		}
 		catch {
 			fxdPrint("\(error)")
 		}
 
-		return payload
+		return extendedPayload
 	}
 }
 

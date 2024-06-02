@@ -159,21 +159,17 @@ extension FXDswiftuiSDEngineBasicRoot {
 extension FXDswiftuiSDEngineBasicRoot {
 	@ViewBuilder
 	var OVERLAY_promptEditor: some View {
-		if let currentPayload = sdEngine.currentPayload,
-		   let payload = String(data: currentPayload, encoding: .utf8) {
-
-			FXDswiftuiTextEditor(
-				editedText: payload,
-				finishedEditing: {
-					(editedParagraph_0, editedParagraph_1, editedPayload) in
-					fxdPrint("editedParagraph_0: \(editedParagraph_0)")
-					fxdPrint("editedParagraph_1: \(editedParagraph_1)")
-				})
-			.transition(AnyTransition.opacity.animation(.easeInOut(duration: 1.0)))
-			.onDisappear(perform: {
-				shouldPresentPromptEditor = false
+		FXDswiftuiTextEditor(
+			editedText: "",
+			finishedEditing: {
+				(editedParagraph_0, editedParagraph_1, editedPayload) in
+				fxdPrint("editedParagraph_0: \(editedParagraph_0)")
+				fxdPrint("editedParagraph_1: \(editedParagraph_1)")
 			})
-		}
+		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 1.0)))
+		.onDisappear(perform: {
+			shouldPresentPromptEditor = false
+		})
 	}
 }
 
