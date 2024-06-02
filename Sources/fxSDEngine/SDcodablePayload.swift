@@ -120,7 +120,7 @@ extension SDcodablePayload {
 }
 
 extension SDcodablePayload {
-	static func decodedGenerationPayload(infotext: String) -> SDcodablePayload? {	fxd_log()
+	static func decoded(infotext: String) -> SDcodablePayload? {	fxd_log()
 		fxdPrint(infotext)
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Steps:"))
@@ -136,12 +136,11 @@ extension SDcodablePayload {
 		let negative_prompt = promptPair?.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
 		guard !(prompt.isEmpty) else {
-			fxdPrint(infotext)
 			return nil
 		}
 
 
-		var payloadDictionary: [String:Any?] = [
+		var payloadDictionary: [String:Any] = [
 			"prompt" : prompt,
 			"negative_prompt" : negative_prompt
 		]
@@ -169,13 +168,12 @@ extension SDcodablePayload {
 			}
 		}
 
-
 		fxdPrint(dictionary: payloadDictionary)
 
-		var decodedPayload: SDcodablePayload? = nil
+		var decodedPayload: Self? = nil
 		do {
 			let payloadData = try JSONSerialization.data(withJSONObject: payloadDictionary)
-			decodedPayload = try JSONDecoder().decode(SDcodablePayload.self, from: payloadData)
+			decodedPayload = try JSONDecoder().decode(Self.self, from: payloadData)
 			fxdPrint(decodedPayload!)
 		}
 		catch {
