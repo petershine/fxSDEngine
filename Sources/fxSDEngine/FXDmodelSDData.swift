@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public struct SDcodablePayload: Codable {
+struct SDcodablePayload: Codable {
 	var prompt: String? = nil
 	var negative_prompt: String? = nil
 
@@ -41,7 +41,7 @@ public struct SDcodablePayload: Codable {
 		case hr_upscaler = "hires upscaler"
 	}
 
-	public init(from decoder: any Decoder) throws {
+	init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt)
@@ -80,8 +80,10 @@ public struct SDcodablePayload: Codable {
 			self.hr_upscaler = try alternativeContainer.decodeIfPresent(String.self, forKey: .hr_upscaler)
 		}
 	}
+}
 
-	public func encodedPayload() -> Data? {
+extension SDcodablePayload {
+	func encodedPayload() -> Data? {
 		var payload: Data? = nil
 		do {
 			payload = try JSONEncoder().encode(self)
@@ -117,26 +119,8 @@ public struct SDcodablePayload: Codable {
 	}
 }
 
-
-extension FXDmoduleSDEngine {
-	func decodedGenerationPayload(decodedResponse: SDcodableGeneration) -> SDcodablePayload? {
-		guard let infotext = decodedResponse.infotext() else {
-			return nil
-		}
-
-		return decodedGenerationPayload(infotext: infotext)
-	}
-
-	func decodedGenerationPayload(receivedData: Data) -> SDcodablePayload? {
-		guard let receivedString = String(data: receivedData, encoding: .utf8) else {
-			return nil
-		}
-
-		return decodedGenerationPayload(infotext: receivedString)
-	}
-
-
-	func decodedGenerationPayload(infotext: String) -> SDcodablePayload? {	fxd_log()
+extension SDcodablePayload {
+	static func decodedGenerationPayload(infotext: String) -> SDcodablePayload? {	fxd_log()
 		fxdPrint(infotext)
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Steps:"))

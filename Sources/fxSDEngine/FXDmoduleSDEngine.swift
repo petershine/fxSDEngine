@@ -185,12 +185,14 @@ open class FXDmoduleSDEngine: NSObject {
 			responseHandler: {
 				[weak self] (received, error) in
 
-				guard let receivedData = received else {
+				guard let receivedData = received,
+					  let receivedString = String(data: receivedData, encoding: .utf8)
+				else {
 					completionHandler?(error)
 					return
 				}
 
-				guard let decodedPayload = self?.decodedGenerationPayload(receivedData: receivedData) else {
+				guard let decodedPayload = SDcodablePayload.decodedGenerationPayload(infotext: receivedString) else {
 					completionHandler?(error)
 					return
 				}
@@ -258,7 +260,8 @@ open class FXDmoduleSDEngine: NSObject {
 					self?.observable.displayedImage = generated
 				}
 
-				if let decodedPayload = self?.decodedGenerationPayload(decodedResponse: (decodedResponse as! SDcodableGeneration)),
+				if let infotext = (decodedResponse as? SDcodableGeneration)?.infotext(),
+				   let decodedPayload = SDcodablePayload.decodedGenerationPayload(infotext: infotext),
 				   let encodedPayload = decodedPayload.encodedPayload() {
 					self?.savePayloadToFile(payload: encodedPayload)
 				}
