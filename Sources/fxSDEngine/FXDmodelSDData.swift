@@ -218,7 +218,18 @@ extension FXDmoduleSDEngine {
 			let key: String = key_value.first?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
 			if !key.isEmpty {
 				let value: String = key_value.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-				payloadDictionary[key] = value
+				if let doubleValue = Double(value) {
+					payloadDictionary[key] = doubleValue
+				}
+				else if let integerValue = Int(value) {
+					payloadDictionary[key] = integerValue
+				}
+				else if let boolValue = Bool(value) {
+					payloadDictionary[key] = boolValue
+				}
+				else {
+					payloadDictionary[key] = value
+				}
 			}
 		}
 
