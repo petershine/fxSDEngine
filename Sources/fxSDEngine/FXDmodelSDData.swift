@@ -10,27 +10,27 @@ public struct SDcodablePayload: Codable {
 	var prompt: String? = nil
 	var negative_prompt: String? = nil
 
-	var sampler_name: String = "DPM++ 2M SDE"
-	var scheduler: String = "Karras"
-	var steps: Int = 30
-	var cfg_scale: Double = 7.0
+	var sampler_name: String? = "DPM++ 2M SDE"
+	var scheduler: String? = "Karras"
+	var steps: Int? = 30
+	var cfg_scale: Double? = 7.0
 
-	var width: Int = 512
-	var height: Int = 768
+	var width: Int? = 512
+	var height: Int? = 768
 
 	var enable_hr: Bool = true
-	var denoising_strength: Double = 0.4
-	var hr_scale: Double = 1.5
-	var hr_second_pass_steps: Int = 10
-	var hr_upscaler: String = "4x-UltraSharp"
-	var hr_scheduler: String = "Karras"
+	var denoising_strength: Double? = 0.4
+	var hr_scale: Double? = 1.5
+	var hr_second_pass_steps: Int? = 10
+	var hr_upscaler: String? = "4x-UltraSharp"
+	var hr_scheduler: String? = "Karras"
 	var hr_prompt: String? = nil
 	var hr_negative_prompt: String? = nil
 
-	var n_iter: Int = 1	//batch count
-	var batch_size: Int = 1
+	var n_iter: Int? = 1	//batch count
+	var batch_size: Int? = 1
 
-	enum CodingKeys: String, CodingKey {
+	enum AlternativeCodingKeys: String, CodingKey {
 		case sampler_name = "sampler"
 		case scheduler = "schedule type"
 		case cfg_scale = "cfg scale"
@@ -43,15 +43,43 @@ public struct SDcodablePayload: Codable {
 
 	public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
-		self.sampler_name = try container.decode(String.self, forKey: .sampler_name)
-		self.scheduler = try container.decode(String.self, forKey: .scheduler)
-		self.cfg_scale = try container.decode(Double.self, forKey: .cfg_scale)
-		self.denoising_strength = try container.decode(Double.self, forKey: .denoising_strength)
-		self.hr_scale = try container.decode(Double.self, forKey: .hr_scale)
-		self.hr_second_pass_steps = try container.decode(Int.self, forKey: .hr_second_pass_steps)
-		self.hr_upscaler = try container.decode(String.self, forKey: .hr_upscaler)
-	}
 
+		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt)
+		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt)
+		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps)
+		self.width = try container.decodeIfPresent(Int.self, forKey: .width)
+		self.height = try container.decodeIfPresent(Int.self, forKey: .height)
+		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? true
+		self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler)
+		self.hr_prompt = try container.decodeIfPresent(String.self, forKey: .hr_prompt)
+		self.hr_negative_prompt = try container.decodeIfPresent(String.self, forKey: .hr_negative_prompt)
+		self.n_iter = try container.decodeIfPresent(Int.self, forKey: .n_iter)
+		self.batch_size = try container.decodeIfPresent(Int.self, forKey: .batch_size)
+
+		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name)
+		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler)
+		self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale)
+
+		self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength)
+		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale)
+		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps)
+		self.hr_upscaler = try container.decodeIfPresent(String.self, forKey: .hr_upscaler)
+
+
+		if self.cfg_scale == nil
+			|| self.sampler_name == nil {
+			let alternativeContainer = try decoder.container(keyedBy: AlternativeCodingKeys.self)
+
+			self.sampler_name = try alternativeContainer.decodeIfPresent(String.self, forKey: .sampler_name)
+			self.scheduler = try alternativeContainer.decodeIfPresent(String.self, forKey: .scheduler)
+			self.cfg_scale = try alternativeContainer.decodeIfPresent(Double.self, forKey: .cfg_scale)
+
+			self.denoising_strength = try alternativeContainer.decodeIfPresent(Double.self, forKey: .denoising_strength)
+			self.hr_scale = try alternativeContainer.decodeIfPresent(Double.self, forKey: .hr_scale)
+			self.hr_second_pass_steps = try alternativeContainer.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps)
+			self.hr_upscaler = try alternativeContainer.decodeIfPresent(String.self, forKey: .hr_upscaler)
+		}
+	}
 
 	public func encodedPayload() -> Data? {
 		var payload: Data? = nil
