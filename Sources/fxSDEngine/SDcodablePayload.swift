@@ -7,7 +7,7 @@ import fXDKit
 
 
 struct SDcodablePayload: Codable {
-	var prompt: String? = nil
+	var prompt: String
 	var negative_prompt: String? = nil
 
 	var sampler_name: String? = "DPM++ 2M SDE"
@@ -41,15 +41,16 @@ struct SDcodablePayload: Codable {
 		case hr_upscaler = "hires upscaler"
 	}
 
+
 	init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 
-		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt)
+		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? "fxSDEngine!"
 		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt)
 		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps)
 		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 512
 		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
-		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? true
+		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? false
 		self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler)
 		self.hr_prompt = try container.decodeIfPresent(String.self, forKey: .hr_prompt)
 		self.hr_negative_prompt = try container.decodeIfPresent(String.self, forKey: .hr_negative_prompt)

@@ -121,6 +121,13 @@ open class FXDmoduleSDEngine: NSObject {
 			[weak self] (error) in
 
 			guard let folderPath = self?.systemInfo?.generationFolder() else {
+				// TODO: find better evaluation for NEWly server
+				do {
+					self?.currentGenerationPayload = try JSONDecoder().decode(SDcodablePayload.self, from: "{}".data(using: .utf8) ?? Data())
+				}
+				catch {
+					fxdPrint(error)
+				}
 				completionHandler?(error)
 				return
 			}
@@ -212,6 +219,7 @@ open class FXDmoduleSDEngine: NSObject {
 				let decodedImageArray = decodedResponse.decodedImages()
 
 				guard let generated = decodedImageArray.first else {
+					fxdPrint(receivedData.jsonObject())
 					completionHandler?(error)
 					return
 				}
