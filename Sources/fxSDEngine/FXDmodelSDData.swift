@@ -15,8 +15,8 @@ public struct SDcodablePayload: Codable {
 	var steps: Int? = 35
 	var cfg_scale: Double? = 8.0
 
-	var width: Int? = 512
-	var height: Int? = 768
+	var width: Int
+	var height: Int
 
 	var enable_hr: Bool = true
 	var denoising_strength: Double? = 0.4
@@ -47,8 +47,8 @@ public struct SDcodablePayload: Codable {
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt)
 		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt)
 		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps)
-		self.width = try container.decodeIfPresent(Int.self, forKey: .width)
-		self.height = try container.decodeIfPresent(Int.self, forKey: .height)
+		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 512
+		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? true
 		self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler)
 		self.hr_prompt = try container.decodeIfPresent(String.self, forKey: .hr_prompt)
