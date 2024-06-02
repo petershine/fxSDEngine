@@ -359,7 +359,7 @@ open class FXDmoduleSDEngine: NSObject {
 					.filter { 
 						!($0?.fullpath?.contains("DS_Store") ?? false)
 					}
-					.first as? SDcodableFiles.SDcodableFile
+					.first as? SDcodableFile
 
 				fxdPrint("latestFileORfolder?.updated_time(): \(latestFileORfolder?.updated_time())")
 				fxdPrint("latestFileORfolder?.fullpath: \(latestFileORfolder?.fullpath)")
