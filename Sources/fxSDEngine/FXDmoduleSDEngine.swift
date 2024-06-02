@@ -181,8 +181,9 @@ open class FXDmoduleSDEngine: NSObject {
 
 				#if DEBUG
 				do {
-					let jsonObject = try data?.jsonObject(quiet: true)
-					os_log("[INTERNAL_SYSINFO]:\n%@", String(describing: jsonObject))
+					if let jsonObject = try data?.jsonObject(quiet: true) {
+						os_log("[INTERNAL_SYSINFO]:\n%@\n\n", jsonObject)
+					}
 				}
 				catch {
 					
@@ -424,10 +425,13 @@ extension FXDmoduleSDEngine {
 
 
 				var modifiedError = error
+				let httpResponse = response as? HTTPURLResponse
+				let httpResponseCode = httpResponse?.statusCode ?? 200
+
 				if modifiedError == nil,
-				   let responseCode = (response as? HTTPURLResponse)?.statusCode, 
-					responseCode != 200 {
-					fxdPrint("response: \(response)")
+				   httpResponse != nil,
+				   httpResponseCode != 200 {
+					fxdPrint("httpResponse: \(httpResponse!)")
 
 					var jsonObject: [String:Any?]? = nil
 					do {
@@ -438,7 +442,7 @@ extension FXDmoduleSDEngine {
 					}
 
 					var errorDescription = "Problem with server"
-					switch responseCode {
+					switch httpResponseCode {
 						case 404:
 							errorDescription = "Possibly, your Stable Diffusion server is not operating."
 						default:
@@ -456,7 +460,7 @@ extension FXDmoduleSDEngine {
 
 					modifiedError = NSError(
 						domain: "SDEngine",
-						code: responseCode,
+						code: httpResponseCode,
 						userInfo: responseUserInfo)
 				}
 
