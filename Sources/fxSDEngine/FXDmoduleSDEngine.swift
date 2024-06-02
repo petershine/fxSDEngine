@@ -1,5 +1,5 @@
 
-
+import OSLog
 import Foundation
 import UIKit
 
@@ -195,7 +195,7 @@ open class FXDmoduleSDEngine: NSObject {
 				#if DEBUG
 				if data != nil {
 					let jsonObject = self?.decodedJSONobject(receivedData: data!, quiet: true)
-					fxdPrint("[INTERNAL_SYSINFO]:\n\(String(describing: jsonObject))")
+					os_log("[INTERNAL_SYSINFO]:\n%@", String(describing: jsonObject))
 				}
 				#endif
 
@@ -344,8 +344,8 @@ open class FXDmoduleSDEngine: NSObject {
 					}
 					.first as? SDcodableResponse.SDcodableFile
 
-				fxdPrint("latestFileORfolder?.updated_time(): \(String(describing: latestFileORfolder?.updated_time()))")
-				fxdPrint("latestFileORfolder?.fullpath: \(String(describing: latestFileORfolder?.fullpath))")
+				fxdPrint("latestFileORfolder?.updated_time(): \(latestFileORfolder?.updated_time())")
+				fxdPrint("latestFileORfolder?.fullpath: \(latestFileORfolder?.fullpath)")
 				guard latestFileORfolder != nil,
 					  let fullpath = latestFileORfolder?.fullpath
 				else {
@@ -354,7 +354,7 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 
-				fxdPrint("latestFileORfolder?.type: \(String(describing: latestFileORfolder?.type))")
+				fxdPrint("latestFileORfolder?.type: \(latestFileORfolder?.type)")
 				guard let type = latestFileORfolder?.type,
 						  type != "dir"
 				else {
@@ -423,13 +423,13 @@ extension FXDmoduleSDEngine {
 			let httpTask = URLSession.shared.dataTask(with: httpRequest) {
 				[weak self] (data: Data?, response: URLResponse?, error: Error?) in
 
-				fxdPrint("data: \(String(describing: data))", quiet:quiet)
-				fxdPrint("error: \(String(describing: error))", quiet:quiet)
+				fxdPrint("data: \(data)", quiet:quiet)
+				fxdPrint("error: \(error)", quiet:quiet)
 				guard let receivedData = data else {
-					fxdPrint("httpRequest.url: \(String(describing: httpRequest.url))")
-					fxdPrint("httpRequest.allHTTPHeaderFields: \(String(describing: httpRequest.allHTTPHeaderFields))")
-					fxdPrint("httpRequest.httpMethod: \(String(describing: httpRequest.httpMethod))")
-					fxdPrint("httpRequest.httpBody: \(String(describing: httpRequest.httpBody))")
+					fxdPrint("httpRequest.url: \(httpRequest.url)")
+					fxdPrint("httpRequest.allHTTPHeaderFields: \(httpRequest.allHTTPHeaderFields)")
+					fxdPrint("httpRequest.httpMethod: \(httpRequest.httpMethod)")
+					fxdPrint("httpRequest.httpBody: \(httpRequest.httpBody)")
 					responseHandler?(nil, error)
 					return
 				}
@@ -439,7 +439,7 @@ extension FXDmoduleSDEngine {
 				if modifiedError == nil,
 				   let responseCode = (response as? HTTPURLResponse)?.statusCode, 
 					responseCode != 200 {
-					fxdPrint("response: \(String(describing: response))")
+					fxdPrint("response: \(response)")
 
 					let jsonObject = self?.decodedJSONobject(receivedData: receivedData)
 
