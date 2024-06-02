@@ -119,21 +119,6 @@ public struct SDcodablePayload: Codable {
 
 
 extension FXDmoduleSDEngine {
-	func decodedJSONobject(receivedData: Data, quiet: Bool = false) -> Dictionary<String, Any?>? {
-		var jsonObject: Dictionary<String, Any?>? = nil
-		do {
-			jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
-			fxdPrint(jsonObject, quiet:quiet)
-		}
-		catch {
-			fxdPrint(error)
-			let receivedString = String(data: receivedData, encoding: .utf8)
-			fxdPrint(receivedString)
-		}
-
-		return jsonObject
-	}
-
 	func decodedGenerationPayload(decodedResponse: SDcodableGeneration) -> SDcodablePayload? {
 		guard let infotext = decodedResponse.infotext() else {
 			return nil
