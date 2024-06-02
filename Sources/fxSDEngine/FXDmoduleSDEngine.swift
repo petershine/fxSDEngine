@@ -171,18 +171,18 @@ open class FXDmoduleSDEngine: NSObject {
 					return
 				}
 
-				guard let encodedPayload = self?.encodeGenerationPayload(receivedData: receivedData) else {
+				guard let decodedPayload = self?.decodedGenerationPayload(receivedData: receivedData) else {
 					completionHandler?(error)
 					return
 				}
 
-				guard let payload = encodedPayload.payload() else {
+				guard let encodedPayload = decodedPayload.encodedPayload() else {
 					completionHandler?(error)
 					return
 				}
 
 
-				self?.savePayloadToFile(payload: payload)
+				self?.savePayloadToFile(payload: encodedPayload)
 				completionHandler?(error)
 		})
 	}

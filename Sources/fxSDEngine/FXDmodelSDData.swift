@@ -30,8 +30,30 @@ public struct SDcodablePayload: Codable {
 	var n_iter: Int = 1	//batch count
 	var batch_size: Int = 1
 
+	enum CodingKeys: String, CodingKey {
+		case sampler_name = "sampler"
+		case scheduler = "schedule type"
+		case cfg_scale = "cfg scale"
 
-	public func payload() -> Data? {
+		case denoising_strength = "denoising strength"
+		case hr_scale = "hires upscale"
+		case hr_second_pass_steps = "hires steps"
+		case hr_upscaler = "hires upscaler"
+	}
+
+	public init(from decoder: any Decoder) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+		self.sampler_name = try container.decode(String.self, forKey: .sampler_name)
+		self.scheduler = try container.decode(String.self, forKey: .scheduler)
+		self.cfg_scale = try container.decode(Double.self, forKey: .cfg_scale)
+		self.denoising_strength = try container.decode(Double.self, forKey: .denoising_strength)
+		self.hr_scale = try container.decode(Double.self, forKey: .hr_scale)
+		self.hr_second_pass_steps = try container.decode(Int.self, forKey: .hr_second_pass_steps)
+		self.hr_upscaler = try container.decode(String.self, forKey: .hr_upscaler)
+	}
+
+
+	public func encodedPayload() -> Data? {
 		var payload: Data? = nil
 		do {
 			payload = try JSONEncoder().encode(self)
@@ -153,16 +175,17 @@ extension FXDmoduleSDEngine {
 		return jsonObject
 	}
 
-	func encodeGenerationPayload(receivedData: Data) -> SDcodablePayload? {
+	func decodedGenerationPayload(receivedData: Data) -> SDcodablePayload? {
 		guard let receivedString = String(data: receivedData, encoding: .utf8) else {
 			return nil
 		}
 
-		return encodeGenerationPayload(infotext: receivedString)
+		return decodedGenerationPayload(infotext: receivedString)
 	}
 
 
-	func encodeGenerationPayload(infotext: String) -> SDcodablePayload? {	fxd_log()
+	func decodedGenerationPayload(infotext: String) -> SDcodablePayload? {	fxd_log()
+		fxdPrint(infotext)
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Steps:"))
 		else {
@@ -202,17 +225,17 @@ extension FXDmoduleSDEngine {
 
 		fxdPrint(dictionary: payloadDictionary)
 
-		var encodablePayload: SDcodablePayload? = nil
+		var decodedPayload: SDcodablePayload? = nil
 		do {
 			let payloadData = try JSONSerialization.data(withJSONObject: payloadDictionary)
-			encodablePayload = try JSONDecoder().decode(SDcodablePayload.self, from: payloadData)
-			fxdPrint(encodablePayload)
+			decodedPayload = try JSONDecoder().decode(SDcodablePayload.self, from: payloadData)
+			fxdPrint(decodedPayload)
 		}
 		catch {
 			fxdPrint(error)
 		}
 
-		return encodablePayload
+		return decodedPayload
 	}
 }
 
