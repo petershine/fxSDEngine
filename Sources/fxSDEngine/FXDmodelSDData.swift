@@ -12,8 +12,8 @@ public struct SDcodablePayload: Codable {
 
 	var sampler_name: String? = "DPM++ 2M SDE"
 	var scheduler: String? = "Karras"
-	var steps: Int? = 30
-	var cfg_scale: Double? = 7.0
+	var steps: Int? = 35
+	var cfg_scale: Double? = 8.0
 
 	var width: Int? = 512
 	var height: Int? = 768
