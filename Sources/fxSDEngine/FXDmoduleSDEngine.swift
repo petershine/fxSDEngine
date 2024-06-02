@@ -84,7 +84,6 @@ open class FXDmoduleSDEngine: NSObject {
 	open var currentPayload: Data? {
 		do {
 			let payload = try loadPayloadFromFile()
-			fxdPrint(String(data: payload!, encoding: .utf8) as Any)
 			return payload
 		} catch {
 			fxdPrint("Error reading JSON object: \(error)")
@@ -172,18 +171,18 @@ open class FXDmoduleSDEngine: NSObject {
 					return
 				}
 
-				guard let encodablePayload = self?.encodeGenerationPayload(receivedData: receivedData) else {
+				guard let encodedPayload = self?.encodeGenerationPayload(receivedData: receivedData) else {
 					completionHandler?(error)
 					return
 				}
 
-				guard let generationInfo = encodablePayload.generationInfo() else {
+				guard let payload = encodedPayload.payload() else {
 					completionHandler?(error)
 					return
 				}
 
 
-				self?.savePayloadToFile(payload: generationInfo)
+				self?.savePayloadToFile(payload: payload)
 				completionHandler?(error)
 		})
 	}
@@ -423,6 +422,7 @@ extension FXDmoduleSDEngine {
 
 			httpRequest.httpMethod = method ?? "GET"
 			if payload != nil {
+				fxdPrint("[payload]:\n\(String(data: payload!, encoding: .utf8)!.lineReBroken())")
 				httpRequest.httpMethod = "POST"
 				httpRequest.httpBody = payload
 			}

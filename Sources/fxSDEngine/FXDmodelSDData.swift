@@ -30,50 +30,40 @@ public struct SDcodablePayload: Codable {
 	var n_iter: Int = 1	//batch count
 	var batch_size: Int = 1
 
-	public init(prompt: String, negative_prompt: String) {	fxd_log()
-		fxdPrint("[prompt]:\n\(prompt)")
-		fxdPrint("[negative_prompt]:\n\(negative_prompt)")
 
-		self.prompt = prompt
-		self.negative_prompt = negative_prompt
-
-		self.hr_prompt = self.prompt
-		self.hr_negative_prompt = self.negative_prompt
-	}
-
-	public func generationInfo() -> Data? {
-		var generationInfo: Data? = nil
+	public func payload() -> Data? {
+		var payload: Data? = nil
 		do {
-			generationInfo = try JSONEncoder().encode(self)
+			payload = try JSONEncoder().encode(self)
 		}
 		catch {
 			fxdPrint("\(error)")
 		}
-		guard generationInfo != nil else {
+		guard payload != nil else {
 			return nil
 		}
 
 
-		guard let encodableADetailer = Bundle.main.url(forResource: "encodableADetailer", withExtension: "json") else {
+		guard let scriptJSONfilename = Bundle.main.url(forResource: "encodableADetailer", withExtension: "json") else {
 			return nil
 		}
 
 		do {
-			let ADetailerData = try Data(contentsOf: encodableADetailer)
-			let ADetailerDictionary = try JSONSerialization.jsonObject(with: ADetailerData) as? Dictionary<String, Any>
+			let scriptData = try Data(contentsOf: scriptJSONfilename)
+			let alwayson_scripts = try JSONSerialization.jsonObject(with: scriptData) as? Dictionary<String, Any>
 
-			var generationDictionary = try JSONSerialization.jsonObject(with: generationInfo!) as? Dictionary<String, Any>
+			var payloadDictionary = try JSONSerialization.jsonObject(with: payload!) as? Dictionary<String, Any>
 
-			if generationDictionary != nil {
-				generationDictionary?["alwayson_scripts"] = ADetailerDictionary
-				generationInfo = try JSONSerialization.data(withJSONObject: generationDictionary!)
+			if payloadDictionary != nil {
+				payloadDictionary?["alwayson_scripts"] = alwayson_scripts
+				payload = try JSONSerialization.data(withJSONObject: payloadDictionary!)
 			}
 		}
 		catch {
 			fxdPrint("\(error)")
 		}
 
-		return generationInfo
+		return payload
 	}
 }
 
@@ -140,9 +130,8 @@ extension FXDmoduleSDEngine {
 		do {
 			decodedResponse = try JSONDecoder().decode(SDcodableResponse.self, from: receivedData)
 		}
-		catch let decodeException {
-			fxdPrint("decodeException: \(decodeException)")
-
+		catch {
+			fxdPrint(error)
 			let _ = decodedJSONobject(receivedData: receivedData)
 		}
 
@@ -153,12 +142,12 @@ extension FXDmoduleSDEngine {
 		var jsonObject: Dictionary<String, Any?>? = nil
 		do {
 			jsonObject = try JSONSerialization.jsonObject(with: receivedData, options: .mutableContainers) as? Dictionary<String, Any?>
-			fxdPrint("jsonObject: \(jsonObject)", quiet:quiet)
+			fxdPrint(jsonObject, quiet:quiet)
 		}
-		catch let jsonError {
+		catch {
+			fxdPrint(error)
 			let receivedString = String(data: receivedData, encoding: .utf8)
-			fxdPrint("receivedString: \(receivedString)")
-			fxdPrint("jsonError: \(jsonError)")
+			fxdPrint(receivedString)
 		}
 
 		return jsonObject
@@ -166,7 +155,6 @@ extension FXDmoduleSDEngine {
 
 	func encodeGenerationPayload(receivedData: Data) -> SDcodablePayload? {
 		guard let receivedString = String(data: receivedData, encoding: .utf8) else {
-			fxdPrint("receivedString: \(String(data: receivedData, encoding: .utf8))")
 			return nil
 		}
 
@@ -182,40 +170,47 @@ extension FXDmoduleSDEngine {
 		}
 
 
-		let infoComponents = infotext.components(separatedBy: "Steps:")
-		let parametersString = "{Steps: \(infoComponents.last?.trimmingCharacters(in: .whitespacesAndNewlines).lineReBroken() ?? "")}"
+		let infoComponents = infotext.lineReBroken().components(separatedBy: "Steps:")
+		let promptPair = infoComponents.first?.components(separatedBy: "Negative prompt:")
 
-		#if DEBUG
-		if let parametersData = parametersString.processedJSONData() {
-			do {
-				let parametersObject = try JSONSerialization.jsonObject(with: parametersData) as? Dictionary<String, Any?>
-				fxdPrint("[parametersObject]:\n\(parametersObject!)\n")
-			}
-			catch {
-				fxdPrint("[parametersString]:\n\(parametersString)\n")
-				fxdPrint(error)
-			}
-		}
-		#endif
+		let prompt = promptPair?.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+		let negative_prompt = promptPair?.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
-
-		let promptPair: String = infoComponents.first ?? ""
-
-		let promptComponents = promptPair.components(separatedBy: "Negative prompt:")
-		let promptString = promptComponents.first?.trimmingCharacters(in: .whitespacesAndNewlines).lineReBroken() ?? ""
-		let negativePromptString = promptComponents.last?.trimmingCharacters(in: .whitespacesAndNewlines).lineReBroken() ?? ""
-
-		guard !(promptString.isEmpty) else {
+		guard !(prompt.isEmpty) else {
 			fxdPrint(infotext)
 			return nil
 		}
 
 
-		let encodablePayload = SDcodablePayload(
-			prompt: promptString,
-			negative_prompt: negativePromptString
-		)
+		var payloadDictionary: [String:Any?] = [
+			"prompt" : prompt,
+			"negative_prompt" : negative_prompt
+		]
 
+		let parametersString = "Steps: \(infoComponents.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")"
+		let parameters = parametersString.components(separatedBy: ",")
+		for parameter in parameters {
+			let key_value = parameter.components(separatedBy: ":")
+
+			let key: String = key_value.first?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
+			if !key.isEmpty {
+				let value: String = key_value.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+				payloadDictionary[key] = value
+			}
+		}
+
+
+		fxdPrint(dictionary: payloadDictionary)
+
+		var encodablePayload: SDcodablePayload? = nil
+		do {
+			let payloadData = try JSONSerialization.data(withJSONObject: payloadDictionary)
+			encodablePayload = try JSONDecoder().decode(SDcodablePayload.self, from: payloadData)
+			fxdPrint(encodablePayload)
+		}
+		catch {
+			fxdPrint(error)
+		}
 
 		return encodablePayload
 	}
