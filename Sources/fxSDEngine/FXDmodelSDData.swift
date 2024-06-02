@@ -120,6 +120,7 @@ public struct SDcodablePayload: Codable {
 public struct SDcodableResponse: Codable {
 	// txt2img
 	var images: [String?]? = nil
+	var info: String? = nil
 
 	// progress
 	var progress: Double? = nil
@@ -171,6 +172,28 @@ public struct SDcodableResponse: Codable {
 			return dateFormatter.date(from:date!)
 		}
 	}
+
+	public func infotext() -> String? {	fxd_log()
+		guard let info = self.info,
+			  let infoData = info.data(using: .utf8)
+		else {
+			return nil
+		}
+
+
+		do {
+			let infoDictionary = try JSONSerialization.jsonObject(with: infoData) as? Dictionary<String, Any?>
+
+			if let infotext = (infoDictionary?["infotexts"] as? Array<Any>)?.first {
+				return infotext as? String
+			}
+		}
+		catch {
+			fxdPrint(error)
+		}
+
+		return nil
+	}
 }
 
 
@@ -201,6 +224,14 @@ extension FXDmoduleSDEngine {
 		}
 
 		return jsonObject
+	}
+
+	func decodedGenerationPayload(decodedResponse: SDcodableResponse) -> SDcodablePayload? {
+		guard let infotext = decodedResponse.infotext() else {
+			return nil
+		}
+
+		return decodedGenerationPayload(infotext: infotext)
 	}
 
 	func decodedGenerationPayload(receivedData: Data) -> SDcodablePayload? {
@@ -268,7 +299,7 @@ extension FXDmoduleSDEngine {
 		do {
 			let payloadData = try JSONSerialization.data(withJSONObject: payloadDictionary)
 			decodedPayload = try JSONDecoder().decode(SDcodablePayload.self, from: payloadData)
-			fxdPrint(decodedPayload)
+			fxdPrint(decodedPayload!)
 		}
 		catch {
 			fxdPrint(error)
@@ -306,26 +337,3 @@ extension FXDmoduleSDEngine {
 	}
 }
 
-
-#if DEBUG
-extension FXDmoduleSDEngine {
-	func fxdebug(data: Data) {
-		var jsonObject = self.decodedJSONobject(receivedData: data, quiet: true)
-		jsonObject?["images"] = ["<IMAGE base64 string>"]
-
-		//fxdPrint("[TXT2IMG] jsonObject:\n\(jsonObject)\n")
-		for (key, value) in jsonObject?.enumerated() ?? [:].enumerated() {
-			fxdPrint("[TXT2IMG] \(key):\n\(value)\n")
-		}
-
-		let infoDictionary = jsonObject?["info"]
-		fxdPrint("[TXT2IMG] info:\n\(infoDictionary)\n")
-
-		let infotexts = (infoDictionary as? [String:Any?])?["infotexts"]
-		fxdPrint("[TXT2IMG] infotexts:\n\(infotexts)\n")
-
-		let encodedPayload = encodeGenerationPayload(infotext: infotexts as? String ?? "")
-		fxdPrint("[TXT2IMG] encodedPayload:\n\(encodedPayload)")
-	}
-}
-#endif

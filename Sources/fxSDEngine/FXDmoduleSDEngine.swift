@@ -213,17 +213,11 @@ open class FXDmoduleSDEngine: NSObject {
 			}
 	}
 
-	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {
+	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			payload: currentPayload) {
 				[weak self] (data, error) in
-
-				#if DEBUG
-				if data != nil {
-					self?.fxdebug(data: data!)
-				}
-				#endif
 
 				guard let receivedData = data,
 					  let decodedResponse = self?.decodedResponse(receivedData: receivedData),
@@ -245,6 +239,12 @@ open class FXDmoduleSDEngine: NSObject {
 				DispatchQueue.main.async {
 					self?.observable.displayedImage = generated
 				}
+
+				if let decodedPayload = self?.decodedGenerationPayload(decodedResponse: decodedResponse),
+				   let encodedPayload = decodedPayload.encodedPayload() {
+					self?.savePayloadToFile(payload: encodedPayload)
+				}
+
 				completionHandler?(error)
 			}
 	}
@@ -254,14 +254,6 @@ open class FXDmoduleSDEngine: NSObject {
 			quiet: quiet,
 			api_endpoint: .SDAPI_V1_PROGRESS) {
 				[weak self] (data, error) in
-
-				#if DEBUG
-				if data != nil {
-					var jsonObject = self?.decodedJSONobject(receivedData: data!, quiet: true)
-					jsonObject?["current_image"] = "<IMAGE base64 string>"
-					fxdPrint("[PROGRESS]:\n\(String(describing: jsonObject))", quiet: true)
-				}
-				#endif
 
 				guard let receivedData = data,
 					  let decodedResponse = self?.decodedResponse(receivedData: receivedData)
