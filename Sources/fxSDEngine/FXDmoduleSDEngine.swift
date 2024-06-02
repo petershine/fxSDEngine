@@ -192,7 +192,7 @@ open class FXDmoduleSDEngine: NSObject {
 					return
 				}
 
-				guard let decodedPayload = SDcodablePayload.decodedGenerationPayload(infotext: receivedString) else {
+				guard let decodedPayload = SDcodablePayload.decoded(infotext: receivedString) else {
 					completionHandler?(error)
 					return
 				}
@@ -224,8 +224,8 @@ open class FXDmoduleSDEngine: NSObject {
 				#endif
 
 				guard let receivedData = data,
-					  let decodedResponse = SDcodableSysInfo.decoded(receivedData),
-					  let Config = (decodedResponse as? SDcodableSysInfo)?.Config
+					  let decodedResponse = SDcodableSysInfo.decoded(receivedData) as? SDcodableSysInfo,
+					  let Config = decodedResponse.Config
 				else {
 					completionHandler?(error)
 					return
@@ -244,16 +244,16 @@ open class FXDmoduleSDEngine: NSObject {
 				[weak self] (data, error) in
 
 				guard let receivedData = data,
-					  let decodedResponse = SDcodableGeneration.decoded(receivedData)
+					  let decodedResponse = SDcodableGeneration.decoded(receivedData) as? SDcodableGeneration
 				else {
 					completionHandler?(error)
 					return
 				}
 
 
-				let decodedImageArray = (decodedResponse as? SDcodableGeneration)?.decodedImages()
+				let decodedImageArray = decodedResponse.decodedImages()
 
-				guard let generated = decodedImageArray?.first else {
+				guard let generated = decodedImageArray.first else {
 					completionHandler?(error)
 					return
 				}
@@ -263,8 +263,8 @@ open class FXDmoduleSDEngine: NSObject {
 					self?.observable.displayedImage = generated
 				}
 
-				if let infotext = (decodedResponse as? SDcodableGeneration)?.infotext(),
-				   let decodedPayload = SDcodablePayload.decodedGenerationPayload(infotext: infotext),
+				if let infotext = decodedResponse.infotext(),
+				   let decodedPayload = SDcodablePayload.decoded(infotext: infotext),
 				   let encodedPayload = decodedPayload.encodedPayload() {
 					self?.savePayloadToFile(payload: encodedPayload)
 				}
@@ -280,7 +280,7 @@ open class FXDmoduleSDEngine: NSObject {
 				[weak self] (data, error) in
 
 				guard let receivedData = data,
-					  let decodedResponse = SDcodableProgress.decoded(receivedData)
+					  let decodedResponse = SDcodableProgress.decoded(receivedData) as? SDcodableProgress
 				else {
 					completionHandler?(nil, error)
 					return
@@ -289,7 +289,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 				var progressImage: UIImage? = nil
 				if !skipImageDecoding,
-				   let imageEncoded = (decodedResponse as? SDcodableProgress)?.current_image,
+				   let imageEncoded = decodedResponse.current_image,
 				   let decodedImage = imageEncoded.decodedImage() {
 					progressImage = decodedImage
 				}
@@ -300,11 +300,11 @@ open class FXDmoduleSDEngine: NSObject {
 						self?.observable.displayedImage = progressImage
 					}
 
-					self?.observable.progressValue = (decodedResponse as? SDcodableProgress)?.progress
+					self?.observable.progressValue = decodedResponse.progress
 
-					self?.observable.isJobRunning = (decodedResponse as? SDcodableProgress)?.state?.isJobRunning() ?? false
+					self?.observable.isJobRunning = decodedResponse.state?.isJobRunning() ?? false
 				}
-				completionHandler?((decodedResponse as? SDcodableProgress), error)
+				completionHandler?(decodedResponse, error)
 			}
 	}
 
@@ -349,8 +349,8 @@ open class FXDmoduleSDEngine: NSObject {
 				[weak self] (data, error) in
 
 				guard let receivedData = data,
-					  let decodedResponse = SDcodableFiles.decoded(receivedData),
-					  let filesORfolders = (decodedResponse as? SDcodableFiles)?.files
+					  let decodedResponse = SDcodableFiles.decoded(receivedData) as? SDcodableFiles,
+					  let filesORfolders = decodedResponse.files
 				else {
 					completionHandler?(nil, nil, error)
 					return
