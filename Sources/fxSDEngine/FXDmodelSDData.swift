@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public struct SDencodablePayload: Encodable {
+public struct SDcodablePayload: Codable {
 	var prompt: String? = nil
 	var negative_prompt: String? = nil
 
@@ -161,7 +161,7 @@ extension FXDmoduleSDEngine {
 		return jsonObject
 	}
 
-	func encodeGenerationPayload(receivedData: Data) -> SDencodablePayload? {
+	func encodeGenerationPayload(receivedData: Data) -> SDcodablePayload? {
 		guard let receivedString = String(data: receivedData, encoding: .utf8) else {
 			fxdPrint("receivedString: \(String(data: receivedData, encoding: .utf8))")
 			return nil
@@ -171,7 +171,7 @@ extension FXDmoduleSDEngine {
 	}
 
 
-	func encodeGenerationPayload(infotext: String) -> SDencodablePayload? {
+	func encodeGenerationPayload(infotext: String) -> SDcodablePayload? {	fxd_log()
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Negative prompt:"))
 		else {
@@ -221,7 +221,7 @@ extension FXDmoduleSDEngine {
 		fxdPrint("parsed[1]:\n\(parsed[1])\n\n")
 		#endif
 
-		let encodablePayload = SDencodablePayload(
+		let encodablePayload = SDcodablePayload(
 			prompt: parsed[0],
 			negative_prompt: parsed[1]
 		)
