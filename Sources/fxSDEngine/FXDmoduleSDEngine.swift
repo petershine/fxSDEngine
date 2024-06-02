@@ -239,15 +239,14 @@ open class FXDmoduleSDEngine: NSObject {
 				[weak self] (data, error) in
 
 				guard let receivedData = data,
-					  let decodedResponse = SDcodableGeneration.decoded(receivedData),
-					  let images = (decodedResponse as? SDcodableGeneration)?.images
+					  let decodedResponse = SDcodableGeneration.decoded(receivedData)
 				else {
 					completionHandler?(error)
 					return
 				}
 
 
-				let decodedImageArray = self?.decodedImages(imagesEncoded: images)
+				let decodedImageArray = (decodedResponse as? SDcodableGeneration)?.decodedImages()
 
 				guard let generated = decodedImageArray?.first else {
 					completionHandler?(error)
@@ -284,10 +283,9 @@ open class FXDmoduleSDEngine: NSObject {
 
 				var progressImage: UIImage? = nil
 				if !skipImageDecoding,
-				   let current_image = (decodedResponse as? SDcodableProgress)?.current_image,
-				   let imagesEncoded = [current_image] as? Array<String>,
-				   let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded, quiet:quiet) {
-					progressImage = decodedImageArray.first
+				   let imageEncoded = (decodedResponse as? SDcodableProgress)?.current_image,
+				   let decodedImage = imageEncoded.decodedImage() {
+					progressImage = decodedImage
 				}
 
 

@@ -216,32 +216,3 @@ extension FXDmoduleSDEngine {
 		return decodedPayload
 	}
 }
-
-extension FXDmoduleSDEngine {
-	func decodedImages(imagesEncoded: [String?], quiet: Bool = false) -> [UIImage] {
-		fxdPrint("[STARTED DECODING]: \(imagesEncoded.count) image(s)", quiet:quiet)
-
-		var decodedImageArray: [UIImage] = []
-		for base64string in imagesEncoded {
-			guard base64string != nil, !(base64string!.isEmpty) else {
-				continue
-			}
-
-
-			guard let imageData = Data(base64Encoded: base64string!) else {
-				continue
-			}
-			fxdPrint("imageData byte count: \(imageData.count)", quiet:quiet)
-
-			guard let decodedImage = UIImage(data: imageData) else {
-				continue
-			}
-			fxdPrint("decodedImage: \(decodedImage)", quiet:quiet)
-
-			decodedImageArray.append(decodedImage)
-		}
-
-		return decodedImageArray
-	}
-}
-
