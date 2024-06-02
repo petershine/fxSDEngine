@@ -19,6 +19,25 @@ public enum SDAPIendpoint: String, CaseIterable {
 }
 
 
+protocol SDcodableResponse: Codable {
+	static func decoded(_ receivedData: Data) -> (any SDcodableResponse)?
+}
+
+extension SDcodableResponse {
+	static func decoded(_ receivedData: Data) -> (any SDcodableResponse)? {
+		var decodedResponse: (any SDcodableResponse)? = nil
+		do {
+			decodedResponse = try JSONDecoder().decode(Self.self, from: receivedData)
+		}
+		catch {	fxd_log()
+			fxdPrint(error)
+		}
+
+		return decodedResponse
+	}
+}
+
+
 enum SDError: Error {
 	case reason(msg: String?)
 }
@@ -200,8 +219,8 @@ open class FXDmoduleSDEngine: NSObject {
 				#endif
 
 				guard let receivedData = data,
-					  let decodedResponse = self?.decodedResponse(receivedData: receivedData),
-					  let Config = decodedResponse.Config
+					  let decodedResponse = SDcodableSysInfo.decoded(receivedData),
+					  let Config = (decodedResponse as? SDcodableSysInfo)?.Config
 				else {
 					completionHandler?(error)
 					return
@@ -220,8 +239,8 @@ open class FXDmoduleSDEngine: NSObject {
 				[weak self] (data, error) in
 
 				guard let receivedData = data,
-					  let decodedResponse = self?.decodedResponse(receivedData: receivedData),
-					  let images = decodedResponse.images
+					  let decodedResponse = SDcodableGeneration.decoded(receivedData),
+					  let images = (decodedResponse as? SDcodableGeneration)?.images
 				else {
 					completionHandler?(error)
 					return
@@ -240,7 +259,7 @@ open class FXDmoduleSDEngine: NSObject {
 					self?.observable.displayedImage = generated
 				}
 
-				if let decodedPayload = self?.decodedGenerationPayload(decodedResponse: decodedResponse),
+				if let decodedPayload = self?.decodedGenerationPayload(decodedResponse: (decodedResponse as! SDcodableGeneration)),
 				   let encodedPayload = decodedPayload.encodedPayload() {
 					self?.savePayloadToFile(payload: encodedPayload)
 				}
@@ -249,14 +268,14 @@ open class FXDmoduleSDEngine: NSObject {
 			}
 	}
 
-	open func execute_progress(skipImageDecoding: Bool, quiet: Bool = false, completionHandler: ((_ lastProgress: SDcodableResponse?, _ error: Error?)->Void)?) {
+	open func execute_progress(skipImageDecoding: Bool, quiet: Bool = false, completionHandler: ((_ lastProgress: SDcodableProgress?, _ error: Error?)->Void)?) {
 		requestToSDServer(
 			quiet: quiet,
 			api_endpoint: .SDAPI_V1_PROGRESS) {
 				[weak self] (data, error) in
 
 				guard let receivedData = data,
-					  let decodedResponse = self?.decodedResponse(receivedData: receivedData)
+					  let decodedResponse = SDcodableProgress.decoded(receivedData)
 				else {
 					completionHandler?(nil, error)
 					return
@@ -265,7 +284,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 				var progressImage: UIImage? = nil
 				if !skipImageDecoding,
-				   let current_image = decodedResponse.current_image,
+				   let current_image = (decodedResponse as? SDcodableProgress)?.current_image,
 				   let imagesEncoded = [current_image] as? Array<String>,
 				   let decodedImageArray = self?.decodedImages(imagesEncoded: imagesEncoded, quiet:quiet) {
 					progressImage = decodedImageArray.first
@@ -277,11 +296,11 @@ open class FXDmoduleSDEngine: NSObject {
 						self?.observable.displayedImage = progressImage
 					}
 
-					self?.observable.progressValue = decodedResponse.progress
+					self?.observable.progressValue = (decodedResponse as? SDcodableProgress)?.progress
 
-					self?.observable.isJobRunning = decodedResponse.state?.isJobRunning() ?? false
+					self?.observable.isJobRunning = (decodedResponse as? SDcodableProgress)?.state?.isJobRunning() ?? false
 				}
-				completionHandler?(decodedResponse, error)
+				completionHandler?((decodedResponse as? SDcodableProgress), error)
 			}
 	}
 
@@ -326,8 +345,8 @@ open class FXDmoduleSDEngine: NSObject {
 				[weak self] (data, error) in
 
 				guard let receivedData = data,
-					  let decodedResponse = self?.decodedResponse(receivedData: receivedData),
-					  let filesORfolders = decodedResponse.files
+					  let decodedResponse = SDcodableFiles.decoded(receivedData),
+					  let filesORfolders = (decodedResponse as? SDcodableFiles)?.files
 				else {
 					completionHandler?(nil, nil, error)
 					return
@@ -342,7 +361,7 @@ open class FXDmoduleSDEngine: NSObject {
 					.filter { 
 						!($0?.fullpath?.contains("DS_Store") ?? false)
 					}
-					.first as? SDcodableResponse.SDcodableFile
+					.first as? SDcodableFiles.SDcodableFile
 
 				fxdPrint("latestFileORfolder?.updated_time(): \(latestFileORfolder?.updated_time())")
 				fxdPrint("latestFileORfolder?.fullpath: \(latestFileORfolder?.fullpath)")

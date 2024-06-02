@@ -117,100 +117,8 @@ public struct SDcodablePayload: Codable {
 	}
 }
 
-public struct SDcodableResponse: Codable {
-	// txt2img
-	var images: [String?]? = nil
-	var info: String? = nil
-
-	// progress
-	var progress: Double? = nil
-	var eta_relative: Date? = nil
-	var textinfo: String? = nil
-	var current_image: String? = nil
-	public var state: SDcodableState? = nil
-	public struct SDcodableState: Codable {
-		var interrupted: Bool? = nil
-		var job: String? = nil
-		var job_count: Int? = nil
-		var job_no: Int? = nil
-		var job_timestamp: String? = nil
-		var sampling_step: Int? = nil
-		var sampling_steps: Int? = nil
-		var skipped: Bool? = nil
-		var stopping_generation: Bool? = nil
-
-		public func isJobRunning() -> Bool {
-			return !((job ?? "").isEmpty || interrupted ?? true)
-		}
-	}
-
-	// sysinfo
-	var Config: SDcodableConfig? = nil
-	struct SDcodableConfig: Codable {
-		var outdir_samples: String? = nil
-	}
-
-
-	// file
-	var files: [SDcodableFile?]? = nil
-	struct SDcodableFile: Codable {
-		var type: String? = nil
-		var size: String? = nil
-		var name: String? = nil
-		var fullpath: String? = nil
-		var is_under_scanned_path: Bool? = nil
-		var date: String? = nil
-		var created_time: String? = nil
-
-		func updated_time() -> Date? {
-			guard date != nil else {
-				return nil
-			}
-
-			let dateFormatter = DateFormatter()
-			dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-			return dateFormatter.date(from:date!)
-		}
-	}
-
-	public func infotext() -> String? {	fxd_log()
-		guard let info = self.info,
-			  let infoData = info.data(using: .utf8)
-		else {
-			return nil
-		}
-
-
-		do {
-			let infoDictionary = try JSONSerialization.jsonObject(with: infoData) as? Dictionary<String, Any?>
-
-			if let infotext = (infoDictionary?["infotexts"] as? Array<Any>)?.first {
-				return infotext as? String
-			}
-		}
-		catch {
-			fxdPrint(error)
-		}
-
-		return nil
-	}
-}
-
 
 extension FXDmoduleSDEngine {
-	func decodedResponse(receivedData: Data) -> SDcodableResponse? {
-		var decodedResponse: SDcodableResponse? = nil
-		do {
-			decodedResponse = try JSONDecoder().decode(SDcodableResponse.self, from: receivedData)
-		}
-		catch {
-			fxdPrint(error)
-			let _ = decodedJSONobject(receivedData: receivedData)
-		}
-
-		return decodedResponse
-	}
-
 	func decodedJSONobject(receivedData: Data, quiet: Bool = false) -> Dictionary<String, Any?>? {
 		var jsonObject: Dictionary<String, Any?>? = nil
 		do {
@@ -226,7 +134,7 @@ extension FXDmoduleSDEngine {
 		return jsonObject
 	}
 
-	func decodedGenerationPayload(decodedResponse: SDcodableResponse) -> SDcodablePayload? {
+	func decodedGenerationPayload(decodedResponse: SDcodableGeneration) -> SDcodablePayload? {
 		guard let infotext = decodedResponse.infotext() else {
 			return nil
 		}
