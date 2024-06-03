@@ -180,13 +180,8 @@ open class FXDmoduleSDEngine: NSObject {
 				[weak self] (data, error) in
 
 				#if DEBUG
-				do {
-					if let jsonObject = try data?.jsonObject(quiet: true) {
-						os_log("[INTERNAL_SYSINFO]:\n%@\n\n", jsonObject)
-					}
-				}
-				catch {
-					
+				if let jsonObject = data?.jsonObject(quiet: true) {
+					os_log("[INTERNAL_SYSINFO]:\n%@\n\n", jsonObject)
 				}
 				#endif
 
@@ -220,7 +215,7 @@ open class FXDmoduleSDEngine: NSObject {
 				let decodedImageArray = decodedResponse.decodedImages()
 
 				guard let generated = decodedImageArray.first else {
-					fxdPrint(receivedData.jsonObject())
+					fxdPrint(receivedData.jsonObject() as Any)
 					completionHandler?(error)
 					return
 				}
@@ -410,7 +405,7 @@ extension FXDmoduleSDEngine {
 
 
 			let httpTask = URLSession.shared.dataTask(with: httpRequest) {
-				[weak self] (data: Data?, response: URLResponse?, error: Error?) in
+				(data: Data?, response: URLResponse?, error: Error?) in
 
 				fxdPrint("data: \(data)", quiet:quiet)
 				fxdPrint("error: \(error)", quiet:quiet)
@@ -433,13 +428,7 @@ extension FXDmoduleSDEngine {
 				   httpResponseCode != 200 {
 					fxdPrint("httpResponse: \(httpResponse!)")
 
-					var jsonObject: [String:Any?]? = nil
-					do {
-						jsonObject = try receivedData.jsonObject()
-					}
-					catch {
-
-					}
+					let jsonObject: [String:Any?]? = receivedData.jsonObject()
 
 					var errorDescription = "Problem with server"
 					switch httpResponseCode {
