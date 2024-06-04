@@ -8,27 +8,29 @@ import fXDKit
 
 struct SDcodablePayload: Codable {
 	var prompt: String
-	var negative_prompt: String? = nil
+	var negative_prompt: String
 
-	var sampler_name: String? = "DPM++ 2M SDE"
-	var scheduler: String? = "Karras"
-	var steps: Int? = 35
-	var cfg_scale: Double? = 8.0
+	var sampler_name: String?
+	var scheduler: String?
+	var steps: Int
+	var cfg_scale: Double?
 
 	var width: Int
 	var height: Int
 
-	var enable_hr: Bool = true
-	var denoising_strength: Double? = 0.4
-	var hr_scale: Double? = 1.5
-	var hr_second_pass_steps: Int? = 10
-	var hr_upscaler: String? = "4x-UltraSharp"
-	var hr_scheduler: String? = "Karras"
-	var hr_prompt: String? = nil
-	var hr_negative_prompt: String? = nil
+	var enable_hr: Bool
+	var denoising_strength: Double?
+	var hr_scale: Double?
+	var hr_second_pass_steps: Int?
+	var hr_upscaler: String?
+	var hr_scheduler: String
+	var hr_prompt: String
+	var hr_negative_prompt: String
 
-	var n_iter: Int? = 1	//batch count
-	var batch_size: Int? = 1
+	var n_iter: Int
+	var batch_size: Int
+
+	var save_images: Bool
 
 	enum AlternativeCodingKeys: String, CodingKey {
 		case sampler_name = "sampler"
@@ -46,16 +48,33 @@ struct SDcodablePayload: Codable {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? "fxSDEngine!"
-		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt)
-		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps)
+		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt) ?? ""
+
+		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 35
+
 		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 512
 		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
+
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? false
-		self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler)
-		self.hr_prompt = try container.decodeIfPresent(String.self, forKey: .hr_prompt)
-		self.hr_negative_prompt = try container.decodeIfPresent(String.self, forKey: .hr_negative_prompt)
-		self.n_iter = try container.decodeIfPresent(Int.self, forKey: .n_iter)
-		self.batch_size = try container.decodeIfPresent(Int.self, forKey: .batch_size)
+		self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler) ?? "Karras"
+		self.hr_prompt = try container.decodeIfPresent(String.self, forKey: .hr_prompt) ?? self.prompt
+		self.hr_negative_prompt = try container.decodeIfPresent(String.self, forKey: .hr_negative_prompt) ?? self.negative_prompt
+
+		self.n_iter = try container.decodeIfPresent(Int.self, forKey: .n_iter) ?? 1
+		self.batch_size = try container.decodeIfPresent(Int.self, forKey: .batch_size) ?? 1
+
+		self.save_images = try container.decodeIfPresent(Bool.self, forKey: .save_images) ?? true
+
+
+		self.sampler_name = "DPM++ 2M SDE"
+		self.scheduler = "Karras"
+		self.cfg_scale = 8.0
+
+		self.denoising_strength = 0.4
+		self.hr_scale = 1.5
+		self.hr_second_pass_steps = 10
+		self.hr_upscaler = "4x-UltraSharp"
+
 
 		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name)
 		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler)
