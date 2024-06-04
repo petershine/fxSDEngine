@@ -118,25 +118,22 @@ extension SDcodablePayload {
 
 extension SDcodablePayload {
 	func evaluatedPayload(extensions: [SDcodableExtension?]?) -> Data? {
-		guard let filtered = extensions?.filter({ $0?.name?.lowercased() == "adetailer"}),
-			  filtered.count > 0 else {
-			return encodedPayload()
-		}
-
-		return extendedPayload(extensions: extensions)
-	}
-
-	func extendedPayload(extensions: [SDcodableExtension?]?) -> Data? {
 		guard let payload: Data = encodedPayload() else {
 			return nil
 		}
 
-
-		var extendedPayload: Data? = nil
-		guard let scriptJSONfilename = Bundle.main.url(forResource: "encodableADetailer", withExtension: "json") else {
-			return nil
+		guard let filtered = extensions?.filter({ $0?.name?.lowercased() == "adetailer"}),
+			  filtered.count > 0
+		else {
+			return payload
 		}
 
+		guard let scriptJSONfilename = Bundle.main.url(forResource: "encodableADetailer", withExtension: "json") else {
+			return payload
+		}
+
+
+		var extendedPayload: Data? = nil
 		do {
 			let scriptData = try Data(contentsOf: scriptJSONfilename)
 			let alwayson_scripts = try JSONSerialization.jsonObject(with: scriptData) as? Dictionary<String, Any>
@@ -152,7 +149,7 @@ extension SDcodablePayload {
 			fxdPrint("\(error)")
 		}
 
-		return extendedPayload
+		return extendedPayload ?? payload
 	}
 }
 
