@@ -169,10 +169,13 @@ extension SDsceneBasicRoot {
 			editedParagraph_1: negative_prompt,
 			finishedEditing: {
 				(editedPrompt, editedNegativePrompt, other) in
-				
-				fxdPrint(editedPrompt)
-				fxdPrint(editedNegativePrompt)
-				fxdPrint(other)
+
+				if let modifiedPayload = sdEngine.currentGenerationPayload?.modified(
+					editedPrompt: editedPrompt,
+					editedNegativePrompt: negative_prompt) {
+
+					sdEngine.currentGenerationPayload = modifiedPayload
+				}
 			})
 		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
 		.onDisappear(perform: {

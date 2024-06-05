@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public struct SDcodablePayload: Codable {
+public class SDcodablePayload: Codable {
 	public var prompt: String
 	public var negative_prompt: String
 
@@ -44,7 +44,7 @@ public struct SDcodablePayload: Codable {
 	}
 
 
-	public init(from decoder: any Decoder) throws {
+	required public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? "fxSDEngine!"
@@ -166,7 +166,11 @@ extension SDcodablePayload {
 		let infoComponents = infotext.lineReBroken().components(separatedBy: "Steps:")
 		let promptPair = infoComponents.first?.components(separatedBy: "Negative prompt:")
 
-		let prompt = promptPair?.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+		var prompt = promptPair?.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+		if prompt.first == "\"" {
+			prompt.removeFirst()
+		}
+
 		let negative_prompt = promptPair?.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
 		guard !(prompt.isEmpty) else {
@@ -215,5 +219,27 @@ extension SDcodablePayload {
 		}
 
 		return decodedPayload
+	}
+}
+
+extension SDcodablePayload {
+	public func modified(editedPrompt: String, editedNegativePrompt: String) -> SDcodablePayload? {
+		let didChangePrompt = !(self.prompt == editedPrompt)
+		let didChangeNegativePrompt = !(self.negative_prompt == editedNegativePrompt)
+
+		guard (didChangePrompt || didChangeNegativePrompt) else {
+			return nil
+		}
+
+
+		if didChangePrompt {
+			self.prompt = editedPrompt
+		}
+
+		if didChangeNegativePrompt {
+			self.negative_prompt = editedNegativePrompt
+		}
+
+		return self
 	}
 }
