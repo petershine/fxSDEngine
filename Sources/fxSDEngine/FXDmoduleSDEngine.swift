@@ -61,8 +61,6 @@ public protocol SDprotocolProperties {
 	var shouldContinueRefreshing: Bool { get set }
 
 	var isJobRunning: Bool { get set }
-
-	var currentGenerationPayload: SDcodablePayload? { get set }
 }
 
 
@@ -84,8 +82,6 @@ open class FXDobservableSDProperties: SDprotocolProperties, ObservableObject {
 
 	@Published open var isJobRunning: Bool = false
 
-	@Published open var currentGenerationPayload: SDcodablePayload? = nil
-
 	public init() {
 		self.shouldContinueRefreshing = false
 	}
@@ -96,6 +92,13 @@ open class FXDmoduleSDEngine: NSObject {
 
 	fileprivate var systemInfo: SDcodableSysInfo? = nil
 
+	public var currentGenerationPayload: SDcodablePayload? {
+		didSet {
+			if let encodedPayload = currentGenerationPayload?.encodedPayload() {
+				savePayloadToFile(payload: encodedPayload)
+			}
+		}
+	}
 
 
 	open var savedPayloadFilename: String {
@@ -121,16 +124,11 @@ open class FXDmoduleSDEngine: NSObject {
 			guard let folderPath = self?.systemInfo?.generationFolder() else {
 				// TODO: find better evaluation for NEWly server
 				do {
-					self?.observable.currentGenerationPayload = try JSONDecoder().decode(SDcodablePayload.self, from: "{}".data(using: .utf8) ?? Data())
+					self?.currentGenerationPayload = try JSONDecoder().decode(SDcodablePayload.self, from: "{}".data(using: .utf8) ?? Data())
 				}
 				catch {
 					fxdPrint(error)
 				}
-
-				if let encodedPayload = self?.observable.currentGenerationPayload?.encodedPayload() {
-					self?.savePayloadToFile(payload: encodedPayload)
-				}
-
 				completionHandler?(error)
 				return
 			}
@@ -172,12 +170,7 @@ open class FXDmoduleSDEngine: NSObject {
 					return
 				}
 
-				self?.observable.currentGenerationPayload = decodedPayload
-
-				if let encodedPayload = self?.observable.currentGenerationPayload?.encodedPayload() {
-					self?.savePayloadToFile(payload: encodedPayload)
-
-				}
+				self?.currentGenerationPayload = decodedPayload
 				completionHandler?(error)
 		})
 	}
@@ -206,7 +199,7 @@ open class FXDmoduleSDEngine: NSObject {
 	}
 
 	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
-		let payload: Data? = observable.currentGenerationPayload?.evaluatedPayload(extensions: systemInfo?.Extensions)
+		let payload: Data? = currentGenerationPayload?.evaluatedPayload(extensions: systemInfo?.Extensions)
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			payload: payload) {
@@ -243,11 +236,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 				if let infotext = decodedResponse.infotext(),
 				   let decodedPayload = SDcodablePayload.decoded(infotext: infotext) {
-					self?.observable.currentGenerationPayload = decodedPayload
-
-					if let encodedPayload = self?.observable.currentGenerationPayload?.encodedPayload() {
-						self?.savePayloadToFile(payload: encodedPayload)
-					}
+					self?.currentGenerationPayload = decodedPayload
 				}
 
 				completionHandler?(error)
