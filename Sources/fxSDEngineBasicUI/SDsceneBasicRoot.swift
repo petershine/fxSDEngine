@@ -53,9 +53,10 @@ public struct SDsceneBasicRoot: View {
 				}
 				.padding()
 			}
-		}
-		.fullScreenCover(isPresented: $shouldPresentPromptEditor) {
-			OVERLAY_promptEditor
+
+			if shouldPresentPromptEditor {
+				OVERLAY_promptEditor
+			}
 		}
 	}
 }
@@ -160,12 +161,12 @@ extension SDsceneBasicRoot {
 	@ViewBuilder
 	var OVERLAY_promptEditor: some View {
 		FXDswiftuiTextEditor(
-			editedText: "",
-			finishedEditing: {
-				(editedParagraph_0, editedParagraph_1, editedPayload) in
-				fxdPrint("editedParagraph_0: \(editedParagraph_0)")
-				fxdPrint("editedParagraph_1: \(editedParagraph_1)")
-			})
+			observable: FXDobservableTextEditor(
+				editedParagraph_0: sdObservable.currentGenerationPayload?.prompt ?? "",
+				editedParagraph_1: sdObservable.currentGenerationPayload?.negative_prompt ?? "",
+				finishedEditing: {
+					(editedPrompt, editedNegativePrompt, other) in
+				}))
 		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 1.0)))
 		.onDisappear(perform: {
 			shouldPresentPromptEditor = false
