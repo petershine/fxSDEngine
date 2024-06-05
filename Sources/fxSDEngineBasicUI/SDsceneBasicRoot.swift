@@ -160,10 +160,13 @@ extension SDsceneBasicRoot {
 extension SDsceneBasicRoot {
 	@ViewBuilder
 	var OVERLAY_promptEditor: some View {
+		let prompt = sdEngine.currentGenerationPayload?.prompt ?? "PROMPT"
+		let negative_prompt = sdEngine.currentGenerationPayload?.negative_prompt ?? "NEGATIVE_PROMPT"
+
 		FXDswiftuiTextEditor(
 			shouldPresentPromptEditor: $shouldPresentPromptEditor,
-			editedParagraph_0: sdEngine.currentGenerationPayload?.prompt ?? "",
-			editedParagraph_1: sdEngine.currentGenerationPayload?.negative_prompt ?? "",
+			editedParagraph_0: prompt,
+			editedParagraph_1: negative_prompt,
 			finishedEditing: {
 				(editedPrompt, editedNegativePrompt, other) in
 				
