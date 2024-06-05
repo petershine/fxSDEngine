@@ -6,9 +6,9 @@ import UIKit
 import fXDKit
 
 
-struct SDcodablePayload: Codable {
-	var prompt: String
-	var negative_prompt: String
+public struct SDcodablePayload: Codable {
+	public var prompt: String
+	public var negative_prompt: String
 
 	var sampler_name: String?
 	var scheduler: String?
@@ -44,7 +44,7 @@ struct SDcodablePayload: Codable {
 	}
 
 
-	init(from decoder: any Decoder) throws {
+	public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? "fxSDEngine!"
