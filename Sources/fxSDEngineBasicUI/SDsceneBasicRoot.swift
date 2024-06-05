@@ -41,14 +41,14 @@ public struct SDsceneBasicRoot: View {
 				HStack {
 					if sdObservable.isJobRunning {
 						GROUP_progress
-							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 					}
 
 					Spacer()
 
 					if !sdObservable.isJobRunning {
 						GROUP_generating
-							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 					}
 				}
 				.padding()
@@ -81,7 +81,7 @@ extension SDsceneBasicRoot {
 								}
 							}
 						})
-					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 				}
 			}
 
@@ -95,7 +95,7 @@ extension SDsceneBasicRoot {
 						action: {
 							sdEngine.refresh_LastPayload(completionHandler: nil)
 						})
-					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 				}
 			}
 		}
@@ -177,7 +177,7 @@ extension SDsceneBasicRoot {
 					sdEngine.currentGenerationPayload = modifiedPayload
 				}
 			})
-		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
+		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 		.onDisappear(perform: {
 			shouldPresentPromptEditor = false
 		})
