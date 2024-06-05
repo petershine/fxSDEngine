@@ -6,7 +6,7 @@ import fxSDEngine
 import SwiftUI
 
 
-public struct FXDswiftuiSDEngineBasicRoot: View {
+public struct SDsceneBasicRoot: View {
 	@Environment(\.colorScheme) var colorScheme
 
 	@Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -61,7 +61,7 @@ public struct FXDswiftuiSDEngineBasicRoot: View {
 }
 
 
-extension FXDswiftuiSDEngineBasicRoot {
+extension SDsceneBasicRoot {
 	var GROUP_resetting: some View {
 		HStack {
 			VStack {
@@ -156,7 +156,7 @@ extension FXDswiftuiSDEngineBasicRoot {
 }
 
 
-extension FXDswiftuiSDEngineBasicRoot {
+extension SDsceneBasicRoot {
 	@ViewBuilder
 	var OVERLAY_promptEditor: some View {
 		FXDswiftuiTextEditor(
