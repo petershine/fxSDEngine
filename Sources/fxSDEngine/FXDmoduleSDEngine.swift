@@ -306,7 +306,7 @@ open class FXDmoduleSDEngine: NSObject {
 					completionHandler: {
 						lastProgress, error in
 
-						fxdPrint("[lastProgress?.state]: \(lastProgress?.state)")
+						fxdPrint("[lastProgress?.state]: \(lastProgress?.state as Any)")
 						completionHandler?(error)
 					})
 			}
@@ -337,8 +337,8 @@ open class FXDmoduleSDEngine: NSObject {
 					}
 					.first as? SDcodableFile
 
-				fxdPrint("latestFileORfolder?.updated_time(): \(latestFileORfolder?.updated_time())")
-				fxdPrint("latestFileORfolder?.fullpath: \(latestFileORfolder?.fullpath)")
+				fxdPrint("latestFileORfolder?.updated_time(): \(latestFileORfolder?.updated_time() as Any)")
+				fxdPrint("latestFileORfolder?.fullpath: \(latestFileORfolder?.fullpath as Any)")
 				guard latestFileORfolder != nil,
 					  let fullpath = latestFileORfolder?.fullpath
 				else {
@@ -347,7 +347,7 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 
-				fxdPrint("latestFileORfolder?.type: \(latestFileORfolder?.type)")
+				fxdPrint("latestFileORfolder?.type: \(latestFileORfolder?.type as Any)")
 				guard let type = latestFileORfolder?.type,
 						  type != "dir"
 				else {
@@ -416,13 +416,13 @@ extension FXDmoduleSDEngine {
 			let httpTask = URLSession.shared.dataTask(with: httpRequest) {
 				(data: Data?, response: URLResponse?, error: Error?) in
 
-				fxdPrint("data: \(data)", quiet:quiet)
-				fxdPrint("error: \(error)", quiet:quiet)
+				fxdPrint("data: \(data as Any)", quiet:quiet)
+				fxdPrint("error: \(error as Any)", quiet:quiet)
 				guard let receivedData = data else {
-					fxdPrint("httpRequest.url: \(httpRequest.url)")
-					fxdPrint("httpRequest.allHTTPHeaderFields: \(httpRequest.allHTTPHeaderFields)")
-					fxdPrint("httpRequest.httpMethod: \(httpRequest.httpMethod)")
-					fxdPrint("httpRequest.httpBody: \(httpRequest.httpBody)")
+					fxdPrint("httpRequest.url: \(httpRequest.url as Any)")
+					fxdPrint("httpRequest.allHTTPHeaderFields: \(httpRequest.allHTTPHeaderFields as Any)")
+					fxdPrint("httpRequest.httpMethod: \(httpRequest.httpMethod as Any)")
+					fxdPrint("httpRequest.httpBody: \(httpRequest.httpBody as Any)")
 					responseHandler?(nil, error)
 					return
 				}
