@@ -161,6 +161,7 @@ extension SDsceneBasicRoot {
 	@ViewBuilder
 	var OVERLAY_promptEditor: some View {
 		FXDswiftuiTextEditor(
+			shouldPresentPromptEditor: $shouldPresentPromptEditor,
 			editedParagraph_0: sdObservable.currentGenerationPayload?.prompt ?? "",
 			editedParagraph_1: sdObservable.currentGenerationPayload?.negative_prompt ?? "",
 			finishedEditing: {
@@ -170,7 +171,7 @@ extension SDsceneBasicRoot {
 				fxdPrint(editedNegativePrompt)
 				fxdPrint(other)
 			})
-		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 1.0)))
+		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.25)))
 		.onDisappear(perform: {
 			shouldPresentPromptEditor = false
 		})
