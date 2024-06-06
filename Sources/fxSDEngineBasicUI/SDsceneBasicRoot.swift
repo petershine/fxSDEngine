@@ -172,7 +172,7 @@ extension SDsceneBasicRoot {
 
 				if let modifiedPayload = sdEngine.currentGenerationPayload?.modified(
 					editedPrompt: editedPrompt,
-					editedNegativePrompt: negative_prompt) {
+					editedNegativePrompt: editedNegativePrompt) {
 
 					sdEngine.currentGenerationPayload = modifiedPayload
 				}
