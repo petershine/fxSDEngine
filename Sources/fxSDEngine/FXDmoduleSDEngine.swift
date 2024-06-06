@@ -224,7 +224,7 @@ open class FXDmoduleSDEngine: NSObject {
 				let decodedImageArray = decodedResponse.decodedImages()
 
 				guard let generated = decodedImageArray.first else {
-					fxdPrint(receivedData.jsonObject() as Any)
+					fxdPrint("receivedData.jsonObject()\n", receivedData.jsonObject())
 					completionHandler?(error)
 					return
 				}
@@ -306,7 +306,7 @@ open class FXDmoduleSDEngine: NSObject {
 					completionHandler: {
 						lastProgress, error in
 
-						fxdPrint("[lastProgress?.state]: ", lastProgress?.state as Any)
+						fxdPrint("[lastProgress?.state]: ", lastProgress?.state)
 						completionHandler?(error)
 					})
 			}
@@ -337,8 +337,8 @@ open class FXDmoduleSDEngine: NSObject {
 					}
 					.first as? SDcodableFile
 
-				fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time() as Any)
-				fxdPrint("latestFileORfolder?.fullpath: ", latestFileORfolder?.fullpath as Any)
+				fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time())
+				fxdPrint("latestFileORfolder?.fullpath: ", latestFileORfolder?.fullpath)
 				guard latestFileORfolder != nil,
 					  let fullpath = latestFileORfolder?.fullpath
 				else {
@@ -347,7 +347,7 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 
-				fxdPrint("latestFileORfolder?.type: ", latestFileORfolder?.type as Any)
+				fxdPrint("latestFileORfolder?.type: ", latestFileORfolder?.type)
 				guard let type = latestFileORfolder?.type,
 						  type != "dir"
 				else {
@@ -407,7 +407,7 @@ extension FXDmoduleSDEngine {
 
 			httpRequest.httpMethod = method ?? "GET"
 			if payload != nil {	fxd_log()
-				fxdPrint("[payload]:\n", payload?.jsonObject() as Any)
+				fxdPrint("[payload]:\n", payload?.jsonObject())
 				httpRequest.httpMethod = "POST"
 				httpRequest.httpBody = payload
 			}
@@ -416,13 +416,13 @@ extension FXDmoduleSDEngine {
 			let httpTask = URLSession.shared.dataTask(with: httpRequest) {
 				(data: Data?, response: URLResponse?, error: Error?) in
 
-				fxdPrint("data: ", data as Any, quiet:quiet)
-				fxdPrint("error: ", error as Any, quiet:quiet)
+				fxdPrint("data: ", data, quiet:quiet)
+				fxdPrint("error: ", error, quiet:quiet)
 				guard let receivedData = data else {
-					fxdPrint("httpRequest.url: ", httpRequest.url as Any)
-					fxdPrint("httpRequest.allHTTPHeaderFields: ", httpRequest.allHTTPHeaderFields as Any)
-					fxdPrint("httpRequest.httpMethod: ", httpRequest.httpMethod as Any)
-					fxdPrint("httpRequest.httpBody: ", httpRequest.httpBody as Any)
+					fxdPrint("httpRequest.url: ", httpRequest.url)
+					fxdPrint("httpRequest.allHTTPHeaderFields: ", httpRequest.allHTTPHeaderFields)
+					fxdPrint("httpRequest.httpMethod: ", httpRequest.httpMethod)
+					fxdPrint("httpRequest.httpBody: ", httpRequest.httpBody)
 					responseHandler?(nil, error)
 					return
 				}
