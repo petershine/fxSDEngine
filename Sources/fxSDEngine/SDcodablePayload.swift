@@ -178,7 +178,7 @@ extension SDcodablePayload {
 		}
 
 
-		var payloadDictionary: [String:Any] = [
+		var parametersDictionary: [String:Any] = [
 			"prompt" : prompt,
 			"negative_prompt" : negative_prompt
 		]
@@ -192,31 +192,31 @@ extension SDcodablePayload {
 			if !key.isEmpty {
 				let value: String = key_value.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 				if let doubleValue = Double(value) {
-					payloadDictionary[key] = doubleValue
+					parametersDictionary[key] = doubleValue
 				}
 				else if let integerValue = Int(value) {
-					payloadDictionary[key] = integerValue
+					parametersDictionary[key] = integerValue
 				}
 				else if let boolValue = Bool(value) {
-					payloadDictionary[key] = boolValue
+					parametersDictionary[key] = boolValue
 				}
 				else {
-					payloadDictionary[key] = value
+					parametersDictionary[key] = value
 				}
 			}
 		}
 
-		let hr_scale = (payloadDictionary["hr_scale"] ?? payloadDictionary["hires upscale"]) as? Double ?? 1.0
+		let hr_scale = (parametersDictionary["hr_scale"] ?? parametersDictionary["hires upscale"]) as? Double ?? 1.0
 		if hr_scale > 1.0,
-		   payloadDictionary["enable_hr"] == nil {
-			payloadDictionary["enable_hr"] = true
+		   parametersDictionary["enable_hr"] == nil {
+			parametersDictionary["enable_hr"] = true
 		}
 
-		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
+		fxdPrint(name: "parametersDictionary", dictionary: parametersDictionary)
 
 		var decodedPayload: Self? = nil
 		do {
-			let payloadData = try JSONSerialization.data(withJSONObject: payloadDictionary)
+			let payloadData = try JSONSerialization.data(withJSONObject: parametersDictionary)
 			decodedPayload = try JSONDecoder().decode(Self.self, from: payloadData)
 			fxdPrint(decodedPayload!)
 		}
