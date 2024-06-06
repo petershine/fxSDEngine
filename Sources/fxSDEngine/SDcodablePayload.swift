@@ -206,7 +206,7 @@ extension SDcodablePayload {
 			}
 		}
 
-		fxdPrint(dictionary: payloadDictionary)
+		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
 
 		var decodedPayload: Self? = nil
 		do {

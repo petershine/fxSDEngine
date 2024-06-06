@@ -182,7 +182,7 @@ open class FXDmoduleSDEngine: NSObject {
 
 				#if DEBUG
 				if let jsonObject = data?.jsonObject(quiet: true) {
-					os_log("[INTERNAL_SYSINFO]:\n%@\n\n", jsonObject)
+					fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonObject)
 				}
 				#endif
 
