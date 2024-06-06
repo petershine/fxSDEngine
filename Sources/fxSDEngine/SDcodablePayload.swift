@@ -206,6 +206,12 @@ extension SDcodablePayload {
 			}
 		}
 
+		let hr_scale = (payloadDictionary["hr_scale"] ?? payloadDictionary["hires upscale"]) as? Double ?? 1.0
+		if hr_scale > 1.0,
+		   payloadDictionary["enable_hr"] == nil {
+			payloadDictionary["enable_hr"] = true
+		}
+
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
 
 		var decodedPayload: Self? = nil
