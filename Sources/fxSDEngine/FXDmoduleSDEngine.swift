@@ -122,7 +122,7 @@ open class FXDmoduleSDEngine: NSObject {
 			[weak self] (error) in
 
 			guard let folderPath = self?.systemInfo?.generationFolder() else {
-				// TODO: find better evaluation for NEWly server
+				// TODO: find better evaluation for NEWly started server
 				do {
 					self?.currentGenerationPayload = try JSONDecoder().decode(SDcodablePayload.self, from: "{}".data(using: .utf8) ?? Data())
 				}
@@ -170,6 +170,7 @@ open class FXDmoduleSDEngine: NSObject {
 					return
 				}
 
+				fxd_log()
 				self?.currentGenerationPayload = decodedPayload
 				completionHandler?(error)
 		})
@@ -235,7 +236,7 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 				if let infotext = decodedResponse.infotext(),
-				   let decodedPayload = SDcodablePayload.decoded(infotext: infotext) {
+				   let decodedPayload = SDcodablePayload.decoded(infotext: infotext) {	fxd_log()
 					self?.currentGenerationPayload = decodedPayload
 				}
 

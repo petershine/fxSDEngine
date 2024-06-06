@@ -155,7 +155,7 @@ extension SDcodablePayload {
 
 extension SDcodablePayload {
 	static func decoded(infotext: String) -> SDcodablePayload? {	fxd_log()
-		fxdPrint(infotext)
+		fxdPrint("[infotext]", infotext)
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Steps:"))
 		else {

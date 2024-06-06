@@ -174,6 +174,7 @@ extension SDsceneBasicRoot {
 					editedPrompt: editedPrompt,
 					editedNegativePrompt: editedNegativePrompt) {
 
+					fxd_log()
 					sdEngine.currentGenerationPayload = modifiedPayload
 				}
 			})
