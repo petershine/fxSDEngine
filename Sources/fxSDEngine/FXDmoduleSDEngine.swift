@@ -407,7 +407,7 @@ extension FXDmoduleSDEngine {
 
 			httpRequest.httpMethod = method ?? "GET"
 			if payload != nil {	fxd_log()
-				fxdPrint("[payload]:\n", payload?.jsonObject())
+				fxdPrint(name: "payload", dictionary: payload?.jsonObject() ?? [:])
 				httpRequest.httpMethod = "POST"
 				httpRequest.httpBody = payload
 			}
