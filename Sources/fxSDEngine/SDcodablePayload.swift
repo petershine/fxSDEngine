@@ -108,8 +108,8 @@ extension SDcodablePayload {
 		do {
 			payload = try JSONEncoder().encode(self)
 		}
-		catch {
-			fxdPrint("\(error)")
+		catch {	fxd_log()
+			fxdPrint("error:", error)
 		}
 
 		return payload
@@ -145,8 +145,8 @@ extension SDcodablePayload {
 				extendedPayload = try JSONSerialization.data(withJSONObject: payloadDictionary!)
 			}
 		}
-		catch {
-			fxdPrint("\(error)")
+		catch {	fxd_log()
+			fxdPrint("error:", error)
 		}
 
 		return extendedPayload ?? payload

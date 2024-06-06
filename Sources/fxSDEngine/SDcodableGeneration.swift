@@ -34,8 +34,8 @@ extension SDcodableGeneration {
 		return nil
 	}
 
-	func decodedImages(quiet: Bool = false) -> [UIImage] {
-		fxdPrint("[STARTED DECODING]: \(images?.count ?? 0) image(s)", quiet:quiet)
+	func decodedImages(quiet: Bool = false) -> [UIImage] {	fxd_log()
+		fxdPrint("[STARTED DECODING]: ", (images?.count as Any), " image(s)", quiet:quiet)
 
 		var decodedImageArray: [UIImage] = []
 		for base64string in (images ?? []) {
@@ -47,7 +47,7 @@ extension SDcodableGeneration {
 				continue
 			}
 
-			fxdPrint("decodedImage: \(decodedImage)", quiet:quiet)
+			fxdPrint("decodedImage: ", decodedImage, quiet:quiet)
 			decodedImageArray.append(decodedImage)
 		}
 

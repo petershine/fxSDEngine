@@ -306,7 +306,7 @@ open class FXDmoduleSDEngine: NSObject {
 					completionHandler: {
 						lastProgress, error in
 
-						fxdPrint("[lastProgress?.state]: \(lastProgress?.state as Any)")
+						fxdPrint("[lastProgress?.state]: ", lastProgress?.state as Any)
 						completionHandler?(error)
 					})
 			}
@@ -326,7 +326,7 @@ open class FXDmoduleSDEngine: NSObject {
 					return
 				}
 
-				fxdPrint("filesORfolders: \(filesORfolders.count)")
+				fxdPrint("filesORfolders.count: ", filesORfolders.count)
 
 				let latestFileORfolder = filesORfolders
 					.sorted {
@@ -337,8 +337,8 @@ open class FXDmoduleSDEngine: NSObject {
 					}
 					.first as? SDcodableFile
 
-				fxdPrint("latestFileORfolder?.updated_time(): \(latestFileORfolder?.updated_time() as Any)")
-				fxdPrint("latestFileORfolder?.fullpath: \(latestFileORfolder?.fullpath as Any)")
+				fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time() as Any)
+				fxdPrint("latestFileORfolder?.fullpath: ", latestFileORfolder?.fullpath as Any)
 				guard latestFileORfolder != nil,
 					  let fullpath = latestFileORfolder?.fullpath
 				else {
@@ -347,7 +347,7 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 
-				fxdPrint("latestFileORfolder?.type: \(latestFileORfolder?.type as Any)")
+				fxdPrint("latestFileORfolder?.type: ", latestFileORfolder?.type as Any)
 				guard let type = latestFileORfolder?.type,
 						  type != "dir"
 				else {
@@ -393,7 +393,7 @@ extension FXDmoduleSDEngine {
 			   let escapedQuery = query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
 				requestPath += "?\(escapedQuery)"
 			}
-			fxdPrint("requestPath: \(requestPath)", quiet:quiet)
+			fxdPrint("requestPath: ", requestPath, quiet:quiet)
 
 			guard let requestURL = URL(string: requestPath) else {
 				responseHandler?(nil, nil)
@@ -407,7 +407,7 @@ extension FXDmoduleSDEngine {
 
 			httpRequest.httpMethod = method ?? "GET"
 			if payload != nil {	fxd_log()
-				fxdPrint("[payload]:\n\(String(data: payload!, encoding: .utf8)!.lineReBroken())")
+				fxdPrint("[payload]:\n", payload?.jsonObject() as Any)
 				httpRequest.httpMethod = "POST"
 				httpRequest.httpBody = payload
 			}
@@ -416,13 +416,13 @@ extension FXDmoduleSDEngine {
 			let httpTask = URLSession.shared.dataTask(with: httpRequest) {
 				(data: Data?, response: URLResponse?, error: Error?) in
 
-				fxdPrint("data: \(data as Any)", quiet:quiet)
-				fxdPrint("error: \(error as Any)", quiet:quiet)
+				fxdPrint("data: ", data as Any, quiet:quiet)
+				fxdPrint("error: ", error as Any, quiet:quiet)
 				guard let receivedData = data else {
-					fxdPrint("httpRequest.url: \(httpRequest.url as Any)")
-					fxdPrint("httpRequest.allHTTPHeaderFields: \(httpRequest.allHTTPHeaderFields as Any)")
-					fxdPrint("httpRequest.httpMethod: \(httpRequest.httpMethod as Any)")
-					fxdPrint("httpRequest.httpBody: \(httpRequest.httpBody as Any)")
+					fxdPrint("httpRequest.url: ", httpRequest.url as Any)
+					fxdPrint("httpRequest.allHTTPHeaderFields: ", httpRequest.allHTTPHeaderFields as Any)
+					fxdPrint("httpRequest.httpMethod: ", httpRequest.httpMethod as Any)
+					fxdPrint("httpRequest.httpBody: ", httpRequest.httpBody as Any)
 					responseHandler?(nil, error)
 					return
 				}
@@ -435,7 +435,7 @@ extension FXDmoduleSDEngine {
 				if modifiedError == nil,
 				   httpResponse != nil,
 				   httpResponseCode != 200 {
-					fxdPrint("httpResponse: \(httpResponse!)")
+					fxdPrint("httpResponse: ", httpResponse)
 
 					let jsonObject: [String:Any?]? = receivedData.jsonObject()
 
@@ -471,7 +471,7 @@ extension FXDmoduleSDEngine {
 
 extension FXDmoduleSDEngine {
 	@objc open func savePayloadToFile(payload: Data) {
-		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {	fxd_log()
 			fxdPrint("Document directory not found")
 			return
 		}
@@ -479,15 +479,15 @@ extension FXDmoduleSDEngine {
 		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
 		do {
 			try payload.write(to: fileURL)
-			fxdPrint("[DATA SAVED]: \(fileURL)")
-		} catch {
-			fxdPrint("payload: \(payload)")
-			fxdPrint("Failed to save: \(error)")
+			fxdPrint("[DATA SAVED]: ", fileURL)
+		} catch {	fxd_log()
+			fxdPrint("payload: ", payload)
+			fxdPrint("Failed to save: ", error)
 		}
 	}
 
 	@objc open func loadPayloadFromFile() -> Data? {
-		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {	fxd_log()
 			fxdPrint("Document directory not found")
 			return nil
 		}
@@ -497,8 +497,8 @@ extension FXDmoduleSDEngine {
 		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
 		do {
 			payloadData = try Data(contentsOf: fileURL)
-		} catch {
-			fxdPrint("Failed to load: \(error)")
+		} catch {	fxd_log()
+			fxdPrint("Failed to load: ", error)
 		}
 
 		return payloadData

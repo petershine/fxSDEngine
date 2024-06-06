@@ -44,3 +44,15 @@ extension SDcodableSysInfo {
 		return Config?.outdir_samples
 	}
 }
+
+/*
+ Extensions =     (
+			 {
+		 branch = main;
+		 name = adetailer;
+		 path = "/Volumes/zzzz/_zSD/stable-diffusion-webui/extensions/adetailer";
+		 remote = "https://github.com/Bing-su/adetailer";
+		 version = a89c01d3;
+	 },
+
+ */
