@@ -47,7 +47,7 @@ public class SDcodablePayload: Codable {
 	required public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 
-		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? "fxSDEngine!"
+		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? ""
 		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt) ?? ""
 
 		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 35
@@ -240,10 +240,12 @@ extension SDcodablePayload {
 
 		if didChangePrompt {
 			self.prompt = editedPrompt
+			self.hr_prompt = self.prompt
 		}
 
 		if didChangeNegativePrompt {
 			self.negative_prompt = editedNegativePrompt
+			self.hr_negative_prompt = self.negative_prompt
 		}
 
 		return self
