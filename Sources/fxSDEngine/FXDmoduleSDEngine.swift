@@ -54,33 +54,27 @@ extension SDError: LocalizedError {
 
 public protocol SDprotocolProperties {
 	var displayedImage: UIImage? { get set }
-
 	var overlayObservable: FXDobservableOverlay? { get set }
+	var progressObservable: SDcodableProgress? { get set }
 
-	var progressValue: Double? { get set }
 	var shouldContinueRefreshing: Bool { get set }
-
-	var isJobRunning: Bool { get set }
 }
 
 
 
 open class FXDobservableSDProperties: SDprotocolProperties, ObservableObject {
 	@Published open var displayedImage: UIImage? = nil
-
 	@Published open var overlayObservable: FXDobservableOverlay? = nil
+	@Published open var progressObservable: SDcodableProgress? = nil
 
-	@Published open var progressValue: Double? = nil
 	@Published open var shouldContinueRefreshing: Bool {
 		didSet {
 			if shouldContinueRefreshing == false {
 				overlayObservable = nil
-				progressValue = nil
+				progressObservable = nil
 			}
 		}
 	}
-
-	@Published open var isJobRunning: Bool = false
 
 	public init() {
 		self.shouldContinueRefreshing = false
@@ -271,9 +265,7 @@ open class FXDmoduleSDEngine: NSObject {
 						self?.observable.displayedImage = progressImage
 					}
 
-					self?.observable.progressValue = decodedResponse.progress
-
-					self?.observable.isJobRunning = decodedResponse.state?.isJobRunning() ?? false
+					self?.observable.progressObservable = decodedResponse
 				}
 				completionHandler?(decodedResponse, error)
 			}
