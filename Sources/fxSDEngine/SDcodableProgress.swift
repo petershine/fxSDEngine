@@ -4,7 +4,7 @@ import Foundation
 
 
 public struct SDcodableProgress: SDcodableResponse {
-	var progress: Double? = nil
+	public var progress: Double? = nil
 	var eta_relative: Date? = nil
 	var textinfo: String? = nil
 
@@ -14,7 +14,7 @@ public struct SDcodableProgress: SDcodableResponse {
 
 public struct SDcodableState: Codable {
 	var interrupted: Bool? = nil
-	var job: String? = nil
+	public var job: String? = nil
 	var job_count: Int? = nil
 	var job_no: Int? = nil
 	var job_timestamp: String? = nil

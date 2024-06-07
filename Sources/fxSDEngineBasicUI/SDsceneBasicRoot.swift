@@ -39,7 +39,8 @@ public struct SDsceneBasicRoot: View {
 				Spacer()
 
 				HStack {
-					if sdObservable.isJobRunning {
+					let isJobRunning = sdObservable.progressObservable?.state?.isJobRunning() ?? false
+					if isJobRunning {
 						GROUP_progress
 							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 					}
@@ -55,7 +56,7 @@ public struct SDsceneBasicRoot: View {
 
 					Spacer()
 
-					if !sdObservable.isJobRunning {
+					if !isJobRunning {
 						GROUP_editor
 							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 					}
@@ -75,7 +76,8 @@ extension SDsceneBasicRoot {
 	var GROUP_resetting: some View {
 		HStack {
 			VStack {
-				if sdObservable.isJobRunning {
+				let isJobRunning = sdObservable.progressObservable?.state?.isJobRunning() ?? false
+				if isJobRunning {
 					FXDswiftuiButton(
 						systemImageName: "stop.circle",
 						foregroundStyle: .red,
@@ -97,7 +99,8 @@ extension SDsceneBasicRoot {
 			Spacer()
 
 			VStack {
-				if !sdObservable.isJobRunning {
+				let isJobRunning = sdObservable.progressObservable?.state?.isJobRunning() ?? false
+				if !isJobRunning {
 					FXDswiftuiButton(
 						systemImageName: "arrow.clockwise",
 						foregroundStyle: .white,
@@ -129,7 +132,7 @@ extension SDsceneBasicRoot {
 					.padding()
 
 					if sdObservable.shouldContinueRefreshing {
-						if let progress = sdObservable.progressValue {
+						if let progress = sdObservable.progressObservable?.progress {
 							Text(String(format: "%0.1f %%", progress * 100.0))
 								.multilineTextAlignment(.leading)
 								.foregroundStyle(.white)
