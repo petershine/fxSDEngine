@@ -53,9 +53,10 @@ extension SDError: LocalizedError {
 
 
 public protocol SDprotocolProperties {
-	var displayedImage: UIImage? { get set }
 	var overlayObservable: FXDobservableOverlay? { get set }
 	var progressObservable: SDcodableProgress? { get set }
+
+	var displayedImage: UIImage? { get set }
 
 	var shouldContinueRefreshing: Bool { get set }
 }
@@ -63,11 +64,10 @@ public protocol SDprotocolProperties {
 
 
 open class FXDobservableSDProperties: SDprotocolProperties, ObservableObject {
-	@Published open var displayedImage: UIImage? = nil
 	@Published open var overlayObservable: FXDobservableOverlay? = nil
 	@Published open var progressObservable: SDcodableProgress? = nil
 
-	@Published open var shouldContinueRefreshing: Bool {
+	@Published open var shouldContinueRefreshing: Bool = false {
 		didSet {
 			if shouldContinueRefreshing == false {
 				overlayObservable = nil
@@ -225,15 +225,14 @@ open class FXDmoduleSDEngine: NSObject {
 				}
 
 
-				DispatchQueue.main.async {
-					self?.observable.displayedImage = generated
-				}
-
 				if let infotext = decodedResponse.infotext(),
 				   let decodedPayload = SDcodablePayload.decoded(infotext: infotext) {	fxd_log()
 					self?.currentGenerationPayload = decodedPayload
 				}
 
+				DispatchQueue.main.async {
+					self?.observable.displayedImage = generated
+				}
 				completionHandler?(error)
 			}
 	}
