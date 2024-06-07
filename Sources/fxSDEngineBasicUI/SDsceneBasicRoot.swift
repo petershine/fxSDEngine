@@ -43,11 +43,20 @@ public struct SDsceneBasicRoot: View {
 						GROUP_progress
 							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 					}
+					else {
+						GROUP_saving
+							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+
+						Spacer()
+
+						GROUP_generating
+							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+					}
 
 					Spacer()
 
 					if !sdObservable.isJobRunning {
-						GROUP_generating
+						GROUP_editor
 							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 					}
 				}
@@ -68,13 +77,13 @@ extension SDsceneBasicRoot {
 			VStack {
 				if sdObservable.isJobRunning {
 					FXDswiftuiButton(
-						systemImageName: "xmark",
+						systemImageName: "stop.circle",
 						foregroundStyle: .red,
 						action: {
 							sdEngine.interrupt{
 								(error) in
 
-								Task {	@MainActor in
+								Task {
 									sdObservable.shouldContinueRefreshing = false
 
 									UIAlertController.errorAlert(error: error, title: "Interrupted")
@@ -102,40 +111,52 @@ extension SDsceneBasicRoot {
 	}
 
 	var GROUP_progress: some View {
-		VStack(alignment: .leading,
-			   spacing: nil,
-			   content: {
-			
+		VStack(
+			alignment: .leading,
+			spacing: nil,
+			content: {
+
+				Spacer()
+
+				HStack {
+					FXDswiftuiButton(
+						systemImageName: (sdObservable.shouldContinueRefreshing ? "tv.slash" : "tv"),
+						foregroundStyle: .white,
+						action: {
+							sdObservable.shouldContinueRefreshing.toggle()
+							sdEngine.continuousProgressRefreshing()
+						})
+					.padding()
+
+					if sdObservable.shouldContinueRefreshing {
+						if let progress = sdObservable.progressValue {
+							Text(String(format: "%0.1f %%", progress * 100.0))
+								.multilineTextAlignment(.leading)
+								.foregroundStyle(.white)
+						}
+					}
+				}
+			})
+	}
+
+	var GROUP_saving: some View {
+		VStack {
 			Spacer()
 
-			if sdObservable.shouldContinueRefreshing,
-			   let progress = sdObservable.progressValue {
-				Text(String(format: "%0.1f %%", progress * 100.0))
-					.multilineTextAlignment(.leading)
-					.foregroundStyle(.white)
-			}
-
 			FXDswiftuiButton(
-				systemImageName: (sdObservable.shouldContinueRefreshing ? "tv.slash" : "tv"),
+				systemImageName: "square.and.arrow.down",
 				foregroundStyle: .white,
 				action: {
-					sdObservable.shouldContinueRefreshing.toggle()
-					sdEngine.continuousProgressRefreshing()
+					if let availableImage = sdObservable.displayedImage {
+						UIActivityViewController.show(items: [availableImage])
+					}
 				})
-		})
+		}
 	}
 
 	var GROUP_generating: some View {
 		VStack {
 			Spacer()
-
-			FXDswiftuiButton(
-				systemImageName: "lightbulb",
-				foregroundStyle: .white,
-				action: {
-					shouldPresentPromptEditor = true
-				})
-			.padding(.bottom)
 
 			FXDswiftuiButton(
 				systemImageName: "paintbrush",
@@ -147,10 +168,23 @@ extension SDsceneBasicRoot {
 					sdEngine.execute_txt2img {
 						error in
 
-						Task {	@MainActor in
+						Task {
 							sdObservable.shouldContinueRefreshing = false
 						}
 					}
+				})
+		}
+	}
+
+	var GROUP_editor: some View {
+		VStack {
+			Spacer()
+
+			FXDswiftuiButton(
+				systemImageName: "lightbulb",
+				foregroundStyle: .white,
+				action: {
+					shouldPresentPromptEditor = true
 				})
 		}
 	}
