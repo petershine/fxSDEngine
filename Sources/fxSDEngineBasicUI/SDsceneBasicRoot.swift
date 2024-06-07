@@ -184,7 +184,7 @@ extension SDsceneBasicRoot {
 			Spacer()
 
 			FXDswiftuiButton(
-				systemImageName: "lightbulb",
+				systemImageName: "pencil.and.list.clipboard",
 				foregroundStyle: .white,
 				action: {
 					shouldPresentPromptEditor = true
