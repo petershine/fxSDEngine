@@ -168,7 +168,7 @@ extension SDsceneBasicRoot {
 			editedParagraph_0: prompt,
 			editedParagraph_1: negative_prompt,
 			finishedEditing: {
-				(editedPrompt, editedNegativePrompt, other) in
+				(editedPrompt, editedNegativePrompt) in
 
 				if let modifiedPayload = sdEngine.currentGenerationPayload?.modified(
 					editedPrompt: editedPrompt,
