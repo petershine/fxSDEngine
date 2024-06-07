@@ -136,6 +136,14 @@ extension SDsceneBasicRoot {
 							Text(String(format: "%0.1f %%", progress * 100.0))
 								.multilineTextAlignment(.leading)
 								.foregroundStyle(.white)
+								.padding()
+						}
+
+						if let job = sdObservable.progressObservable?.state?.job {
+							Text(job)
+								.multilineTextAlignment(.leading)
+								.foregroundStyle(.white)
+								.padding()
 						}
 					}
 				}
