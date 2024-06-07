@@ -67,6 +67,8 @@ open class FXDobservableSDProperties: SDprotocolProperties, ObservableObject {
 	@Published open var overlayObservable: FXDobservableOverlay? = nil
 	@Published open var progressObservable: SDcodableProgress? = nil
 
+	@Published open var displayedImage: UIImage? = nil
+
 	@Published open var shouldContinueRefreshing: Bool = false {
 		didSet {
 			if shouldContinueRefreshing == false {
@@ -138,6 +140,8 @@ open class FXDmoduleSDEngine: NSObject {
 					}
 
 					DispatchQueue.main.async {
+						latestImage?.evaluateProperties()
+
 						self?.observable.displayedImage = latestImage
 					}
 					completionHandler?(error)
