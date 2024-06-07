@@ -140,8 +140,6 @@ open class FXDmoduleSDEngine: NSObject {
 					}
 
 					DispatchQueue.main.async {
-						latestImage?.evaluateProperties()
-
 						self?.observable.displayedImage = latestImage
 					}
 					completionHandler?(error)
