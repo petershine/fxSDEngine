@@ -26,7 +26,7 @@ public protocol SDmoduleMain: NSObject, SDnetworking {
 	func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?)
 
 	func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
-	func prepare_generationPayload(pngData: Data, imagePath: String)
+	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
 	func extract_infotext(pngData: Data) async -> String
 
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
@@ -126,27 +126,34 @@ extension SDmoduleMain {
 			}
 	}
 
-	public func prepare_generationPayload(pngData: Data, imagePath: String) {
+	public func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?) {
 		Task {	@MainActor
 			[weak self] in
 
-			let _assignPayload: (String) -> Void = {
-				[weak self] (infotext: String) in
+			let _assignPayload: (String, Error?) -> Void = {
+				[weak self] (infotext: String, error: Error?) in
+
+				guard !infotext.isEmpty, error == nil else {
+					completionHandler?(error)
+					return
+				}
 
 				guard let obtainedPayload = SDcodablePayload.decoded(infotext: infotext) else {
+					completionHandler?(error)
 					return
 				}
 
 				DispatchQueue.main.async {
 					fxd_log()
 					self?.generationPayload = obtainedPayload
+					completionHandler?(error)
 				}
 			}
 
 
 			let infotext = await self?.extract_infotext(pngData: pngData) ?? ""
 			if !(infotext.isEmpty) {
-				_assignPayload(infotext)
+				_assignPayload(infotext, nil)
 				return
 			}
 
@@ -160,10 +167,11 @@ extension SDmoduleMain {
 					guard let receivedData = received,
 						  let infotext = String(data: receivedData, encoding: .utf8)
 					else {
+						_assignPayload("", error)
 						return
 					}
 
-					_assignPayload(infotext)
+					_assignPayload(infotext, error)
 				})
 		}
 	}

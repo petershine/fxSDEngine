@@ -89,18 +89,25 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 						return
 					}
 
-					if let imagePath = fullPath {
-						self?.prepare_generationPayload(pngData: pngData!, imagePath: imagePath)
+					guard let imagePath = fullPath else {
+						completionHandler?(error)
+						return
 					}
 
 
-					if pngData != nil,
-					   let latestImage = UIImage(data: pngData!) {
-						DispatchQueue.main.async {
-							self?.observable?.displayedImage = latestImage
+					self?.prepare_generationPayload(
+						pngData: pngData!,
+						imagePath: imagePath) {
+							error in
+
+							if pngData != nil,
+							   let latestImage = UIImage(data: pngData!) {
+								DispatchQueue.main.async {
+									self?.observable?.displayedImage = latestImage
+								}
+							}
+							completionHandler?(error)
 						}
-					}
-					completionHandler?(error)
 				})
 		}
 	}
