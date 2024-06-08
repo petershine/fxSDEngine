@@ -56,4 +56,8 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 		self.systemInfo = systemInfo
 		self.currentGenerationPayload = currentGenerationPayload
 	}
+
+	open func obtain_infotext(pngData: Data) async -> String {	fxd_overridable()
+		return ""
+	}
 }
