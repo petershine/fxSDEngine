@@ -20,7 +20,6 @@ let package = Package(
 	dependencies: [
 		// Dependencies declare other packages that this package depends on.
 		.package(url: "https://github.com/petershine/fXDKit", branch: "master"),
-		.package(url: "https://github.com/tayloraswift/swift-png", from: "4.4.0"),
 	],
 	targets: [
 		// Targets are the basic building blocks of a package, defining a module or a test suite.
