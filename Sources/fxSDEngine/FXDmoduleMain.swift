@@ -35,10 +35,10 @@ open class FXDobservableMain: NSObject, SDobservableMain {
 }
 
 
-open class FXDmoduleMain: NSObject, SDmoduleMain {	
+open class FXDmoduleMain: NSObject, SDmoduleMain {
 	@Published open var observable: (any SDobservableMain)? = nil
-	open var systemInfo: SDcodableSysInfo? = nil
 
+	open var systemInfo: SDcodableSysInfo? = nil
 	open var currentGenerationPayload: SDcodablePayload? {
 		didSet {
 			if let encodedPayload = currentGenerationPayload?.encodedPayload() {

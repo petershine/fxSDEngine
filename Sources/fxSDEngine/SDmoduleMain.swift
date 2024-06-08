@@ -15,17 +15,19 @@ public protocol SDobservableMain: ObservableObject {
 	var shouldContinueRefreshing: Bool { get set }
 }
 
-
 public protocol SDmoduleMain: NSObject, SDnetworking {
+	var observable: (any SDobservableMain)? { get set }
+
 	var systemInfo: SDcodableSysInfo? { get set }
 	var currentGenerationPayload: SDcodablePayload? { get set }
 
-	var observable: (any SDobservableMain)? { get set }
 
 	func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?)
 	func refresh_LastPayload(completionHandler: ((_ error: Error?)->Void)?)
-	func obtain_GenInfo(path: String, completionHandler: ((_ error: Error?)->Void)?)
+
 	func obtain_latestGenereatedImage(folderPath: String, completionHandler: ((_ image: UIImage?, _ path: String?, _ error: Error?)->Void)?)
+	func obtain_GenInfo(path: String, completionHandler: ((_ error: Error?)->Void)?)
+	func obtain_infotext(pngData: Data) async -> String
 
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
 
@@ -33,6 +35,7 @@ public protocol SDmoduleMain: NSObject, SDnetworking {
 	func continuousProgressRefreshing()
 	func interrupt(completionHandler: ((_ error: Error?)->Void)?)
 }
+
 
 extension SDmoduleMain {
 	public func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?) {
@@ -78,7 +81,7 @@ extension SDmoduleMain {
 			self?.obtain_latestGenereatedImage(
 				folderPath: folderPath,
 				completionHandler: {
-				[weak self] (latestImage, fullpath, error) in
+					[weak self] (latestImage, fullpath, error) in
 
 					if let path = fullpath {
 						self?.obtain_GenInfo(path: path, completionHandler: nil)
@@ -88,35 +91,12 @@ extension SDmoduleMain {
 						self?.observable?.displayedImage = latestImage
 					}
 					completionHandler?(error)
-			})
+				})
 		}
 	}
+}
 
-	public func obtain_GenInfo(path: String, completionHandler: ((_ error: Error?)->Void)?) {
-		requestToSDServer(
-			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
-			query: "path=\(path)",
-			responseHandler: {
-				[weak self] (received, error) in
-
-				guard let receivedData = received,
-					  let receivedString = String(data: receivedData, encoding: .utf8)
-				else {
-					completionHandler?(error)
-					return
-				}
-
-				guard let decodedPayload = SDcodablePayload.decoded(infotext: receivedString) else {
-					completionHandler?(error)
-					return
-				}
-
-				fxd_log()
-				self?.currentGenerationPayload = decodedPayload
-				completionHandler?(error)
-		})
-	}
-
+extension SDmoduleMain {
 	public func obtain_latestGenereatedImage(folderPath: String, completionHandler: ((_ image: UIImage?, _ path: String?, _ error: Error?)->Void)?) {
 		requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
@@ -180,6 +160,32 @@ extension SDmoduleMain {
 						completionHandler?(latestImage, fullpath, error)
 					}
 			}
+	}
+
+	public func obtain_GenInfo(path: String, completionHandler: ((_ error: Error?)->Void)?) {
+		requestToSDServer(
+			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
+			query: "path=\(path)",
+			responseHandler: {
+				[weak self] (received, error) in
+
+				guard let receivedData = received,
+					  let infotext = String(data: receivedData, encoding: .utf8)
+				else {
+					completionHandler?(error)
+					return
+				}
+
+
+				guard let decodedPayload = SDcodablePayload.decoded(infotext: infotext) else {
+					completionHandler?(error)
+					return
+				}
+
+				fxd_log()
+				self?.currentGenerationPayload = decodedPayload
+				completionHandler?(error)
+		})
 	}
 }
 
