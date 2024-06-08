@@ -105,10 +105,6 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 		}
 	}
 
-	open func extract_infotext(pngData: Data) async -> String {	fxd_overridable()
-		return ""
-	}
-
 	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
 		let payload: Data? = generationPayload?.evaluatedPayload(extensions: systemInfo?.Extensions)
 		requestToSDServer(
@@ -151,5 +147,15 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 				}
 				completionHandler?(error)
 			}
+	}
+}
+
+
+//TODO: need to make swift-png package to be iOS 17 compatible
+//import PNG
+
+extension FXDmoduleMain {
+	@objc open func extract_infotext(pngData: Data) async -> String {
+		return ""
 	}
 }
