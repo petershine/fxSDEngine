@@ -19,15 +19,15 @@ public protocol SDmoduleMain: NSObject, SDnetworking {
 	var observable: (any SDobservableMain)? { get set }
 
 	var systemInfo: SDcodableSysInfo? { get set }
-	var currentGenerationPayload: SDcodablePayload? { get set }
+	var generationPayload: SDcodablePayload? { get set }
 
 
 	func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?)
-	func refresh_LastPayload(completionHandler: ((_ error: Error?)->Void)?)
+	func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?)
 
-	func obtain_latestGenereatedImage(folderPath: String, completionHandler: ((_ image: UIImage?, _ path: String?, _ error: Error?)->Void)?)
-	func obtain_GenInfo(path: String, completionHandler: ((_ error: Error?)->Void)?)
-	func obtain_infotext(pngData: Data) async -> String
+	func obtain_latestImage(path: String, completionHandler: ((_ image: UIImage?, _ path: String?, _ error: Error?)->Void)?)
+	func prepare_generationPayload(imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
+	func extract_infotext(pngData: Data) async -> String
 
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
 
@@ -61,14 +61,14 @@ extension SDmoduleMain {
 			}
 	}
 
-	public func refresh_LastPayload(completionHandler: ((_ error: Error?)->Void)?) {
+	public func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?) {
 		execute_internalSysInfo {
 			[weak self] (error) in
 
 			guard let folderPath = self?.systemInfo?.generationFolder() else {
 				// TODO: find better evaluation for NEWly started server
 				do {
-					self?.currentGenerationPayload = try JSONDecoder().decode(SDcodablePayload.self, from: "{}".data(using: .utf8) ?? Data())
+					self?.generationPayload = try JSONDecoder().decode(SDcodablePayload.self, from: "{}".data(using: .utf8) ?? Data())
 				}
 				catch {
 					fxdPrint(error)
@@ -78,13 +78,13 @@ extension SDmoduleMain {
 			}
 
 
-			self?.obtain_latestGenereatedImage(
-				folderPath: folderPath,
+			self?.obtain_latestImage(
+				path: folderPath,
 				completionHandler: {
 					[weak self] (latestImage, fullpath, error) in
 
 					if let path = fullpath {
-						self?.obtain_GenInfo(path: path, completionHandler: nil)
+						self?.prepare_generationPayload(imagePath: path, completionHandler: nil)
 					}
 
 					DispatchQueue.main.async {
@@ -97,10 +97,10 @@ extension SDmoduleMain {
 }
 
 extension SDmoduleMain {
-	public func obtain_latestGenereatedImage(folderPath: String, completionHandler: ((_ image: UIImage?, _ path: String?, _ error: Error?)->Void)?) {
+	public func obtain_latestImage(path: String, completionHandler: ((_ image: UIImage?, _ path: String?, _ error: Error?)->Void)?) {
 		requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
-			query: "folder_path=\(folderPath)") {
+			query: "folder_path=\(path)") {
 				[weak self] (data, error) in
 
 				guard let receivedData = data,
@@ -137,8 +137,8 @@ extension SDmoduleMain {
 						  type != "dir"
 				else {
 					//recursive
-					self?.obtain_latestGenereatedImage(
-						folderPath: fullpath,
+					self?.obtain_latestImage(
+						path: fullpath,
 						completionHandler: completionHandler)
 					return
 				}
@@ -149,23 +149,23 @@ extension SDmoduleMain {
 					query: "path=\(fullpath)&t=file") {
 						(received, error) in
 
-						guard let receivedData = received else {
+						guard let pngData = received else {
 							completionHandler?(nil, fullpath, error)
 							return
 						}
 
 
-						let latestImage = UIImage(data: receivedData)
+						let latestImage = UIImage(data: pngData)
 
 						completionHandler?(latestImage, fullpath, error)
 					}
 			}
 	}
 
-	public func obtain_GenInfo(path: String, completionHandler: ((_ error: Error?)->Void)?) {
+	public func prepare_generationPayload(imagePath: String, completionHandler: ((_ error: Error?)->Void)?) {
 		requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
-			query: "path=\(path)",
+			query: "path=\(imagePath)",
 			responseHandler: {
 				[weak self] (received, error) in
 
@@ -177,13 +177,13 @@ extension SDmoduleMain {
 				}
 
 
-				guard let decodedPayload = SDcodablePayload.decoded(infotext: infotext) else {
+				guard let obtainedPayload = SDcodablePayload.decoded(infotext: infotext) else {
 					completionHandler?(error)
 					return
 				}
 
 				fxd_log()
-				self?.currentGenerationPayload = decodedPayload
+				self?.generationPayload = obtainedPayload
 				completionHandler?(error)
 		})
 	}
@@ -191,7 +191,7 @@ extension SDmoduleMain {
 
 extension SDmoduleMain {
 	public func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
-		let payload: Data? = currentGenerationPayload?.evaluatedPayload(extensions: systemInfo?.Extensions)
+		let payload: Data? = generationPayload?.evaluatedPayload(extensions: systemInfo?.Extensions)
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			payload: payload) {
@@ -215,7 +215,7 @@ extension SDmoduleMain {
 
 				let decodedImageArray = decodedResponse.decodedImages()
 
-				guard let generated = decodedImageArray.first else {
+				guard let newlyGenerated = decodedImageArray.first else {
 					fxdPrint("receivedData.jsonObject()\n", receivedData.jsonObject())
 					completionHandler?(error)
 					return
@@ -223,12 +223,12 @@ extension SDmoduleMain {
 
 
 				if let infotext = decodedResponse.infotext(),
-				   let decodedPayload = SDcodablePayload.decoded(infotext: infotext) {	fxd_log()
-					self?.currentGenerationPayload = decodedPayload
+				   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {	fxd_log()
+					self?.generationPayload = newlyGeneratedPayload
 				}
 
 				DispatchQueue.main.async {
-					self?.observable?.displayedImage = generated
+					self?.observable?.displayedImage = newlyGenerated
 				}
 				completionHandler?(error)
 			}

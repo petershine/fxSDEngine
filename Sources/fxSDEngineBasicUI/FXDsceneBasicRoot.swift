@@ -105,7 +105,7 @@ extension FXDsceneBasicRoot {
 						systemImageName: "arrow.clockwise",
 						foregroundStyle: .white,
 						action: {
-							sdEngine.refresh_LastPayload(completionHandler: nil)
+							sdEngine.refresh_sysInfo(completionHandler: nil)
 						})
 					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 				}
@@ -205,8 +205,8 @@ extension FXDsceneBasicRoot {
 extension FXDsceneBasicRoot {
 	@ViewBuilder
 	var OVERLAY_promptEditor: some View {
-		let prompt = sdEngine.currentGenerationPayload?.prompt ?? "PROMPT"
-		let negative_prompt = sdEngine.currentGenerationPayload?.negative_prompt ?? "NEGATIVE_PROMPT"
+		let prompt = sdEngine.generationPayload?.prompt ?? "PROMPT"
+		let negative_prompt = sdEngine.generationPayload?.negative_prompt ?? "NEGATIVE_PROMPT"
 
 		FXDswiftuiTextEditor(
 			shouldPresentPromptEditor: $shouldPresentPromptEditor,
@@ -215,12 +215,12 @@ extension FXDsceneBasicRoot {
 			finishedEditing: {
 				(editedPrompt, editedNegativePrompt) in
 
-				if let modifiedPayload = sdEngine.currentGenerationPayload?.modified(
+				if let modifiedPayload = sdEngine.generationPayload?.modified(
 					editedPrompt: editedPrompt,
 					editedNegativePrompt: editedNegativePrompt) {
 
 					fxd_log()
-					sdEngine.currentGenerationPayload = modifiedPayload
+					sdEngine.generationPayload = modifiedPayload
 				}
 			})
 		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))

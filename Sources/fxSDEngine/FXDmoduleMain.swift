@@ -39,9 +39,9 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 	@Published open var observable: (any SDobservableMain)? = nil
 
 	open var systemInfo: SDcodableSysInfo? = nil
-	open var currentGenerationPayload: SDcodablePayload? {
+	open var generationPayload: SDcodablePayload? {
 		didSet {
-			if let encodedPayload = currentGenerationPayload?.encodedPayload() {
+			if let encodedPayload = generationPayload?.encodedPayload() {
 				savePayloadToFile(payload: encodedPayload)
 			}
 		}
@@ -49,15 +49,15 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 
 	public init(observable: (any SDobservableMain)? = nil,
 				systemInfo: SDcodableSysInfo? = nil,
-				currentGenerationPayload: SDcodablePayload? = nil) {
+				generationPayload: SDcodablePayload? = nil) {
 		super.init()
 		
 		self.observable = observable
 		self.systemInfo = systemInfo
-		self.currentGenerationPayload = currentGenerationPayload
+		self.generationPayload = generationPayload
 	}
 
-	open func obtain_infotext(pngData: Data) async -> String {	fxd_overridable()
+	open func extract_infotext(pngData: Data) async -> String {	fxd_overridable()
 		return ""
 	}
 }
