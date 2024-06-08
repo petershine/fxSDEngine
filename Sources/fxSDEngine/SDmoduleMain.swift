@@ -25,7 +25,7 @@ public protocol SDmoduleMain: NSObject, SDnetworking {
 	func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?)
 	func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?)
 
-	func obtain_latestImage(path: String, completionHandler: ((_ image: UIImage?, _ path: String?, _ error: Error?)->Void)?)
+	func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
 	func prepare_generationPayload(imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
 	func extract_infotext(pngData: Data) async -> String
 
@@ -78,17 +78,21 @@ extension SDmoduleMain {
 			}
 
 
-			self?.obtain_latestImage(
+			self?.obtain_latestPNGData(
 				path: folderPath,
 				completionHandler: {
-					[weak self] (latestImage, fullpath, error) in
+					[weak self] (pngData, fullPath, error) in
 
-					if let path = fullpath {
-						self?.prepare_generationPayload(imagePath: path, completionHandler: nil)
+					if let imagePath = fullPath {
+						self?.prepare_generationPayload(imagePath: imagePath, completionHandler: nil)
 					}
 
-					DispatchQueue.main.async {
-						self?.observable?.displayedImage = latestImage
+
+					if pngData != nil,
+					   let latestImage = UIImage(data: pngData!) {
+						DispatchQueue.main.async {
+							self?.observable?.displayedImage = latestImage
+						}
 					}
 					completionHandler?(error)
 				})
@@ -97,7 +101,7 @@ extension SDmoduleMain {
 }
 
 extension SDmoduleMain {
-	public func obtain_latestImage(path: String, completionHandler: ((_ image: UIImage?, _ path: String?, _ error: Error?)->Void)?) {
+	public func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?) {
 		requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
 			query: "folder_path=\(path)") {
@@ -137,7 +141,7 @@ extension SDmoduleMain {
 						  type != "dir"
 				else {
 					//recursive
-					self?.obtain_latestImage(
+					self?.obtain_latestPNGData(
 						path: fullpath,
 						completionHandler: completionHandler)
 					return
@@ -155,9 +159,7 @@ extension SDmoduleMain {
 						}
 
 
-						let latestImage = UIImage(data: pngData)
-
-						completionHandler?(latestImage, fullpath, error)
+						completionHandler?(pngData, fullpath, error)
 					}
 			}
 	}
