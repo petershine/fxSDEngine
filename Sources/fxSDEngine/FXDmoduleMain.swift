@@ -121,7 +121,7 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 
 				#if DEBUG
 				if data != nil,
-				   var jsonObject = data!.jsonObject() {
+				   var jsonObject = data!.jsonObject() {	fxd_log()
 					jsonObject["images"] = ["<IMAGES ENCODED>"]
 					fxdPrint(jsonObject)
 				}
@@ -135,24 +135,42 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 				}
 
 
-				let decodedImageArray = decodedResponse.decodedImages()
-
-				guard let newlyGenerated = decodedImageArray.first else {
+				guard let encodedImage = decodedResponse.images?.first as? String else {	fxd_log()
 					fxdPrint("receivedData.jsonObject()\n", receivedData.jsonObject())
 					completionHandler?(error)
 					return
 				}
 
 
-				if let infotext = decodedResponse.infotext(),
-				   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {	fxd_log()
-					self?.generationPayload = newlyGeneratedPayload
+				guard let pngData = Data(base64Encoded: encodedImage) else {
+					completionHandler?(error)
+					return
 				}
 
-				DispatchQueue.main.async {
-					self?.observable?.displayedImage = newlyGenerated
+
+
+				let infotext = decodedResponse.infotext() ?? ""
+				Task {	@MainActor
+					[weak self] in
+
+					var newImage: UIImage? = nil
+					if let modifiedPNGData = await self?.insert_infotext(infotext: infotext, pngData: pngData),
+					   let modifiedImage = UIImage(data: modifiedPNGData) {
+						newImage = modifiedImage
+					}
+
+					DispatchQueue.main.async {	fxd_log()
+						if !(infotext.isEmpty),
+						   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {
+							self?.generationPayload = newlyGeneratedPayload
+						}
+
+						if newImage != nil {
+							self?.observable?.displayedImage = newImage
+						}
+						completionHandler?(error)
+					}
 				}
-				completionHandler?(error)
 			}
 	}
 }
@@ -164,5 +182,9 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 extension FXDmoduleMain {
 	@objc open func extract_infotext(pngData: Data) async -> String {
 		return ""
+	}
+
+	@objc open func insert_infotext(infotext: String, pngData: Data?) async -> Data? {
+		return pngData
 	}
 }
