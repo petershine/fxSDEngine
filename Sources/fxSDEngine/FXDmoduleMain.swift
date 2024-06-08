@@ -36,6 +36,11 @@ open class FXDobservableMain: NSObject, SDobservableMain {
 
 
 open class FXDmoduleMain: NSObject, SDmoduleMain {
+	open var SD_SERVER_HOSTNAME: String {
+		return "http://127.0.0.1:7860"
+	}
+
+	
 	@Published open var observable: (any SDobservableMain)? = nil
 
 	open var systemInfo: SDcodableSysInfo? = nil

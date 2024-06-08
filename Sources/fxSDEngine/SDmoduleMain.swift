@@ -26,7 +26,7 @@ public protocol SDmoduleMain: NSObject, SDnetworking {
 	func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?)
 
 	func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
-	func prepare_generationPayload(imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
+	func prepare_generationPayload(pngData: Data, imagePath: String)
 	func extract_infotext(pngData: Data) async -> String
 
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
@@ -83,8 +83,13 @@ extension SDmoduleMain {
 				completionHandler: {
 					[weak self] (pngData, fullPath, error) in
 
+					guard pngData != nil else {
+						completionHandler?(error)
+						return
+					}
+
 					if let imagePath = fullPath {
-						self?.prepare_generationPayload(imagePath: imagePath, completionHandler: nil)
+						self?.prepare_generationPayload(pngData: pngData!, imagePath: imagePath)
 					}
 
 
@@ -164,30 +169,43 @@ extension SDmoduleMain {
 			}
 	}
 
-	public func prepare_generationPayload(imagePath: String, completionHandler: ((_ error: Error?)->Void)?) {
-		requestToSDServer(
-			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
-			query: "path=\(imagePath)",
-			responseHandler: {
-				[weak self] (received, error) in
+	public func prepare_generationPayload(pngData: Data, imagePath: String) {
+		Task {	@MainActor
+			[weak self] in
 
-				guard let receivedData = received,
-					  let infotext = String(data: receivedData, encoding: .utf8)
-				else {
-					completionHandler?(error)
-					return
-				}
+			let infotext = await self?.extract_infotext(pngData: pngData) ?? ""
+			if infotext.isEmpty {
+				self?.requestToSDServer(
+					api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
+					query: "path=\(imagePath)",
+					responseHandler: {
+						[weak self] (received, error) in
+
+						guard let receivedData = received,
+							  let infotext = String(data: receivedData, encoding: .utf8)
+						else {
+							return
+						}
 
 
-				guard let obtainedPayload = SDcodablePayload.decoded(infotext: infotext) else {
-					completionHandler?(error)
-					return
-				}
+						guard let obtainedPayload = SDcodablePayload.decoded(infotext: infotext) else {
+							return
+						}
 
-				fxd_log()
-				self?.generationPayload = obtainedPayload
-				completionHandler?(error)
-		})
+						fxd_log()
+						self?.generationPayload = obtainedPayload
+				})
+				return
+			}
+
+
+			guard let obtainedPayload = SDcodablePayload.decoded(infotext: infotext) else {
+				return
+			}
+
+			fxd_log()
+			self?.generationPayload = obtainedPayload
+		}
 	}
 }
 

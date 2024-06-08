@@ -47,10 +47,6 @@ public protocol SDnetworking {
 }
 
 extension SDnetworking {
-	public var SD_SERVER_HOSTNAME: String {
-		return "http://127.0.0.1:7860"
-	}
-
 	public var savedPayloadFilename: String {
 		return "savedPayload.json"
 	}
