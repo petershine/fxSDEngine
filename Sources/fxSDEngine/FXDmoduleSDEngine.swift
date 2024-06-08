@@ -363,6 +363,7 @@ open class FXDmoduleSDEngine: NSObject {
 							return
 						}
 
+						receivedData.evaluatePNGdata()
 
 						let latestImage = UIImage(data: receivedData)
 
@@ -496,5 +497,42 @@ extension FXDmoduleSDEngine {
 		}
 
 		return payloadData
+	}
+}
+
+
+
+//https://swiftinit.org/docs/swift-png/png/iphoneoptimized
+import PNG
+
+extension Data {
+	public func evaluatePNGdata() {
+		//NEED to find a way to setup ByteStream instead...
+		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+		let fileURL = documentDirectory!.appendingPathComponent("savedPNG.png")
+		do {
+			try self.write(to: fileURL)
+		} catch {	fxd_log()
+			fxdPrint("PNGdata: ", self)
+			fxdPrint("Failed to save: ", error)
+			return
+		}
+
+
+		var decompressedPNG: PNG.Image? = nil
+		do {
+			decompressedPNG = try PNG.Image.decompress(path: fileURL.path())
+		}
+		catch {	fxd_log()
+			fxdPrint("Failed to decompress: ", error)
+			return
+		}
+
+
+		fxd_log()
+		let texts = decompressedPNG?.metadata.text as? [PNG.Text]
+		for text in texts ?? [] {
+			fxdPrint(text)
+		}
 	}
 }
