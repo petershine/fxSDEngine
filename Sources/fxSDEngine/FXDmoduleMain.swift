@@ -62,7 +62,94 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 		self.generationPayload = generationPayload
 	}
 
+	open func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?) {
+		execute_internalSysInfo {
+			[weak self] (error) in
+
+			guard let folderPath = self?.systemInfo?.generationFolder() else {
+				// TODO: find better evaluation for NEWly started server
+				do {
+					self?.generationPayload = try JSONDecoder().decode(SDcodablePayload.self, from: "{}".data(using: .utf8) ?? Data())
+				}
+				catch {
+					fxdPrint(error)
+				}
+				completionHandler?(error)
+				return
+			}
+
+
+			self?.obtain_latestPNGData(
+				path: folderPath,
+				completionHandler: {
+					[weak self] (pngData, fullPath, error) in
+
+					guard pngData != nil else {
+						completionHandler?(error)
+						return
+					}
+
+					if let imagePath = fullPath {
+						self?.prepare_generationPayload(pngData: pngData!, imagePath: imagePath)
+					}
+
+
+					if pngData != nil,
+					   let latestImage = UIImage(data: pngData!) {
+						DispatchQueue.main.async {
+							self?.observable?.displayedImage = latestImage
+						}
+					}
+					completionHandler?(error)
+				})
+		}
+	}
+
 	open func extract_infotext(pngData: Data) async -> String {	fxd_overridable()
 		return ""
+	}
+
+	open func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
+		let payload: Data? = generationPayload?.evaluatedPayload(extensions: systemInfo?.Extensions)
+		requestToSDServer(
+			api_endpoint: .SDAPI_V1_TXT2IMG,
+			payload: payload) {
+				[weak self] (data, error) in
+
+				#if DEBUG
+				if data != nil,
+				   var jsonObject = data!.jsonObject() {
+					jsonObject["images"] = ["<IMAGES ENCODED>"]
+					fxdPrint(jsonObject)
+				}
+				#endif
+
+				guard let receivedData = data,
+					  let decodedResponse = SDcodableGeneration.decoded(receivedData) as? SDcodableGeneration
+				else {
+					completionHandler?(error)
+					return
+				}
+
+
+				let decodedImageArray = decodedResponse.decodedImages()
+
+				guard let newlyGenerated = decodedImageArray.first else {
+					fxdPrint("receivedData.jsonObject()\n", receivedData.jsonObject())
+					completionHandler?(error)
+					return
+				}
+
+
+				if let infotext = decodedResponse.infotext(),
+				   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {	fxd_log()
+					self?.generationPayload = newlyGeneratedPayload
+				}
+
+				DispatchQueue.main.async {
+					self?.observable?.displayedImage = newlyGenerated
+				}
+				completionHandler?(error)
+			}
 	}
 }
