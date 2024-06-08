@@ -3,7 +3,7 @@
 import Foundation
 
 
-struct SDcodableSysInfo: SDcodableResponse {
+public struct SDcodableSysInfo: SDcodableResponse {
 	var Config: SDcodableConfig? = nil
 	struct SDcodableConfig: Codable {
 		var outdir_samples: String? = nil
@@ -30,7 +30,7 @@ struct SDcodableSysInfo: SDcodableResponse {
 	public var Extensions: [SDcodableExtension?]? = nil
 }
 
-struct SDcodableExtension: Codable {
+public struct SDcodableExtension: Codable {
 	var branch: String? = nil
 	var name: String? = nil
 	var path: String? = nil

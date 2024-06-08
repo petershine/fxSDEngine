@@ -1,12 +1,12 @@
 
 
-import fXDKit
-import fxSDEngine
-
 import SwiftUI
 
+import fxSDEngine
+import fXDKit
 
-public struct SDsceneBasicRoot: View {
+
+public struct FXDsceneBasicRoot: View {
 	@Environment(\.colorScheme) var colorScheme
 
 	@Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -14,13 +14,13 @@ public struct SDsceneBasicRoot: View {
 
 	@State var shouldPresentPromptEditor: Bool = false
 
-	var sdEngine: FXDmoduleSDEngine
-	@ObservedObject private var sdObservable: FXDobservableSDProperties
+	var sdEngine: FXDmoduleMain
+	@ObservedObject private var sdObservable: FXDobservableMain
 
 
-	public init(sdEngine: FXDmoduleSDEngine?) {
-		self.sdEngine = sdEngine ?? FXDmoduleSDEngine()
-		self.sdObservable = self.sdEngine.observable
+	public init(sdEngine: SDmoduleMain) {
+		self.sdEngine = sdEngine as! FXDmoduleMain
+		self.sdObservable = sdEngine.observable as! FXDobservableMain
 	}
 
 	public var body: some View {
@@ -72,7 +72,7 @@ public struct SDsceneBasicRoot: View {
 }
 
 
-extension SDsceneBasicRoot {
+extension FXDsceneBasicRoot {
 	var GROUP_resetting: some View {
 		HStack {
 			VStack {
@@ -202,7 +202,7 @@ extension SDsceneBasicRoot {
 }
 
 
-extension SDsceneBasicRoot {
+extension FXDsceneBasicRoot {
 	@ViewBuilder
 	var OVERLAY_promptEditor: some View {
 		let prompt = sdEngine.currentGenerationPayload?.prompt ?? "PROMPT"
