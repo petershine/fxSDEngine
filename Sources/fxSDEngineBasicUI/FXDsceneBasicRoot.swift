@@ -35,29 +35,25 @@ public struct FXDsceneBasicRoot: View {
 			VStack {
 				GROUP_resetting
 					.padding()
-
+				
 				Spacer()
-
-				HStack {
-					let isJobRunning = sdObservable.progressObservable?.state?.isJobRunning() ?? false
-					if !isJobRunning {
+				
+				let isJobRunning = sdObservable.progressObservable?.state?.isJobRunning() ?? false
+				if !isJobRunning {
+					HStack {
 						GROUP_saving
-							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
-
+						
 						Spacer()
-
+						
 						GROUP_generating
-							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
-					}
-
-					Spacer()
-
-					if !isJobRunning {
+						
+						Spacer()
+						
 						GROUP_editor
-							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 					}
+					.padding()
+					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 				}
-				.padding()
 			}
 
 			if shouldPresentPromptEditor {
