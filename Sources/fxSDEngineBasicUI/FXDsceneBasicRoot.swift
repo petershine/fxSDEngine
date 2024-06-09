@@ -29,7 +29,10 @@ public struct FXDsceneBasicRoot: View {
 
 	public var body: some View {
 		ZStack {
-			FXDswiftuiMediaDisplay(displayedImage: sdObservable.displayedImage)
+			FXDswiftuiMediaDisplay(
+				displayedImage: Binding.constant(sdObservable.displayedImage),
+				contentMode: Binding.constant(.fit)
+			)
 
 			if sdObservable.overlayObservable != nil {
 				FXDswiftuiOverlay(observable: sdObservable.overlayObservable)
