@@ -40,11 +40,7 @@ public struct FXDsceneBasicRoot: View {
 
 				HStack {
 					let isJobRunning = sdObservable.progressObservable?.state?.isJobRunning() ?? false
-					if isJobRunning {
-						GROUP_progress
-							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
-					}
-					else {
+					if !isJobRunning {
 						GROUP_saving
 							.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 
@@ -75,9 +71,10 @@ public struct FXDsceneBasicRoot: View {
 extension FXDsceneBasicRoot {
 	var GROUP_resetting: some View {
 		HStack {
-			VStack {
+			HStack {
 				let isJobRunning = sdObservable.progressObservable?.state?.isJobRunning() ?? false
-				if isJobRunning {
+				let shouldContinueRefreshing = sdObservable.shouldContinueRefreshing
+				if isJobRunning || shouldContinueRefreshing {
 					FXDswiftuiButton(
 						systemImageName: "stop.circle",
 						foregroundStyle: .red,
@@ -93,6 +90,18 @@ extension FXDsceneBasicRoot {
 							}
 						})
 					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
+
+					if let progress = sdObservable.progressObservable?.progress {
+						Text(String(format: "%0.1f %%", progress * 100.0))
+							.multilineTextAlignment(.leading)
+							.foregroundStyle(.white)
+					}
+
+					if let job = sdObservable.progressObservable?.state?.job {
+						Text(job)
+							.multilineTextAlignment(.leading)
+							.foregroundStyle(.white)
+					}
 				}
 			}
 
@@ -111,43 +120,6 @@ extension FXDsceneBasicRoot {
 				}
 			}
 		}
-	}
-
-	var GROUP_progress: some View {
-		VStack(
-			alignment: .leading,
-			spacing: nil,
-			content: {
-
-				Spacer()
-
-				HStack {
-					FXDswiftuiButton(
-						systemImageName: (sdObservable.shouldContinueRefreshing ? "tv.slash" : "tv"),
-						foregroundStyle: .white,
-						action: {
-							sdObservable.shouldContinueRefreshing.toggle()
-							sdEngine.continuousProgressRefreshing()
-						})
-					.padding()
-
-					if sdObservable.shouldContinueRefreshing {
-						if let progress = sdObservable.progressObservable?.progress {
-							Text(String(format: "%0.1f %%", progress * 100.0))
-								.multilineTextAlignment(.leading)
-								.foregroundStyle(.white)
-								.padding()
-						}
-
-						if let job = sdObservable.progressObservable?.state?.job {
-							Text(job)
-								.multilineTextAlignment(.leading)
-								.foregroundStyle(.white)
-								.padding()
-						}
-					}
-				}
-			})
 	}
 
 	var GROUP_saving: some View {
