@@ -11,7 +11,7 @@ struct FXDsceneBasicConfiguration: View {
 
     var body: some View {
 		HStack {
-			Text("BATCH COUNT: \(batchCount)")
+			Text("BATCH COUNT: \(Int(batchCount))")
 			Slider(value: $batchCount, in: 1...100, step: 1)
 		}
     }

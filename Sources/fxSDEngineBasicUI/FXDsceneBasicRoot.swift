@@ -17,10 +17,14 @@ public struct FXDsceneBasicRoot: View {
 	var sdEngine: FXDmoduleMain
 	@ObservedObject private var sdObservable: FXDobservableMain
 
+	@State var batchCount: Double = 1.0
+
 
 	public init(sdEngine: SDmoduleMain) {
 		self.sdEngine = sdEngine as! FXDmoduleMain
 		self.sdObservable = sdEngine.observable as! FXDobservableMain
+
+		self.batchCount = Double(sdEngine.generationPayload?.n_iter ?? 1)
 	}
 
 	public var body: some View {
@@ -175,8 +179,6 @@ extension FXDsceneBasicRoot {
 	var OVERLAY_promptEditor: some View {
 		let prompt = sdEngine.generationPayload?.prompt ?? "PROMPT"
 		let negative_prompt = sdEngine.generationPayload?.negative_prompt ?? "NEGATIVE_PROMPT"
-		
-		var batchCount: Binding<Double> = Binding.constant(Double(sdEngine.generationPayload?.n_iter ?? 1))
 
 		FXDswiftuiTextEditor(
 			shouldPresentPromptEditor: $shouldPresentPromptEditor,
@@ -188,14 +190,14 @@ extension FXDsceneBasicRoot {
 				if let modifiedPayload = sdEngine.generationPayload?.modified(
 					editedPrompt: editedPrompt,
 					editedNegativePrompt: editedNegativePrompt,
-					batchCount: batchCount.wrappedValue) {
+					batchCount: batchCount) {
 
 					fxd_log()
 					sdEngine.generationPayload = modifiedPayload
 				}
 			},
 			attachedView: {
-				FXDsceneBasicConfiguration(batchCount: batchCount)
+				FXDsceneBasicConfiguration(batchCount: $batchCount)
 			})
 		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 		.onDisappear(perform: {
