@@ -188,3 +188,9 @@ extension FXDmoduleMain {
 		return pngData
 	}
 }
+
+extension FXDmoduleMain {
+	@objc open func sharableItem() -> Any? {
+		return self.observable?.displayedImage
+	}
+}
