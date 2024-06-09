@@ -198,6 +198,7 @@ extension FXDsceneBasicRoot {
 			},
 			attachedView: {
 				FXDsceneBasicConfiguration(batchCount: $batchCount)
+					.foregroundStyle(.white)
 			})
 		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 		.onDisappear(perform: {
