@@ -70,22 +70,22 @@ extension SDnetworking {
 
 
 extension SDnetworking {
-	public func savePayloadToFile(payload: Data) {
-		guard let fileURL = savedPayloadJSONurl else {	fxd_log()
+	public func savePayloadToFile(payload: Data) {	fxd_log()
+		fxdPrint("payload: ", payload)
+		guard let fileURL = savedPayloadJSONurl else {
 			return
 		}
 
 		do {
 			try payload.write(to: fileURL)
 			fxdPrint("[PAYLOAD JSON SAVED]: ", fileURL)
-		} catch {	fxd_log()
-			fxdPrint("payload: ", payload)
-			fxdPrint("Failed to save: ", error)
+		} catch {
+			fxdPrint(error)
 		}
 	}
 
 	public func loadPayloadFromFile() -> Data? {
-		guard let fileURL = savedPayloadJSONurl else {	fxd_log()
+		guard let fileURL = savedPayloadJSONurl else {
 			return nil
 		}
 
@@ -94,14 +94,15 @@ extension SDnetworking {
 		do {
 			payloadData = try Data(contentsOf: fileURL)
 		} catch {	fxd_log()
-			fxdPrint("Failed to load: ", error)
+			fxdPrint(error)
 		}
 
 		return payloadData
 	}
 
-	public func saveGeneratedImage(pngData: Data) async -> Bool {
-		guard let fileURL = savedImageFileURL else {	fxd_log()
+	public func saveGeneratedImage(pngData: Data) async -> Bool {	fxd_log()
+		fxdPrint("pngData: ", pngData)
+		guard let fileURL = savedImageFileURL else {
 			return false
 		}
 
@@ -110,9 +111,8 @@ extension SDnetworking {
 			fxdPrint("[IMAGE FILE SAVED]: ", fileURL)
 			return true
 
-		} catch {	fxd_log()
-			fxdPrint("pngData: ", pngData)
-			fxdPrint("Failed to save: ", error)
+		} catch {
+			fxdPrint(error)
 			return false
 		}
 	}
@@ -127,12 +127,16 @@ extension SDnetworking {
 		query: String? = nil,
 		payload: Data? = nil,
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?) {
+			if !quiet {
+				fxd_log()
+			}
 
 			var requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
 			if !(query?.isEmpty ?? true),
 			   let escapedQuery = query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
 				requestPath += "?\(escapedQuery)"
 			}
+
 			fxdPrint("requestPath: ", requestPath, quiet:quiet)
 
 			guard let requestURL = URL(string: requestPath) else {
