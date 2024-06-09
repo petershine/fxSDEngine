@@ -52,8 +52,10 @@ public class SDcodablePayload: Codable {
 
 		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 35
 
-		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 512
 		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
+
+		let aspectRatio = UIScreen.main.nativeBounds.size.width / UIScreen.main.nativeBounds.size.height
+		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? Int(CGFloat(self.height) * aspectRatio)
 
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? false
 		self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler) ?? "Karras"
