@@ -175,6 +175,8 @@ extension FXDsceneBasicRoot {
 	var OVERLAY_promptEditor: some View {
 		let prompt = sdEngine.generationPayload?.prompt ?? "PROMPT"
 		let negative_prompt = sdEngine.generationPayload?.negative_prompt ?? "NEGATIVE_PROMPT"
+		
+		var batchCount: Binding<Double> = Binding.constant(Double(sdEngine.generationPayload?.n_iter ?? 1))
 
 		FXDswiftuiTextEditor(
 			shouldPresentPromptEditor: $shouldPresentPromptEditor,
@@ -185,11 +187,15 @@ extension FXDsceneBasicRoot {
 
 				if let modifiedPayload = sdEngine.generationPayload?.modified(
 					editedPrompt: editedPrompt,
-					editedNegativePrompt: editedNegativePrompt) {
+					editedNegativePrompt: editedNegativePrompt,
+					batchCount: batchCount.wrappedValue) {
 
 					fxd_log()
 					sdEngine.generationPayload = modifiedPayload
 				}
+			},
+			attachedView: {
+				FXDsceneBasicConfiguration(batchCount: batchCount)
 			})
 		.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 		.onDisappear(perform: {
