@@ -150,26 +150,18 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 
 
 				let infotext = decodedResponse.infotext() ?? ""
-				Task {	@MainActor
-					[weak self] in
+				let newImage = UIImage(data: pngData)
 
-					var newImage: UIImage? = nil
-					if let modifiedPNGData = await self?.insert_infotext(infotext: infotext, pngData: pngData),
-					   let modifiedImage = UIImage(data: modifiedPNGData) {
-						newImage = modifiedImage
+				DispatchQueue.main.async {	fxd_log()
+					if !(infotext.isEmpty),
+					   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {
+						self?.generationPayload = newlyGeneratedPayload
 					}
 
-					DispatchQueue.main.async {	fxd_log()
-						if !(infotext.isEmpty),
-						   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {
-							self?.generationPayload = newlyGeneratedPayload
-						}
-
-						if newImage != nil {
-							self?.observable?.displayedImage = newImage
-						}
-						completionHandler?(error)
+					if newImage != nil {
+						self?.observable?.displayedImage = newImage
 					}
+					completionHandler?(error)
 				}
 			}
 	}
@@ -182,10 +174,6 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 extension FXDmoduleMain {
 	@objc open func extract_infotext(pngData: Data) async -> String {
 		return ""
-	}
-
-	@objc open func insert_infotext(infotext: String, pngData: Data?) async -> Data? {
-		return pngData
 	}
 }
 
