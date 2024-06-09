@@ -155,6 +155,26 @@ extension SDcodablePayload {
 
 extension SDcodablePayload {
 	static func decoded(infotext: String) -> SDcodablePayload? {	fxd_log()
+	static func minimalPayload() -> Self? {
+		let minimalJSON =
+"""
+{
+"prompt" : "(the most beautiful photo), deep forest",
+"negative_prompt" : "(random painting)"
+}
+"""
+
+		var minimalPayload: Self? = nil
+		do {
+			minimalPayload = try JSONDecoder().decode(Self.self, from: minimalJSON.data(using: .utf8) ?? Data())
+		}
+		catch {	fxd_log()
+			fxdPrint(error)
+		}
+
+		return minimalPayload
+	}
+
 		fxdPrint("[infotext]", infotext)
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Steps:"))

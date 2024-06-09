@@ -68,12 +68,7 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 
 			guard let folderPath = self?.systemInfo?.generationFolder() else {
 				// TODO: find better evaluation for NEWly started server
-				do {
-					self?.generationPayload = try JSONDecoder().decode(SDcodablePayload.self, from: "{}".data(using: .utf8) ?? Data())
-				}
-				catch {
-					fxdPrint(error)
-				}
+				self?.generationPayload = SDcodablePayload.minimalPayload()
 				completionHandler?(error)
 				return
 			}
