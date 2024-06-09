@@ -166,13 +166,3 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 			}
 	}
 }
-
-
-//TODO: need to make swift-png package to be iOS 17 compatible
-//import PNG
-
-extension FXDmoduleMain {
-	@objc open func extract_infotext(pngData: Data) async -> String {
-		return ""
-	}
-}

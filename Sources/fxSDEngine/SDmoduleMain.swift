@@ -27,7 +27,6 @@ public protocol SDmoduleMain: NSObject, SDnetworking {
 
 	func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
 	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
-	func extract_infotext(pngData: Data) async -> String
 
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
 
@@ -148,13 +147,6 @@ extension SDmoduleMain {
 					self?.generationPayload = obtainedPayload
 					completionHandler?(error)
 				}
-			}
-
-
-			let infotext = await self?.extract_infotext(pngData: pngData) ?? ""
-			if !(infotext.isEmpty) {
-				_assignPayload(infotext, nil)
-				return
 			}
 
 
