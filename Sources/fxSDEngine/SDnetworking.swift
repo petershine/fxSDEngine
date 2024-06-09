@@ -37,6 +37,10 @@ public protocol SDnetworking {
 	var savedImageFileURL: URL? { get }
 	var sharableItem: Any? { get }
 
+	func savePayloadToFile(payload: Data)
+	func loadPayloadFromFile() -> Data?
+	func saveGeneratedImage(pngData: Data) async throws -> Bool
+
 	func requestToSDServer(
 		quiet: Bool,
 		api_endpoint: SDAPIendpoint,
@@ -44,9 +48,6 @@ public protocol SDnetworking {
 		query: String?,
 		payload: Data?,
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?)
-
-	func savePayloadToFile(payload: Data)
-	func loadPayloadFromFile() -> Data?
 }
 
 extension SDnetworking {
@@ -66,6 +67,57 @@ extension SDnetworking {
 		return savedImageFileURL
 	}
 }
+
+
+extension SDnetworking {
+	public func savePayloadToFile(payload: Data) {
+		guard let fileURL = savedPayloadJSONurl else {	fxd_log()
+			return
+		}
+
+		do {
+			try payload.write(to: fileURL)
+			fxdPrint("[PAYLOAD JSON SAVED]: ", fileURL)
+		} catch {	fxd_log()
+			fxdPrint("payload: ", payload)
+			fxdPrint("Failed to save: ", error)
+		}
+	}
+
+	public func loadPayloadFromFile() -> Data? {
+		guard let fileURL = savedPayloadJSONurl else {	fxd_log()
+			return nil
+		}
+
+
+		var payloadData: Data? = nil
+		do {
+			payloadData = try Data(contentsOf: fileURL)
+		} catch {	fxd_log()
+			fxdPrint("Failed to load: ", error)
+		}
+
+		return payloadData
+	}
+
+	public func saveGeneratedImage(pngData: Data) async -> Bool {
+		guard let fileURL = savedImageFileURL else {	fxd_log()
+			return false
+		}
+
+		do {
+			try pngData.write(to: fileURL)
+			fxdPrint("[IMAGE FILE SAVED]: ", fileURL)
+			return true
+
+		} catch {	fxd_log()
+			fxdPrint("pngData: ", pngData)
+			fxdPrint("Failed to save: ", error)
+			return false
+		}
+	}
+}
+
 
 extension SDnetworking {
 	public func requestToSDServer(
@@ -154,36 +206,4 @@ extension SDnetworking {
 			}
 			httpTask.resume()
 		}
-}
-
-extension SDnetworking {
-	public func savePayloadToFile(payload: Data) {
-		guard let fileURL = savedPayloadJSONurl else {	fxd_log()
-			return
-		}
-
-		do {
-			try payload.write(to: fileURL)
-			fxdPrint("[PAYLOAD JSON SAVED]: ", fileURL)
-		} catch {	fxd_log()
-			fxdPrint("payload: ", payload)
-			fxdPrint("Failed to save: ", error)
-		}
-	}
-
-	public func loadPayloadFromFile() -> Data? {
-		guard let fileURL = savedPayloadJSONurl else {	fxd_log()
-			return nil
-		}
-
-
-		var payloadData: Data? = nil
-		do {
-			payloadData = try Data(contentsOf: fileURL)
-		} catch {	fxd_log()
-			fxdPrint("Failed to load: ", error)
-		}
-
-		return payloadData
-	}
 }

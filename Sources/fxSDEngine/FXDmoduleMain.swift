@@ -160,6 +160,12 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 
 					if newImage != nil {
 						self?.observable?.displayedImage = newImage
+
+						Task {	@MainActor
+							[weak self] in
+
+							let _ = await self?.saveGeneratedImage(pngData:pngData)
+						}
 					}
 					completionHandler?(error)
 				}
