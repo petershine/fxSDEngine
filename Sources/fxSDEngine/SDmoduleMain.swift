@@ -30,7 +30,6 @@ public protocol SDmoduleMain: NSObject, SDnetworking {
 	func extract_infotext(pngData: Data) async -> String
 
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
-	func sharableItem() -> Any?
 
 	func execute_progress(skipImageDecoding: Bool, quiet: Bool, completionHandler: ((_ lastProgress: SDcodableProgress?, _ error: Error?)->Void)?)
 	func continuousProgressRefreshing()

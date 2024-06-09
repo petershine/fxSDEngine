@@ -158,7 +158,7 @@ extension FXDsceneBasicRoot {
 				systemImageName: "square.and.arrow.down",
 				foregroundStyle: .white,
 				action: {
-					if let pngItem = sdEngine.sharableItem() {
+					if let pngItem = sdEngine.sharableItem {
 						UIActivityViewController.show(items: [pngItem])
 					}
 				})

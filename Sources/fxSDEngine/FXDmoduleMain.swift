@@ -176,9 +176,3 @@ extension FXDmoduleMain {
 		return ""
 	}
 }
-
-extension FXDmoduleMain {
-	@objc open func sharableItem() -> Any? {
-		return self.observable?.displayedImage
-	}
-}

@@ -35,6 +35,7 @@ public protocol SDnetworking {
 	
 	var savedPayloadJSONurl: URL? { get }
 	var savedImageFileURL: URL? { get }
+	var sharableItem: Any? { get }
 
 	func requestToSDServer(
 		quiet: Bool,
@@ -59,6 +60,10 @@ extension SDnetworking {
 		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
 		let fileURL = documentDirectory?.appendingPathComponent("savedImage.png")
 		return fileURL
+	}
+
+	public var sharableItem: Any? {
+		return savedImageFileURL
 	}
 }
 
