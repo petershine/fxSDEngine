@@ -154,7 +154,6 @@ extension SDcodablePayload {
 }
 
 extension SDcodablePayload {
-	static func decoded(infotext: String) -> SDcodablePayload? {	fxd_log()
 	static func minimalPayload() -> Self? {
 		let minimalJSON =
 """
@@ -175,6 +174,7 @@ extension SDcodablePayload {
 		return minimalPayload
 	}
 
+	static func decoded(infotext: String) -> Self? {	fxd_log()
 		fxdPrint("[infotext]", infotext)
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Steps:"))
@@ -249,7 +249,7 @@ extension SDcodablePayload {
 }
 
 extension SDcodablePayload {
-	public func modified(editedPrompt: String, editedNegativePrompt: String, batchCount: Double) -> SDcodablePayload? {
+	public func modified(editedPrompt: String, editedNegativePrompt: String, batchCount: Double) -> Self? {
 		let didChangePrompt = !(self.prompt == editedPrompt)
 		let didChangeNegativePrompt = !(self.negative_prompt == editedNegativePrompt)
 		let didChangeBatchCount = !(self.n_iter == Int(batchCount))
