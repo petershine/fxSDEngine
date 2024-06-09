@@ -32,7 +32,9 @@ extension SDError: LocalizedError {
 
 public protocol SDnetworking {
 	var SD_SERVER_HOSTNAME: String { get }
-	var savedPayloadFilename: String { get }
+	
+	var savedPayloadJSONurl: URL? { get }
+	var savedImageFileURL: URL? { get }
 
 	func requestToSDServer(
 		quiet: Bool,
@@ -47,8 +49,16 @@ public protocol SDnetworking {
 }
 
 extension SDnetworking {
-	public var savedPayloadFilename: String {
-		return "savedPayload.json"
+	public var savedPayloadJSONurl: URL? {
+		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+		let fileURL = documentDirectory?.appendingPathComponent("savedPayload.json")
+		return fileURL
+	}
+
+	public var savedImageFileURL: URL? {
+		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+		let fileURL = documentDirectory?.appendingPathComponent("savedImage.png")
+		return fileURL
 	}
 }
 
@@ -143,15 +153,13 @@ extension SDnetworking {
 
 extension SDnetworking {
 	public func savePayloadToFile(payload: Data) {
-		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {	fxd_log()
-			fxdPrint("Document directory not found")
+		guard let fileURL = savedPayloadJSONurl else {	fxd_log()
 			return
 		}
 
-		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
 		do {
 			try payload.write(to: fileURL)
-			fxdPrint("[DATA SAVED]: ", fileURL)
+			fxdPrint("[PAYLOAD JSON SAVED]: ", fileURL)
 		} catch {	fxd_log()
 			fxdPrint("payload: ", payload)
 			fxdPrint("Failed to save: ", error)
@@ -159,14 +167,12 @@ extension SDnetworking {
 	}
 
 	public func loadPayloadFromFile() -> Data? {
-		guard let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {	fxd_log()
-			fxdPrint("Document directory not found")
+		guard let fileURL = savedPayloadJSONurl else {	fxd_log()
 			return nil
 		}
 
 
 		var payloadData: Data? = nil
-		let fileURL = documentDirectory.appendingPathComponent(savedPayloadFilename)
 		do {
 			payloadData = try Data(contentsOf: fileURL)
 		} catch {	fxd_log()
