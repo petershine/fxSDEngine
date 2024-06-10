@@ -13,9 +13,9 @@ public protocol SDmoduleMain: SDnetworking, AnyObject {
 	var overlayObservable: FXDobservableOverlay? { get set }
 	var progressObservable: SDcodableProgress? { get set }
 
-	var displayedImage: UIImage? { get set }
-
 	var shouldContinueRefreshing: Bool { get set }
+
+	var displayedImage: UIImage? { get set }
 
 
 	func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?)
@@ -52,6 +52,51 @@ extension SDmoduleMain {
 				self?.systemInfo = decodedResponse
 				completionHandler?(error)
 			}
+	}
+
+	public func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?) {
+		execute_internalSysInfo {
+			[weak self] (error) in
+
+			guard let folderPath = self?.systemInfo?.generationFolder() else {
+				// TODO: find better evaluation for NEWly started server
+				self?.generationPayload = SDcodablePayload.minimalPayload()
+				completionHandler?(error)
+				return
+			}
+
+
+			self?.obtain_latestPNGData(
+				path: folderPath,
+				completionHandler: {
+					[weak self] (pngData, fullPath, error) in
+
+					guard pngData != nil else {
+						completionHandler?(error)
+						return
+					}
+
+					guard let imagePath = fullPath else {
+						completionHandler?(error)
+						return
+					}
+
+
+					self?.prepare_generationPayload(
+						pngData: pngData!,
+						imagePath: imagePath) {
+							error in
+
+							if pngData != nil,
+							   let latestImage = UIImage(data: pngData!) {
+								DispatchQueue.main.async {
+									self?.displayedImage = latestImage
+								}
+							}
+							completionHandler?(error)
+						}
+				})
+		}
 	}
 }
 
@@ -159,6 +204,66 @@ extension SDmoduleMain {
 					_assignPayload(infotext, error)
 				})
 		}
+	}
+}
+
+extension SDmoduleMain {
+	public func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
+		let payload: Data? = generationPayload?.evaluatedPayload(extensions: systemInfo?.Extensions)
+		requestToSDServer(
+			api_endpoint: .SDAPI_V1_TXT2IMG,
+			payload: payload) {
+				[weak self] (data, error) in
+
+				#if DEBUG
+				if data != nil,
+				   var jsonObject = data!.jsonObject() {	fxd_log()
+					jsonObject["images"] = ["<IMAGES ENCODED>"]
+					fxdPrint(jsonObject)
+				}
+				#endif
+
+				guard let decodedResponse = data?.decode(SDcodableGeneration.self) else {
+					completionHandler?(error)
+					return
+				}
+
+
+				guard let encodedImage = decodedResponse.images?.first as? String else {	fxd_log()
+					fxdPrint("receivedData.jsonObject()\n", data?.jsonObject())
+					completionHandler?(error)
+					return
+				}
+
+
+				guard let pngData = Data(base64Encoded: encodedImage) else {
+					completionHandler?(error)
+					return
+				}
+
+
+
+				let infotext = decodedResponse.infotext() ?? ""
+				let newImage = UIImage(data: pngData)
+
+				DispatchQueue.main.async {	fxd_log()
+					if !(infotext.isEmpty),
+					   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {
+						self?.generationPayload = newlyGeneratedPayload
+					}
+
+					if newImage != nil {
+						self?.displayedImage = newImage
+
+						Task {	@MainActor
+							[weak self] in
+
+							let _ = try await self?.saveGeneratedImage(pngData:pngData)
+						}
+					}
+					completionHandler?(error)
+				}
+			}
 	}
 }
 
