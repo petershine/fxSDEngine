@@ -269,7 +269,11 @@ extension SDmoduleMain {
 
 
 extension SDmoduleMain {
-	public func execute_progress(skipImageDecoding: Bool, quiet: Bool = false, completionHandler: ((_ lastProgress: SDcodableProgress?, _ error: Error?)->Void)?) {
+	public func execute_progress(
+		skipImageDecoding: Bool = false,
+		quiet: Bool = false,
+		completionHandler: ((_ lastProgress: SDcodableProgress?, _ error: Error?)->Void)?) {
+
 		requestToSDServer(
 			quiet: quiet,
 			api_endpoint: .SDAPI_V1_PROGRESS) {

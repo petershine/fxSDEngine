@@ -27,7 +27,7 @@ public class SDcodablePayload: Codable {
 	var hr_prompt: String
 	var hr_negative_prompt: String
 
-	public var n_iter: Int
+	var n_iter: Int
 	var batch_size: Int
 
 	var save_images: Bool
@@ -251,14 +251,12 @@ extension SDcodablePayload {
 }
 
 extension SDcodablePayload {
-	public func modified(editedPrompt: String, editedNegativePrompt: String, batchCount: Double) -> Self? {
+	public func modified(editedPrompt: String, editedNegativePrompt: String) -> Self? {
 		let didChangePrompt = !(self.prompt == editedPrompt)
 		let didChangeNegativePrompt = !(self.negative_prompt == editedNegativePrompt)
-		let didChangeBatchCount = !(self.n_iter == Int(batchCount))
 
 		guard (didChangePrompt
-			   || didChangeNegativePrompt
-			   || didChangeBatchCount)
+			   || didChangeNegativePrompt)
 		else {
 			return nil
 		}
@@ -272,10 +270,6 @@ extension SDcodablePayload {
 		if didChangeNegativePrompt {
 			self.negative_prompt = editedNegativePrompt
 			self.hr_negative_prompt = self.negative_prompt
-		}
-
-		if didChangeBatchCount {
-			self.n_iter = min(max(Int(batchCount), 0), 100)
 		}
 
 		return self
