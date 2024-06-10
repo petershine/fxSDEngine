@@ -13,14 +13,10 @@ let package = Package(
 		.library(
 			name: "fxSDEngine",
 			targets: ["fxSDEngine"]),
-		.library(
-			name: "fxSDEngineBasicUI",
-			targets: ["fxSDEngineBasicUI"]),
 	],
 	dependencies: [
 		// Dependencies declare other packages that this package depends on.
 		.package(url: "https://github.com/petershine/fXDKit", branch: "master"),
-//		.package(url: "https://github.com/tayloraswift/swift-png", branch: "master"),
 	],
 	targets: [
 		// Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -28,10 +24,6 @@ let package = Package(
 		.target(
 			name: "fxSDEngine",
 			dependencies: ["fXDKit"]
-		),
-		.target(
-			name: "fxSDEngineBasicUI",
-			dependencies: ["fxSDEngine", "fXDKit"]
 		),
 	]
 )
