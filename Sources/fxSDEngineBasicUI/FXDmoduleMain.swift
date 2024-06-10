@@ -120,16 +120,14 @@ open class FXDmoduleMain: SDmoduleMain {
 				}
 				#endif
 
-				guard let receivedData = data,
-					  let decodedResponse = SDcodableGeneration.decoded(receivedData) as? SDcodableGeneration
-				else {
+				guard let decodedResponse = data?.decode(SDcodableGeneration.self) else {
 					completionHandler?(error)
 					return
 				}
 
 
 				guard let encodedImage = decodedResponse.images?.first as? String else {	fxd_log()
-					fxdPrint("receivedData.jsonObject()\n", receivedData.jsonObject())
+					fxdPrint("receivedData.jsonObject()\n", data?.jsonObject())
 					completionHandler?(error)
 					return
 				}

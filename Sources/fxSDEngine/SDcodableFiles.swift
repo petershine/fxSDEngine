@@ -3,7 +3,7 @@
 import Foundation
 
 
-struct SDcodableFiles: SDcodableResponse {
+struct SDcodableFiles: Codable {
 	var files: [SDcodableFile?]? = nil
 }
 

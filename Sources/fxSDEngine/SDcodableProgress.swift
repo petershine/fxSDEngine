@@ -3,7 +3,7 @@
 import Foundation
 
 
-public struct SDcodableProgress: SDcodableResponse {
+public struct SDcodableProgress: Codable {
 	public var progress: Double? = nil
 	var eta_relative: Date? = nil
 	var textinfo: String? = nil

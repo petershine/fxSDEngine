@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public struct SDcodableGeneration: SDcodableResponse {
+public struct SDcodableGeneration: Codable {
 	public var images: [String?]? = nil
 	var info: String? = nil
 }

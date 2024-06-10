@@ -48,9 +48,7 @@ extension SDmoduleMain {
 				}
 				#endif
 
-				guard let receivedData = data,
-					  let decodedResponse = SDcodableSysInfo.decoded(receivedData) as? SDcodableSysInfo
-				else {
+				guard let decodedResponse = data?.decode(SDcodableSysInfo.self) else {
 					completionHandler?(error)
 					return
 				}
@@ -68,8 +66,7 @@ extension SDmoduleMain {
 			query: "folder_path=\(path)") {
 				[weak self] (data, error) in
 
-				guard let receivedData = data,
-					  let decodedResponse = SDcodableFiles.decoded(receivedData) as? SDcodableFiles,
+				guard let decodedResponse = data?.decode(SDcodableFiles.self),
 					  let filesORfolders = decodedResponse.files
 				else {
 					completionHandler?(nil, nil, error)
@@ -177,9 +174,7 @@ extension SDmoduleMain {
 			api_endpoint: .SDAPI_V1_PROGRESS) {
 				[weak self] (data, error) in
 
-				guard let receivedData = data,
-					  let decodedResponse = SDcodableProgress.decoded(receivedData) as? SDcodableProgress
-				else {
+				guard let decodedResponse = data?.decode(SDcodableProgress.self) else {
 					completionHandler?(nil, error)
 					return
 				}

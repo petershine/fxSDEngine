@@ -3,7 +3,7 @@
 import Foundation
 
 
-public struct SDcodableSysInfo: SDcodableResponse {
+public struct SDcodableSysInfo: Codable {
 	var Config: SDcodableConfig? = nil
 	struct SDcodableConfig: Codable {
 		var outdir_samples: String? = nil
