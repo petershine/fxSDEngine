@@ -1,12 +1,12 @@
 
-import OSLog
 import Foundation
 import UIKit
 
 import fXDKit
+import fxSDEngine
 
 
-open class FXDobservableMain: NSObject, SDobservableMain {
+open class FXDobservableMain: SDobservableMain, ObservableObject {
 	@Published open var overlayObservable: FXDobservableOverlay? = nil
 	@Published open var progressObservable: SDcodableProgress? = nil
 
@@ -25,7 +25,6 @@ open class FXDobservableMain: NSObject, SDobservableMain {
 				progressObservable: SDcodableProgress? = nil,
 				displayedImage: UIImage? = nil,
 				shouldContinueRefreshing: Bool = false) {
-		super.init()
 
 		self.overlayObservable = overlayObservable
 		self.progressObservable = progressObservable
@@ -35,7 +34,7 @@ open class FXDobservableMain: NSObject, SDobservableMain {
 }
 
 
-open class FXDmoduleMain: NSObject, SDmoduleMain {
+open class FXDmoduleMain: SDmoduleMain {
 	open var SD_SERVER_HOSTNAME: String {
 		return "http://127.0.0.1:7860"
 	}
@@ -55,7 +54,6 @@ open class FXDmoduleMain: NSObject, SDmoduleMain {
 	public init(observable: (any SDobservableMain)? = nil,
 				systemInfo: SDcodableSysInfo? = nil,
 				generationPayload: SDcodablePayload? = nil) {
-		super.init()
 		
 		self.observable = observable
 		self.systemInfo = systemInfo

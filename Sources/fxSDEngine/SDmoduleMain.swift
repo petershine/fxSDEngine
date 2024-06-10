@@ -15,7 +15,7 @@ public protocol SDobservableMain {
 	var shouldContinueRefreshing: Bool { get set }
 }
 
-public protocol SDmoduleMain: NSObject, SDnetworking {
+public protocol SDmoduleMain: SDnetworking, AnyObject {
 	var observable: (any SDobservableMain)? { get set }
 
 	var systemInfo: SDcodableSysInfo? { get set }
