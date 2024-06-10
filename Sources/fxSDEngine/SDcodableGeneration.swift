@@ -6,13 +6,13 @@ import UIKit
 import fXDKit
 
 
-struct SDcodableGeneration: SDcodableResponse {
+public struct SDcodableGeneration: SDcodableResponse {
 	public var images: [String?]? = nil
 	var info: String? = nil
 }
 
 extension SDcodableGeneration {
-	func infotext() -> String? {
+	public func infotext() -> String? {
 		guard let info = self.info,
 			  let infoData = info.data(using: .utf8)
 		else {
@@ -34,7 +34,7 @@ extension SDcodableGeneration {
 		return nil
 	}
 
-	func decodedImages(quiet: Bool = false) -> [UIImage] {	fxd_log()
+	public func decodedImages(quiet: Bool = false) -> [UIImage] {	fxd_log()
 		fxdPrint("[STARTED DECODING]: ", images?.count, " image(s)", quiet:quiet)
 
 		var decodedImageArray: [UIImage] = []

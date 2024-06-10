@@ -40,7 +40,7 @@ public struct SDcodableExtension: Codable {
 
 
 extension SDcodableSysInfo {
-	func generationFolder() -> String? {
+	public func generationFolder() -> String? {
 		return Config?.outdir_samples
 	}
 }

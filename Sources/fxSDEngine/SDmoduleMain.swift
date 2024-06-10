@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public protocol SDobservableMain: ObservableObject {
+public protocol SDobservableMain {
 	var overlayObservable: FXDobservableOverlay? { get set }
 	var progressObservable: SDcodableProgress? { get set }
 

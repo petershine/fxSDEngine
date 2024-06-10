@@ -105,7 +105,7 @@ public class SDcodablePayload: Codable {
 }
 
 extension SDcodablePayload {
-	func encodedPayload() -> Data? {
+	public func encodedPayload() -> Data? {
 		var payload: Data? = nil
 		do {
 			payload = try JSONEncoder().encode(self)
@@ -119,7 +119,7 @@ extension SDcodablePayload {
 }
 
 extension SDcodablePayload {
-	func evaluatedPayload(extensions: [SDcodableExtension?]?) -> Data? {
+	public func evaluatedPayload(extensions: [SDcodableExtension?]?) -> Data? {
 		guard let payload: Data = encodedPayload() else {
 			return nil
 		}
@@ -156,7 +156,7 @@ extension SDcodablePayload {
 }
 
 extension SDcodablePayload {
-	static func minimalPayload() -> Self? {
+	public static func minimalPayload() -> Self? {
 		let minimalJSON =
 """
 {
@@ -176,7 +176,7 @@ extension SDcodablePayload {
 		return minimalPayload
 	}
 
-	static func decoded(infotext: String) -> Self? {	fxd_log()
+	public static func decoded(infotext: String) -> Self? {	fxd_log()
 		fxdPrint("[infotext]", infotext)
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Steps:"))

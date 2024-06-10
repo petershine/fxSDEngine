@@ -6,12 +6,12 @@ import UIKit
 import fXDKit
 
 
-protocol SDcodableResponse: Codable {
+public protocol SDcodableResponse: Codable {
 	static func decoded(_ receivedData: Data) -> (any SDcodableResponse)?
 }
 
 extension SDcodableResponse {
-	static func decoded(_ receivedData: Data) -> (any SDcodableResponse)? {
+	public static func decoded(_ receivedData: Data) -> (any SDcodableResponse)? {
 		var decodedResponse: (any SDcodableResponse)? = nil
 		do {
 			decodedResponse = try JSONDecoder().decode(Self.self, from: receivedData)
