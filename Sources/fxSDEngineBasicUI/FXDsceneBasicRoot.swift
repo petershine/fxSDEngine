@@ -14,15 +14,13 @@ public struct FXDsceneBasicRoot: View {
 
 	@State var shouldPresentPromptEditor: Bool = false
 
-	var sdEngine: FXDmoduleBasic
-	@ObservedObject private var sdObservable: FXDobservableBasic
+	@ObservedObject var sdEngine: FXDmoduleBasic
 
 	@State var batchCount: Double = 1.0
 
 
-	public init(sdEngine: SDmoduleMain) {
-		self.sdEngine = sdEngine as! FXDmoduleBasic
-		self.sdObservable = sdEngine.observable as! FXDobservableBasic
+	public init(sdEngine: FXDmoduleBasic) {
+		self.sdEngine = sdEngine
 
 		self.batchCount = Double(sdEngine.generationPayload?.n_iter ?? 1)
 	}
@@ -30,12 +28,12 @@ public struct FXDsceneBasicRoot: View {
 	public var body: some View {
 		ZStack {
 			FXDswiftuiMediaDisplay(
-				displayedImage: Binding.constant(sdObservable.displayedImage),
+				displayedImage: Binding.constant(sdEngine.displayedImage),
 				contentMode: Binding.constant(.fit)
 			)
 
-			if sdObservable.overlayObservable != nil {
-				FXDswiftuiOverlay(observable: sdObservable.overlayObservable)
+			if sdEngine.overlayObservable != nil {
+				FXDswiftuiOverlay(observable: sdEngine.overlayObservable)
 					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.5)))
 			}
 
@@ -45,7 +43,7 @@ public struct FXDsceneBasicRoot: View {
 				
 				Spacer()
 				
-				let isJobRunning = sdObservable.progressObservable?.state?.isJobRunning() ?? false
+				let isJobRunning = sdEngine.progressObservable?.state?.isJobRunning() ?? false
 				if !isJobRunning {
 					HStack {
 						GROUP_saving
@@ -75,8 +73,8 @@ extension FXDsceneBasicRoot {
 	var GROUP_resetting: some View {
 		HStack {
 			HStack {
-				let isJobRunning = sdObservable.progressObservable?.state?.isJobRunning() ?? false
-				let shouldContinueRefreshing = sdObservable.shouldContinueRefreshing
+				let isJobRunning = sdEngine.progressObservable?.state?.isJobRunning() ?? false
+				let shouldContinueRefreshing = sdEngine.shouldContinueRefreshing
 				if isJobRunning || shouldContinueRefreshing {
 					FXDswiftuiButton(
 						systemImageName: "stop.circle",
@@ -86,7 +84,7 @@ extension FXDsceneBasicRoot {
 								(error) in
 
 								Task {
-									sdObservable.shouldContinueRefreshing = false
+									sdEngine.shouldContinueRefreshing = false
 
 									UIAlertController.errorAlert(error: error, title: "Interrupted")
 								}
@@ -94,13 +92,13 @@ extension FXDsceneBasicRoot {
 						})
 					.transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.2)))
 
-					if let progress = sdObservable.progressObservable?.progress {
+					if let progress = sdEngine.progressObservable?.progress {
 						Text(String(format: "%0.1f %%", progress * 100.0))
 							.multilineTextAlignment(.leading)
 							.foregroundStyle(.white)
 					}
 
-					if let job = sdObservable.progressObservable?.state?.job {
+					if let job = sdEngine.progressObservable?.state?.job {
 						Text(job)
 							.multilineTextAlignment(.leading)
 							.foregroundStyle(.white)
@@ -111,7 +109,7 @@ extension FXDsceneBasicRoot {
 			Spacer()
 
 			VStack {
-				let isJobRunning = sdObservable.progressObservable?.state?.isJobRunning() ?? false
+				let isJobRunning = sdEngine.progressObservable?.state?.isJobRunning() ?? false
 				if !isJobRunning {
 					FXDswiftuiButton(
 						systemImageName: "arrow.clockwise",
@@ -148,14 +146,14 @@ extension FXDsceneBasicRoot {
 				systemImageName: "paintbrush",
 				foregroundStyle: .white,
 				action: {
-					sdObservable.shouldContinueRefreshing = true
+					sdEngine.shouldContinueRefreshing = true
 					sdEngine.continuousProgressRefreshing()
 
 					sdEngine.execute_txt2img {
 						error in
 
 						Task {
-							sdObservable.shouldContinueRefreshing = false
+							sdEngine.shouldContinueRefreshing = false
 						}
 					}
 				})

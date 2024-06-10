@@ -6,7 +6,21 @@ import fXDKit
 import fxSDEngine
 
 
-open class FXDobservableBasic: SDobservableMain, ObservableObject {
+open class FXDmoduleBasic: SDmoduleMain, ObservableObject {
+	open var SD_SERVER_HOSTNAME: String {
+		return "http://127.0.0.1:7860"
+	}
+
+
+	open var systemInfo: SDcodableSysInfo? = nil
+	open var generationPayload: SDcodablePayload? {
+		didSet {
+			if let encodedPayload = generationPayload?.encodedPayload() {
+				savePayloadToFile(payload: encodedPayload)
+			}
+		}
+	}
+
 	@Published open var overlayObservable: FXDobservableOverlay? = nil
 	@Published open var progressObservable: SDcodableProgress? = nil
 
@@ -21,44 +35,15 @@ open class FXDobservableBasic: SDobservableMain, ObservableObject {
 		}
 	}
 
-	public init(overlayObservable: FXDobservableOverlay? = nil,
-				progressObservable: SDcodableProgress? = nil,
-				displayedImage: UIImage? = nil,
-				shouldContinueRefreshing: Bool = false) {
-
+	public init(systemInfo: SDcodableSysInfo? = nil, generationPayload: SDcodablePayload? = nil, overlayObservable: FXDobservableOverlay? = nil, progressObservable: SDcodableProgress? = nil, displayedImage: UIImage? = nil, shouldContinueRefreshing: Bool = false) {
+		self.systemInfo = systemInfo
+		self.generationPayload = generationPayload
 		self.overlayObservable = overlayObservable
 		self.progressObservable = progressObservable
 		self.displayedImage = displayedImage
 		self.shouldContinueRefreshing = shouldContinueRefreshing
 	}
-}
 
-
-open class FXDmoduleBasic: SDmoduleMain {
-	open var SD_SERVER_HOSTNAME: String {
-		return "http://127.0.0.1:7860"
-	}
-
-	
-	@Published open var observable: (any SDobservableMain)? = nil
-
-	open var systemInfo: SDcodableSysInfo? = nil
-	open var generationPayload: SDcodablePayload? {
-		didSet {
-			if let encodedPayload = generationPayload?.encodedPayload() {
-				savePayloadToFile(payload: encodedPayload)
-			}
-		}
-	}
-
-	public init(observable: (any SDobservableMain)? = nil,
-				systemInfo: SDcodableSysInfo? = nil,
-				generationPayload: SDcodablePayload? = nil) {
-		
-		self.observable = observable
-		self.systemInfo = systemInfo
-		self.generationPayload = generationPayload
-	}
 
 	open func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?) {
 		execute_internalSysInfo {
@@ -96,7 +81,7 @@ open class FXDmoduleBasic: SDmoduleMain {
 							if pngData != nil,
 							   let latestImage = UIImage(data: pngData!) {
 								DispatchQueue.main.async {
-									self?.observable?.displayedImage = latestImage
+									self?.displayedImage = latestImage
 								}
 							}
 							completionHandler?(error)
@@ -150,7 +135,7 @@ open class FXDmoduleBasic: SDmoduleMain {
 					}
 
 					if newImage != nil {
-						self?.observable?.displayedImage = newImage
+						self?.displayedImage = newImage
 
 						Task {	@MainActor
 							[weak self] in

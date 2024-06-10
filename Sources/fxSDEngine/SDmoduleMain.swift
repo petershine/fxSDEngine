@@ -6,20 +6,16 @@ import UIKit
 import fXDKit
 
 
-public protocol SDobservableMain {
+public protocol SDmoduleMain: SDnetworking, AnyObject {
+	var systemInfo: SDcodableSysInfo? { get set }
+	var generationPayload: SDcodablePayload? { get set }
+
 	var overlayObservable: FXDobservableOverlay? { get set }
 	var progressObservable: SDcodableProgress? { get set }
 
 	var displayedImage: UIImage? { get set }
 
 	var shouldContinueRefreshing: Bool { get set }
-}
-
-public protocol SDmoduleMain: SDnetworking, AnyObject {
-	var observable: (any SDobservableMain)? { get set }
-
-	var systemInfo: SDcodableSysInfo? { get set }
-	var generationPayload: SDcodablePayload? { get set }
 
 
 	func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?)
@@ -190,17 +186,17 @@ extension SDmoduleMain {
 
 				DispatchQueue.main.async {
 					if progressImage != nil {
-						self?.observable?.displayedImage = progressImage
+						self?.displayedImage = progressImage
 					}
 
-					self?.observable?.progressObservable = decodedResponse
+					self?.progressObservable = decodedResponse
 					completionHandler?(decodedResponse, error)
 				}
 			}
 	}
 
 	public func continuousProgressRefreshing() {
-		guard observable?.shouldContinueRefreshing ?? false else {
+		guard shouldContinueRefreshing else {
 			return
 		}
 
