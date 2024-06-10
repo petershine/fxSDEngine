@@ -14,15 +14,15 @@ public struct FXDsceneBasicRoot: View {
 
 	@State var shouldPresentPromptEditor: Bool = false
 
-	var sdEngine: FXDmoduleMain
-	@ObservedObject private var sdObservable: FXDobservableMain
+	var sdEngine: FXDmoduleBasic
+	@ObservedObject private var sdObservable: FXDobservableBasic
 
 	@State var batchCount: Double = 1.0
 
 
 	public init(sdEngine: SDmoduleMain) {
-		self.sdEngine = sdEngine as! FXDmoduleMain
-		self.sdObservable = sdEngine.observable as! FXDobservableMain
+		self.sdEngine = sdEngine as! FXDmoduleBasic
+		self.sdObservable = sdEngine.observable as! FXDobservableBasic
 
 		self.batchCount = Double(sdEngine.generationPayload?.n_iter ?? 1)
 	}

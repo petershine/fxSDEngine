@@ -6,7 +6,7 @@ import fXDKit
 import fxSDEngine
 
 
-open class FXDobservableMain: SDobservableMain, ObservableObject {
+open class FXDobservableBasic: SDobservableMain, ObservableObject {
 	@Published open var overlayObservable: FXDobservableOverlay? = nil
 	@Published open var progressObservable: SDcodableProgress? = nil
 
@@ -34,7 +34,7 @@ open class FXDobservableMain: SDobservableMain, ObservableObject {
 }
 
 
-open class FXDmoduleMain: SDmoduleMain {
+open class FXDmoduleBasic: SDmoduleMain {
 	open var SD_SERVER_HOSTNAME: String {
 		return "http://127.0.0.1:7860"
 	}
