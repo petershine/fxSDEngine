@@ -58,10 +58,12 @@ extension SDmoduleMain {
 		execute_internalSysInfo {
 			[weak self] (error) in
 
+			// TODO: find better evaluation for NEWly started server
 			guard let folderPath = self?.systemInfo?.generationFolder() else {
-				// TODO: find better evaluation for NEWly started server
-				self?.generationPayload = SDcodablePayload.minimalPayload()
-				completionHandler?(error)
+				DispatchQueue.main.async {
+					self?.generationPayload = SDcodablePayload.minimalPayload()
+					completionHandler?(error)
+				}
 				return
 			}
 
@@ -231,7 +233,9 @@ extension SDmoduleMain {
 				#endif
 
 				guard let decodedResponse = data?.decode(SDcodableGeneration.self) else {
-					completionHandler?(error)
+					DispatchQueue.main.async {
+						completionHandler?(error)
+					}
 					return
 				}
 
