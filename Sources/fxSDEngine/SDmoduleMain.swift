@@ -255,10 +255,8 @@ extension SDmoduleMain {
 					if newImage != nil {
 						self?.displayedImage = newImage
 
-						Task {	@MainActor
-							[weak self] in
-
-							let _ = try await self?.saveGeneratedImage(pngData:pngData)
+						Task {
+							let _ = await SDmoduleStorage().saveGeneratedImage(pngData:pngData)
 						}
 					}
 					completionHandler?(error)

@@ -32,14 +32,6 @@ extension SDError: LocalizedError {
 
 public protocol SDnetworking {
 	var SD_SERVER_HOSTNAME: String { get }
-	
-	var savedPayloadJSONurl: URL? { get }
-	var savedImageFileURL: URL? { get }
-	var sharableItem: Any? { get }
-
-	func savePayloadToFile(payload: Data)
-	func loadPayloadFromFile() -> Data?
-	func saveGeneratedImage(pngData: Data) async throws -> Bool
 
 	func requestToSDServer(
 		quiet: Bool,
@@ -49,75 +41,6 @@ public protocol SDnetworking {
 		payload: Data?,
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?)
 }
-
-extension SDnetworking {
-	public var savedPayloadJSONurl: URL? {
-		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-		let fileURL = documentDirectory?.appendingPathComponent("savedPayload.json")
-		return fileURL
-	}
-
-	public var savedImageFileURL: URL? {
-		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-		let fileURL = documentDirectory?.appendingPathComponent("savedImage.png")
-		return fileURL
-	}
-
-	public var sharableItem: Any? {
-		return savedImageFileURL
-	}
-}
-
-
-extension SDnetworking {
-	public func savePayloadToFile(payload: Data) {	fxd_log()
-		fxdPrint("payload: ", payload)
-		guard let fileURL = savedPayloadJSONurl else {
-			return
-		}
-
-		do {
-			try payload.write(to: fileURL)
-			fxdPrint("[PAYLOAD JSON SAVED]: ", fileURL)
-		} catch {
-			fxdPrint(error)
-		}
-	}
-
-	public func loadPayloadFromFile() -> Data? {
-		guard let fileURL = savedPayloadJSONurl else {
-			return nil
-		}
-
-
-		var payloadData: Data? = nil
-		do {
-			payloadData = try Data(contentsOf: fileURL)
-		} catch {	fxd_log()
-			fxdPrint(error)
-		}
-
-		return payloadData
-	}
-
-	public func saveGeneratedImage(pngData: Data) async -> Bool {	fxd_log()
-		fxdPrint("pngData: ", pngData)
-		guard let fileURL = savedImageFileURL else {
-			return false
-		}
-
-		do {
-			try pngData.write(to: fileURL)
-			fxdPrint("[IMAGE FILE SAVED]: ", fileURL)
-			return true
-
-		} catch {
-			fxdPrint(error)
-			return false
-		}
-	}
-}
-
 
 extension SDnetworking {
 	public func requestToSDServer(
