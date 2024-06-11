@@ -34,7 +34,6 @@ open class SDmoduleStorage: NSObject {
 				at: documentDirectory,
 				includingPropertiesForKeys: [.contentModificationDateKey, .contentTypeKey],
 				options: [.skipsSubdirectoryDescendants, .skipsHiddenFiles])
-			fxdPrint(contents)
 			
 			fileURLs = try contents
 				.filter {
@@ -74,7 +73,7 @@ open class SDmoduleStorage: NSObject {
 		}
 	}
 
-	open func loadPayloadFromFile() -> Data? {
+	open func loadPayloadFromFile() throws -> Data? {
 		guard let fileURL = savedPayloadURL else {
 			return nil
 		}
@@ -83,8 +82,8 @@ open class SDmoduleStorage: NSObject {
 		var payloadData: Data? = nil
 		do {
 			payloadData = try Data(contentsOf: fileURL)
-		} catch {	fxd_log()
-			fxdPrint(error)
+		} catch {
+			throw error
 		}
 
 		return payloadData
