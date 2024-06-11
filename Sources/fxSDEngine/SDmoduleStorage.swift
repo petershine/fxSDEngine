@@ -2,6 +2,7 @@
 import Foundation
 
 import fXDKit
+import UniformTypeIdentifiers
 
 
 open class SDmoduleStorage: NSObject {
@@ -13,9 +14,47 @@ open class SDmoduleStorage: NSObject {
 
 	open var savedImageFileURL: URL? {
 		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-		let fileURL = documentDirectory?.appendingPathComponent("savedImage.png")
+		
+		let dateFormatter = DateFormatter()
+		dateFormatter.dateFormat = "yyyy-MM-dd_HH_mm_ss"
+
+		let fileName = dateFormatter.string(from: Date.now)
+		let fileURL = documentDirectory?.appendingPathComponent("GenerArt_\(fileName).png")
 		return fileURL
 	}
+
+	open var latestImageFileURLs: [URL]? {	fxd_log()
+		guard  let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+			return nil
+		}
+		
+		var fileURLs: [URL]? = nil
+		do {
+			let contents = try FileManager.default.contentsOfDirectory(
+				at: documentDirectory,
+				includingPropertiesForKeys: [.contentModificationDateKey, .contentTypeKey],
+				options: [.skipsSubdirectoryDescendants, .skipsHiddenFiles])
+			fxdPrint(contents)
+			
+			fileURLs = try contents
+				.filter {
+					let resourceValues: URLResourceValues = try $0.resourceValues(forKeys: [.contentTypeKey])
+					return resourceValues.contentType == UTType.png
+				}
+				.sorted {
+					let resourceValues_0: URLResourceValues = try $0.resourceValues(forKeys: [.contentModificationDateKey])
+					let resourceValues_1: URLResourceValues = try $1.resourceValues(forKeys: [.contentModificationDateKey])
+					return resourceValues_0.contentModificationDate  ?? Date.now > resourceValues_1.contentModificationDate ?? Date.now
+				}
+		}
+		catch {
+			fxdPrint(error)
+		}
+		
+		fxdPrint(fileURLs)
+		return fileURLs
+	}
+
 
 	public override init() {
 		super.init()
