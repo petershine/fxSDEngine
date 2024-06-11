@@ -183,6 +183,13 @@ extension SDmoduleMain {
 				DispatchQueue.main.async {
 					fxd_log()
 					self?.generationPayload = obtainedPayload
+					
+					Task {
+						if let encodedPayload = obtainedPayload.encodedPayload() {
+							await SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
+						}
+					}
+
 					completionHandler?(error)
 				}
 			}
@@ -250,6 +257,12 @@ extension SDmoduleMain {
 					if !(infotext.isEmpty),
 					   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {
 						self?.generationPayload = newlyGeneratedPayload
+
+						Task {
+							if let encodedPayload = newlyGeneratedPayload.encodedPayload() {
+								await SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
+							}
+						}
 					}
 
 					if newImage != nil {

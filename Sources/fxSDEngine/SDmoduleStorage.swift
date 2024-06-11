@@ -6,7 +6,7 @@ import UniformTypeIdentifiers
 
 
 open class SDmoduleStorage: NSObject {
-	var savedPayloadJSONurl: URL? {
+	var savedPayloadURL: URL? {
 		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
 		let fileURL = documentDirectory?.appendingPathComponent("savedPayload.json")
 		return fileURL
@@ -60,9 +60,9 @@ open class SDmoduleStorage: NSObject {
 		super.init()
 	}
 
-	open func savePayloadToFile(payload: Data) {	fxd_log()
+	open func savePayloadToFile(payload: Data) async {	fxd_log()
 		fxdPrint("payload: ", payload)
-		guard let fileURL = savedPayloadJSONurl else {
+		guard let fileURL = savedPayloadURL else {
 			return
 		}
 
@@ -74,8 +74,8 @@ open class SDmoduleStorage: NSObject {
 		}
 	}
 
-	func loadPayloadFromFile() -> Data? {
-		guard let fileURL = savedPayloadJSONurl else {
+	open func loadPayloadFromFile() -> Data? {
+		guard let fileURL = savedPayloadURL else {
 			return nil
 		}
 
