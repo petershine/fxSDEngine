@@ -27,7 +27,7 @@ public struct SDcodableSysInfo: Codable {
 		var sd_model_checkpoint: String? = nil
 	}
 	
-	public var Extensions: [SDcodableExtension?]? = nil
+	public var Extensions: [SDcodableExtension]? = nil
 }
 
 public struct SDcodableExtension: Codable {
