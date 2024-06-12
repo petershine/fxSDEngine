@@ -14,6 +14,7 @@ public protocol SDmoduleMain: SDNetworking, AnyObject {
 	var progressObservable: SDcodableProgress? { get set }
 
 	var shouldContinueRefreshing: Bool { get set }
+	var shouldContinueGenerating: Bool { get set }
 
 	var displayedImage: UIImage? { get set }
 
@@ -25,6 +26,7 @@ public protocol SDmoduleMain: SDNetworking, AnyObject {
 	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
 
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
+	func continueGenerating(completionHandler: ((_ error: Error?)->Void)?)
 
 	func execute_progress(skipImageDecoding: Bool, quiet: Bool, completionHandler: ((_ lastProgress: SDcodableProgress?, _ error: Error?)->Void)?)
 	func continuousProgressRefreshing()
@@ -279,6 +281,31 @@ extension SDmoduleMain {
 					completionHandler?(error)
 				}
 			}
+	}
+
+	public func continueGenerating(completionHandler: ((_ error: Error?)->Void)?) {
+		guard shouldContinueGenerating else {
+			DispatchQueue.main.async {
+				completionHandler?(nil)
+			}
+			return
+		}
+		
+		
+		execute_txt2img {
+			[weak self] (error) in
+			
+			if error != nil {
+				DispatchQueue.main.async {
+					self?.shouldContinueGenerating = false
+					completionHandler?(error)
+				}
+				return
+			}
+			
+			
+			self?.continueGenerating(completionHandler: completionHandler)
+		}
 	}
 }
 
