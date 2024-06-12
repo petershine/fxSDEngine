@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public protocol SDmoduleMain: SDnetworking, AnyObject {
+public protocol SDmoduleMain: SDNetworking, AnyObject {
 	var systemInfo: SDcodableSysInfo? { get set }
 	var generationPayload: SDcodablePayload? { get set }
 
@@ -232,7 +232,7 @@ extension SDmoduleMain {
 				}
 				#endif
 
-				guard let decodedResponse = data?.decode(SDcodableGeneration.self) else {
+				guard let decodedResponse = data?.decode(SDcodableGenerated.self) else {
 					DispatchQueue.main.async {
 						completionHandler?(error)
 					}

@@ -30,7 +30,7 @@ extension SDError: LocalizedError {
 }
 
 
-public protocol SDnetworking {
+public protocol SDNetworking {
 	var SD_SERVER_HOSTNAME: String { get }
 
 	func requestToSDServer(
@@ -42,7 +42,7 @@ public protocol SDnetworking {
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?)
 }
 
-extension SDnetworking {
+extension SDNetworking {
 	public func requestToSDServer(
 		quiet: Bool = false,
 		api_endpoint: SDAPIendpoint,
