@@ -4,6 +4,8 @@ import Foundation
 
 
 public struct SDcodableSysInfo: Codable {
+	var Extensions: [SDcodableExtension]? = nil
+
 	var Config: SDcodableConfig? = nil
 	struct SDcodableConfig: Codable {
 		var outdir_samples: String? = nil
@@ -26,33 +28,10 @@ public struct SDcodableSysInfo: Codable {
 		var sd_checkpoint_hash: String? = nil
 		var sd_model_checkpoint: String? = nil
 	}
-	
-	public var Extensions: [SDcodableExtension]? = nil
 }
-
-public struct SDcodableExtension: Codable {
-	var branch: String? = nil
-	var name: String? = nil
-	var path: String? = nil
-	var remote: String? = nil
-	var version: String? = nil
-}
-
 
 extension SDcodableSysInfo {
 	public func generationFolder() -> String? {
 		return Config?.outdir_samples
 	}
 }
-
-/*
- Extensions =     (
-			 {
-		 branch = main;
-		 name = adetailer;
-		 path = "/Volumes/zzzz/_zSD/stable-diffusion-webui/extensions/adetailer";
-		 remote = "https://github.com/Bing-su/adetailer";
-		 version = a89c01d3;
-	 },
-
- */

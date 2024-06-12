@@ -120,34 +120,7 @@ extension SDcodablePayload {
 
 
 extension SDcodablePayload {
-	enum SDscriptName: String {
-		case ADetailer
-		case adetailer
-
-		func arguments() -> Dictionary<String, Any?>? {
-			var args: Dictionary<String, Any?>? = nil
-			switch self {
-				case .ADetailer, .adetailer:
-					do {
-						args = [
-							"args" : [
-								1,
-								0,
-								try JSONEncoder().encode(SDcodableADetailer()).jsonObject() ?? [:],
-								try JSONEncoder().encode(SDcodableADetailer()).jsonObject() ?? [:],
-							]
-						]
-					}
-					catch {	fxd_log()
-						fxdPrint(error)
-					}
-			}
-			return args
-		}
-	}
-
-
-	public func evaluatedPayload(extensions: [SDcodableExtension]?) -> Data? {
+	func evaluatedPayload(extensions: [SDcodableExtension]?) -> Data? {
 		guard let payload: Data = encodedPayload() else {
 			return nil
 		}
@@ -171,23 +144,11 @@ extension SDcodablePayload {
 		}
 
 
-		let alwayson_scripts_Key = "alwayson_scripts"
-		var alwayson_scripts = payloadDictionary?[alwayson_scripts_Key] as? Dictionary<String, Any?> ?? [:]
-
-		for on_script in extensions ?? [] {
-			guard on_script.name != nil,
-				  let script_case = SDscriptName(rawValue: on_script.name!) else {
-				continue
-			}
-
-			if let args = script_case.arguments() {
-				alwayson_scripts[script_case.rawValue] = args
-			}
-		}
-
 		var extendedPayload: Data = payload
+
+		let alwayson_scripts = SDcodableExtension.alwayson_scripts(extensions: extensions)
 		if alwayson_scripts.count > 0 {
-			payloadDictionary?[alwayson_scripts_Key] = alwayson_scripts
+			payloadDictionary?["alwayson_scripts"] = alwayson_scripts
 
 			do {
 				extendedPayload = try JSONSerialization.data(withJSONObject: payloadDictionary!)

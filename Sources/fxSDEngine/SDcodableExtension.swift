@@ -2,8 +2,76 @@
 
 import Foundation
 
+import fXDKit
 
-struct SDcodableADetailer: Codable {
+
+struct SDcodableExtension: Codable {
+	var branch: String? = nil
+	var name: String? = nil
+	var path: String? = nil
+	var remote: String? = nil
+	var version: String? = nil
+}
+
+enum SDExtensionName: String {
+	case ADetailer
+	case adetailer
+}
+
+extension SDExtensionName {
+	func arguments() -> Dictionary<String, Any?>? {
+		var args: Dictionary<String, Any?>? = nil
+		do {
+			switch self {
+				case .ADetailer, .adetailer:
+					args = [
+						"args" : [
+							1,
+							0,
+							try JSONEncoder().encode(SDextensionADetailer()).jsonObject() ?? [:],
+							try JSONEncoder().encode(SDextensionADetailer()).jsonObject() ?? [:],
+						]
+					]
+			}
+		}
+		catch {	fxd_log()
+			fxdPrint(error)
+		}
+		return args
+	}
+}
+
+extension SDcodableExtension {
+	static func alwayson_scripts(extensions: [Self]?) -> Dictionary<String, Any?> {
+		var alwayson_scripts: Dictionary<String, Any?> = [:]
+
+		for on_script in extensions ?? [] {
+			guard on_script.name != nil,
+				  let script_case = SDExtensionName(rawValue: on_script.name!) else {
+				continue
+			}
+
+			if let args = script_case.arguments() {
+				alwayson_scripts[script_case.rawValue] = args
+			}
+		}
+
+		return alwayson_scripts
+	}
+}
+
+/*
+ Extensions =     (
+			 {
+		 branch = main;
+		 name = adetailer;
+		 path = "/Volumes/zzzz/_zSD/stable-diffusion-webui/extensions/adetailer";
+		 remote = "https://github.com/Bing-su/adetailer";
+		 version = a89c01d3;
+	 },
+
+ */
+struct SDextensionADetailer: Codable {
 	var ad_cfg_scale: Int = 7
 	var ad_checkpoint: String = "Use same checkpoint"
 	var ad_clip_skip: Int = 1
