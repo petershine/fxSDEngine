@@ -32,17 +32,6 @@ public class SDcodablePayload: Codable {
 
 	var save_images: Bool
 
-	enum AlternativeCodingKeys: String, CodingKey {
-		case sampler_name = "sampler"
-		case scheduler = "schedule type"
-		case cfg_scale = "cfg scale"
-
-		case denoising_strength = "denoising strength"
-		case hr_scale = "hires upscale"
-		case hr_second_pass_steps = "hires steps"
-		case hr_upscaler = "hires upscaler"
-	}
-
 
 	required public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -77,7 +66,6 @@ public class SDcodablePayload: Codable {
 		self.hr_second_pass_steps = 10
 		self.hr_upscaler = "4x-UltraSharp"
 
-
 		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name)
 		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler)
 		self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale)
@@ -90,6 +78,18 @@ public class SDcodablePayload: Codable {
 
 		if self.cfg_scale == nil
 			|| self.sampler_name == nil {
+
+			enum AlternativeCodingKeys: String, CodingKey {
+				case sampler_name = "sampler"
+				case scheduler = "schedule type"
+				case cfg_scale = "cfg scale"
+
+				case denoising_strength = "denoising strength"
+				case hr_scale = "hires upscale"
+				case hr_second_pass_steps = "hires steps"
+				case hr_upscaler = "hires upscaler"
+			}
+
 			let alternativeContainer = try decoder.container(keyedBy: AlternativeCodingKeys.self)
 
 			self.sampler_name = try alternativeContainer.decodeIfPresent(String.self, forKey: .sampler_name)
