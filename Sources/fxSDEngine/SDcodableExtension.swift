@@ -81,7 +81,7 @@ struct SDextensionADetailer: Codable {
 	var ad_controlnet_model: String = "None"
 	var ad_controlnet_module: String = "None"
 	var ad_controlnet_weight: Int = 1
-	var ad_denoising_strength: Double = 0.3
+	var ad_denoising_strength: Double = 0.4
 	var ad_dilate_erode: Int = 4
 	var ad_inpaint_height: Int = 512
 	var ad_inpaint_only_masked: Bool = true
@@ -98,7 +98,7 @@ struct SDextensionADetailer: Codable {
 	var ad_noise_multiplier: Int = 1
 	var ad_prompt: String = ""
 	var ad_restore_face: Bool = false
-	var ad_sampler: String = "DPM++ 2M"
+	var ad_sampler: String = "Use same sampler"
 	var ad_scheduler: String = "Use same scheduler"
 	var ad_steps: Int = 28
 	var ad_tap_enable: Bool = true
