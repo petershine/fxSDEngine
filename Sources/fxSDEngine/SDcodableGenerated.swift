@@ -6,12 +6,12 @@ import UIKit
 import fXDKit
 
 
-public struct SDcodableGeneration: Codable {
+public struct SDcodableGenerated: Codable {
 	public var images: [String?]? = nil
 	var info: String? = nil
 }
 
-extension SDcodableGeneration {
+extension SDcodableGenerated {
 	public func infotext() -> String? {
 		guard let info = self.info,
 			  let infoData = info.data(using: .utf8)
