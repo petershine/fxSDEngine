@@ -26,9 +26,8 @@ extension SDExtensionName {
 				case .ADetailer, .adetailer:
 					args = [
 						"args" : [
-							1,
-							0,
-							try JSONEncoder().encode(SDextensionADetailer()).jsonObject() ?? [:],
+							true,
+							false,
 							try JSONEncoder().encode(SDextensionADetailer()).jsonObject() ?? [:],
 						]
 					]
