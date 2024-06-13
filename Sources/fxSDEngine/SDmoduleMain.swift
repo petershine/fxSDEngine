@@ -18,6 +18,8 @@ public protocol SDmoduleMain: SDNetworking, AnyObject {
 
 	var displayedImage: UIImage? { get set }
 
+	var isEngineRunning: Bool { get }
+
 
 	func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?)
 	func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?)
