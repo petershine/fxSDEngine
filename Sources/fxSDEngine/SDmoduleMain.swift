@@ -303,8 +303,10 @@ extension SDmoduleMain {
 				return
 			}
 			
-			
-			self?.continueGenerating(completionHandler: completionHandler)
+
+			DispatchQueue.global().asyncAfter(deadline: .now() + 5.0) {
+				self?.continueGenerating(completionHandler: completionHandler)
+			}
 		}
 	}
 }
