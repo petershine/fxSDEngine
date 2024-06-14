@@ -302,8 +302,10 @@ extension SDmoduleMain {
 		}
 		
 
-		let waitingObservable = FXDobservableOverlay(overlayColor: .black, overlayAlpha: 0.75)
-		self.overlayObservable = waitingObservable
+		DispatchQueue.main.async {
+			let waitingObservable = FXDobservableOverlay(overlayColor: .black, overlayAlpha: 0.75)
+			self.overlayObservable = waitingObservable
+		}
 
 
 		execute_txt2img {
