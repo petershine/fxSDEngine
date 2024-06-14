@@ -257,6 +257,12 @@ extension SDmoduleMain {
 				}
 
 
+				guard self?.progressObservable?.state?.interrupted ?? false == false else {	fxd_log()
+					completionHandler?(error)
+					return
+				}
+
+
 
 				let infotext = decodedResponse.infotext() ?? ""
 				let newImage = UIImage(data: pngData)
