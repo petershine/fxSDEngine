@@ -23,7 +23,7 @@ open class SDmoduleStorage: NSObject {
 		return fileURL
 	}
 
-	open var latestImageFileURLs: [URL]? {	fxd_log()
+	open var latestImageFileURLs: [URL]? {
 		guard  let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
 			return nil
 		}
@@ -46,11 +46,10 @@ open class SDmoduleStorage: NSObject {
 					return resourceValues_0.contentModificationDate  ?? Date.now > resourceValues_1.contentModificationDate ?? Date.now
 				}
 		}
-		catch {
+		catch {	fxd_log()
 			fxdPrint(error)
 		}
-		
-		fxdPrint(fileURLs)
+
 		return fileURLs
 	}
 
