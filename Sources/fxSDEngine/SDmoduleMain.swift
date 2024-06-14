@@ -294,35 +294,32 @@ extension SDmoduleMain {
 	public func continueGenerating(completionHandler: ((_ error: Error?)->Void)?) {
 		guard shouldContinueGenerating else {
 			DispatchQueue.main.async {
-
 				self.overlayObservable = nil
 				completionHandler?(nil)
 			}
 			return
 		}
-		
-
-		DispatchQueue.main.async {
-			let waitingObservable = FXDobservableOverlay(overlayColor: .black, overlayAlpha: 0.75)
-			self.overlayObservable = waitingObservable
-		}
 
 
 		execute_txt2img {
 			[weak self] (error) in
-			
+
 			if error != nil {
 				DispatchQueue.main.async {
 					self?.shouldContinueGenerating = false
-
 					self?.overlayObservable = nil
 					completionHandler?(error)
 				}
 				return
 			}
-			
 
-			DispatchQueue.global().asyncAfter(deadline: .now() + 5.0) {
+
+			DispatchQueue.main.async {
+				let waitingObservable = FXDobservableOverlay(overlayColor: .black, overlayAlpha: 0.75)
+				self?.overlayObservable = waitingObservable
+			}
+
+			DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
 				self?.continueGenerating(completionHandler: completionHandler)
 			}
 		}
