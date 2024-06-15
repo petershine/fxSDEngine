@@ -172,51 +172,47 @@ extension SDmoduleMain {
 	}
 
 	public func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?) {
-		Task {	@MainActor
-			[weak self] in
+		let _assignPayload: (String, Error?) -> Void = {
+			[weak self] (infotext: String, error: Error?) in
 
-			let _assignPayload: (String, Error?) -> Void = {
-				[weak self] (infotext: String, error: Error?) in
-
-				guard !infotext.isEmpty, error == nil else {
-					completionHandler?(error)
-					return
-				}
-
-				guard let obtainedPayload = SDcodablePayload.decoded(infotext: infotext) else {
-					completionHandler?(error)
-					return
-				}
-
-				DispatchQueue.main.async {
-					fxd_log()
-					self?.generationPayload = obtainedPayload
-					
-					if let encodedPayload = obtainedPayload.encodedPayload() {
-						SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
-					}
-
-					completionHandler?(error)
-				}
+			guard !infotext.isEmpty, error == nil else {
+				completionHandler?(error)
+				return
 			}
 
+			guard let obtainedPayload = SDcodablePayload.decoded(infotext: infotext) else {
+				completionHandler?(error)
+				return
+			}
 
-			self?.requestToSDServer(
-				api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
-				query: "path=\(imagePath)",
-				responseHandler: {
-					(received, error) in
+			DispatchQueue.main.async {
+				fxd_log()
+				self?.generationPayload = obtainedPayload
 
-					guard let receivedData = received,
-						  let infotext = String(data: receivedData, encoding: .utf8)
-					else {
-						_assignPayload("", error)
-						return
-					}
+				if let encodedPayload = obtainedPayload.encodedPayload() {
+					SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
+				}
 
-					_assignPayload(infotext, error)
-				})
+				completionHandler?(error)
+			}
 		}
+
+
+		requestToSDServer(
+			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
+			query: "path=\(imagePath)",
+			responseHandler: {
+				(received, error) in
+
+				guard let receivedData = received,
+					  let infotext = String(data: receivedData, encoding: .utf8)
+				else {
+					_assignPayload("", error)
+					return
+				}
+
+				_assignPayload(infotext, error)
+			})
 	}
 }
 
