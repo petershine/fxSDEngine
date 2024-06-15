@@ -1,5 +1,6 @@
 
 import Foundation
+import UIKit
 
 import fXDKit
 import UniformTypeIdentifiers
@@ -103,5 +104,41 @@ open class SDmoduleStorage: NSObject {
 			fxdPrint(error)
 			return nil
 		}
+	}
+}
+
+extension SDmoduleStorage {
+	public func deleteAll() -> Int? {
+		guard let imageURLs = self.latestImageURLs,
+			  imageURLs.count > 0
+		else {
+			return nil
+		}
+
+
+		let originalCount = imageURLs.count
+		var deletedCount: Int = 0
+		var deletingError: Error? = nil
+		do {
+			for fileURL in imageURLs {
+				try FileManager.default.removeItem(at: fileURL)
+				deletedCount = deletedCount + 1
+			}
+		}
+		catch {	fxd_log()
+			fxdPrint(error)
+			deletingError = error
+		}
+
+		DispatchQueue.main.async {
+			if deletedCount == originalCount {
+				UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images", message: nil)
+			}
+			else {
+				UIAlertController.errorAlert(error: deletingError)
+			}
+		}
+
+		return deletedCount
 	}
 }
