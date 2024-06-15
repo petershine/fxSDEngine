@@ -1,6 +1,7 @@
 
 
 import Foundation
+import UIKit
 
 
 public struct SDcodableProgress: Codable {
@@ -27,5 +28,14 @@ public struct SDcodableState: Codable {
 extension SDcodableState {
 	public func isJobRunning() -> Bool {
 		return !((job ?? "").isEmpty || interrupted ?? true)
+	}
+}
+
+extension UIImage {
+	public func aspectFillSize(maxSize: CGSize) -> CGSize {
+		let aspectRatio = CGFloat(self.size.width) / CGFloat(self.size.height)
+		var fillSize = maxSize
+		fillSize.width = fillSize.height * aspectRatio
+		return fillSize
 	}
 }
