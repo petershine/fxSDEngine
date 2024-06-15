@@ -31,7 +31,7 @@ public protocol SDmoduleMain: SDNetworking, AnyObject {
 	func continueGenerating(completionHandler: ((_ error: Error?)->Void)?)
 
 	func execute_progress(skipImageDecoding: Bool, quiet: Bool, completionHandler: ((_ lastProgress: SDcodableProgress?, _ error: Error?)->Void)?)
-	func continuousProgressRefreshing()
+	func continueRefreshing()
 	func interrupt(completionHandler: ((_ error: Error?)->Void)?)
 }
 
@@ -363,7 +363,7 @@ extension SDmoduleMain {
 			}
 	}
 
-	public func continuousProgressRefreshing() {
+	public func continueRefreshing() {
 		guard shouldContinueRefreshing else {
 			return
 		}
@@ -375,7 +375,9 @@ extension SDmoduleMain {
 			completionHandler: {
 				[weak self] (lastProgress, error) in
 
-				self?.continuousProgressRefreshing()
+				DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) {
+					self?.continueRefreshing()
+				}
 		})
 	}
 
