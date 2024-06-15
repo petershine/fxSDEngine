@@ -12,7 +12,7 @@ open class SDmoduleStorage: NSObject {
 		return fileURL
 	}
 
-	open var savedImageFileURL: URL? {
+	open var savedImageURL: URL? {
 		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
 		
 		let dateFormatter = DateFormatter()
@@ -23,7 +23,7 @@ open class SDmoduleStorage: NSObject {
 		return fileURL
 	}
 
-	open var latestImageFileURLs: [URL]? {
+	open var latestImageURLs: [URL]? {
 		guard  let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
 			return nil
 		}
@@ -90,7 +90,7 @@ open class SDmoduleStorage: NSObject {
 
 	func saveGeneratedImage(pngData: Data) async -> Bool {	fxd_log()
 		fxdPrint("pngData: ", pngData)
-		guard let fileURL = savedImageFileURL else {
+		guard let fileURL = savedImageURL else {
 			return false
 		}
 
