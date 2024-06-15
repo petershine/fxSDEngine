@@ -282,3 +282,12 @@ extension SDcodablePayload {
 		return self
 	}
 }
+
+extension SDcodablePayload {
+	public func aspectFillSize(maxSize: CGSize) -> CGSize {
+		let aspectRatio = CGFloat(self.width) / CGFloat(self.height)
+		var fillSize = maxSize
+		fillSize.width = fillSize.height * aspectRatio
+		return fillSize
+	}
+}
