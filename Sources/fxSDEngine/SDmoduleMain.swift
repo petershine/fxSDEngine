@@ -10,7 +10,6 @@ public protocol SDmoduleMain: SDNetworking, AnyObject {
 	var systemInfo: SDcodableSysInfo? { get set }
 	var generationPayload: SDcodablePayload? { get set }
 
-	var overlayObservable: FXDobservableOverlay? { get set }
 	var progressObservable: SDcodableProgress? { get set }
 
 	var shouldContinueRefreshing: Bool { get set }
