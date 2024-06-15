@@ -20,6 +20,8 @@ public protocol SDmoduleMain: SDNetworking, AnyObject {
 
 	var isEngineRunning: Bool { get }
 
+	var imageURLs: [URL]? { get set }
+
 
 	func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?)
 	func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?)
@@ -190,10 +192,8 @@ extension SDmoduleMain {
 					fxd_log()
 					self?.generationPayload = obtainedPayload
 					
-					Task {
-						if let encodedPayload = obtainedPayload.encodedPayload() {
-							await SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
-						}
+					if let encodedPayload = obtainedPayload.encodedPayload() {
+						SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
 					}
 
 					completionHandler?(error)
@@ -267,29 +267,31 @@ extension SDmoduleMain {
 				let infotext = decodedResponse.infotext() ?? ""
 				let newImage = UIImage(data: pngData)
 
-				DispatchQueue.main.async {	fxd_log()
+				DispatchQueue.main.async {
+					fxd_log()
+
 					if !(infotext.isEmpty),
 					   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {
 						self?.generationPayload = newlyGeneratedPayload
 
-						Task {
-							if let encodedPayload = newlyGeneratedPayload.encodedPayload() {
-								await SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
-							}
+						if let encodedPayload = newlyGeneratedPayload.encodedPayload() {
+							SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
 						}
 					}
 
 					if newImage != nil {
 						self?.displayedImage = newImage
 
-						Task {
-							let _ = await SDmoduleStorage().saveGeneratedImage(pngData:pngData)
+						let storage = SDmoduleStorage()
+						if let _ = storage.saveGeneratedImage(pngData: pngData) {
+							self?.imageURLs = storage.latestImageURLs
 						}
 					}
 					completionHandler?(error)
 				}
 			}
 	}
+
 
 	public func continueGenerating(completionHandler: ((_ error: Error?)->Void)?) {
 		guard shouldContinueGenerating else {

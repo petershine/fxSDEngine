@@ -58,7 +58,7 @@ open class SDmoduleStorage: NSObject {
 		super.init()
 	}
 
-	open func savePayloadToFile(payload: Data) async {	fxd_log()
+	open func savePayloadToFile(payload: Data) {	fxd_log()
 		fxdPrint("payload: ", payload)
 		guard let fileURL = savedPayloadURL else {
 			return
@@ -88,20 +88,20 @@ open class SDmoduleStorage: NSObject {
 		return payloadData
 	}
 
-	func saveGeneratedImage(pngData: Data) async -> Bool {	fxd_log()
+	func saveGeneratedImage(pngData: Data) -> URL? {	fxd_log()
 		fxdPrint("pngData: ", pngData)
 		guard let fileURL = savedImageURL else {
-			return false
+			return nil
 		}
 
 		do {
 			try pngData.write(to: fileURL)
 			fxdPrint("[IMAGE FILE SAVED]: ", fileURL)
-			return true
+			return fileURL
 
 		} catch {
 			fxdPrint(error)
-			return false
+			return nil
 		}
 	}
 }
