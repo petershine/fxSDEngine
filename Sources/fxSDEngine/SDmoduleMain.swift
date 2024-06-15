@@ -305,19 +305,7 @@ extension SDmoduleMain {
 				}
 
 
-				var progressImage: UIImage? = nil
-				if !skipImageDecoding,
-				   let imageEncoded = decodedResponse.current_image,
-				   let decodedImage = imageEncoded.decodedImage() {
-					progressImage = decodedImage
-				}
-
-
 				DispatchQueue.main.async {
-					if progressImage != nil {
-						self?.displayedImage = progressImage
-					}
-
 					self?.progressObservable = decodedResponse
 					completionHandler?(decodedResponse, error)
 				}

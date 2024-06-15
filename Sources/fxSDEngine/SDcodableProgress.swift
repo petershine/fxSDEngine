@@ -8,7 +8,7 @@ public struct SDcodableProgress: Codable {
 	var eta_relative: Date? = nil
 	var textinfo: String? = nil
 
-	var current_image: String? = nil
+	public var current_image: String? = nil
 	public var state: SDcodableState? = nil
 }
 
