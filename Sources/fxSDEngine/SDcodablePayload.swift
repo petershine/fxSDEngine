@@ -43,7 +43,10 @@ public class SDcodablePayload: Codable {
 
 		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
 
-		let aspectRatio = max(3.0/4.0, UIScreen.main.nativeBounds.size.width / UIScreen.main.nativeBounds.size.height)
+		var aspectRatio = UIScreen.main.nativeBounds.size.width/UIScreen.main.nativeBounds.size.height
+		if UIDevice.current.userInterfaceIdiom != .pad {
+			aspectRatio = max(504.0/768.0, aspectRatio)
+		}
 		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? Int(CGFloat(self.height) * aspectRatio)
 
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? false
@@ -59,10 +62,10 @@ public class SDcodablePayload: Codable {
 
 		self.sampler_name = "DPM++ 2M SDE"
 		self.scheduler = "Karras"
-		self.cfg_scale = 8.0
+		self.cfg_scale = 7.0
 
 		self.denoising_strength = 0.4
-		self.hr_scale = 1.5
+		self.hr_scale = 1.65
 		self.hr_second_pass_steps = 10
 		self.hr_upscaler = "4x-UltraSharp"
 
