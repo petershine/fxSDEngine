@@ -43,7 +43,7 @@ public class SDcodablePayload: Codable {
 
 		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
 
-		let aspectRatio = UIScreen.main.nativeBounds.size.width / UIScreen.main.nativeBounds.size.height
+		let aspectRatio = max(3.0/4.0, UIScreen.main.nativeBounds.size.width / UIScreen.main.nativeBounds.size.height)
 		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? Int(CGFloat(self.height) * aspectRatio)
 
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? false
