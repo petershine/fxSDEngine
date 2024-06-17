@@ -1,5 +1,6 @@
 
 import Foundation
+import UIKit
 
 import fXDKit
 
@@ -40,6 +41,10 @@ public protocol SDNetworking {
 		query: String?,
 		payload: Data?,
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?)
+
+
+	var sdServerRequestTask: UIBackgroundTaskIdentifier? { get set }
+	@MainActor func generatingAsBackgroundTask()
 }
 
 extension SDNetworking {
