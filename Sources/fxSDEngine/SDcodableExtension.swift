@@ -14,8 +14,7 @@ struct SDcodableExtension: Codable {
 }
 
 enum SDExtensionName: String {
-	case ADetailer
-	case adetailer
+	case ADetailer, adetailer
 }
 
 extension SDExtensionName {
@@ -100,7 +99,7 @@ struct SDextensionADetailer: Codable {
 	var ad_sampler: String = "Use same sampler"
 	var ad_scheduler: String = "Use same scheduler"
 	var ad_steps: Int = 28
-	var ad_tap_enable: Bool = true
+	var ad_tab_enable: Bool = true
 	var ad_use_cfg_scale: Bool = false
 	var ad_use_checkpoint: Bool = false
 	var ad_use_clip_skip: Bool = false
