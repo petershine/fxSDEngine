@@ -43,6 +43,7 @@ public protocol SDNetworking: URLSessionDelegate, URLSessionDataDelegate {
 		method: String?,
 		query: String?,
 		payload: Data?,
+		backgroundSession: URLSession?,
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?)
 
 	var completionHandler: ((Data?, URLResponse?, (any Error)?) -> Void)? { get set }
@@ -59,6 +60,7 @@ extension SDNetworking {
 		method: String? = nil,
 		query: String? = nil,
 		payload: Data? = nil,
+		backgroundSession: URLSession? = nil,
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?) {
 			if !quiet {
 				fxd_log()
@@ -90,7 +92,7 @@ extension SDNetworking {
 			}
 
 
-			let completionHandler = {//self.completionHandler = {
+			let completionHandler = {
 				(data: Data?, response: URLResponse?, error: Error?) in
 
 				fxdPrint("data: ", data, quiet:quiet)
@@ -143,7 +145,14 @@ extension SDNetworking {
 			}
 
 
-			let httpTask = URLSession.shared.dataTask(with: httpRequest, completionHandler: completionHandler) //self.backgroundSession.dataTask(with: httpRequest)
-			httpTask.resume()
+			var httpTask: URLSessionDataTask? = nil
+			if backgroundSession != nil {
+				self.completionHandler = completionHandler
+				httpTask = backgroundSession?.dataTask(with: httpRequest)
+			}
+			else {
+				httpTask = URLSession.shared.dataTask(with: httpRequest, completionHandler: completionHandler)
+			}
+			httpTask?.resume()
 		}
 }

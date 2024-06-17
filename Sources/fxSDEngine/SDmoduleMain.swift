@@ -27,7 +27,7 @@ public protocol SDmoduleMain: SDNetworking, AnyObject {
 	func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
 	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
 
-	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
+	func execute_txt2img(backgroundSession: URLSession?, completionHandler: ((_ error: Error?)->Void)?)
 
 	func execute_progress(skipImageDecoding: Bool, quiet: Bool, completionHandler: ((_ lastProgress: SDcodableProgress?, _ error: Error?)->Void)?)
 	func continueRefreshing()
@@ -214,11 +214,12 @@ extension SDmoduleMain {
 }
 
 extension SDmoduleMain {
-	public func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
+	public func execute_txt2img(backgroundSession: URLSession?, completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
 		let payload: Data? = generationPayload?.evaluatedPayload(extensions: systemInfo?.Extensions)
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
-			payload: payload) {
+			payload: payload,
+			backgroundSession: backgroundSession) {
 				[weak self] (data, error) in
 
 				#if DEBUG
