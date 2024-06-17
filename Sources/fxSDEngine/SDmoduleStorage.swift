@@ -108,10 +108,24 @@ open class SDmoduleStorage: NSObject {
 }
 
 extension SDmoduleStorage {
-	public func deleteAll() -> Int? {
-		guard let imageURLs = self.latestImageURLs,
-			  imageURLs.count > 0
-		else {
+	public func deleteOne(fileURL: URL) {
+		UIAlertController.simpleAlert(
+			withTitle: "Do you want to delete?",
+			message: "\(fileURL.absoluteURL.lastPathComponent)",
+			destructiveText: "DELETE",
+			cancelText: "NO",
+			destructiveHandler: {
+				action in
+
+				if action.style != .cancel {
+					let _ = self.deleteMultiple(imageURLs: [fileURL])
+				}
+			})
+	}
+	
+	public func deleteMultiple(imageURLs: [URL]? = nil) -> Int? {
+		let imageURLs = imageURLs ?? self.latestImageURLs ?? []
+		guard imageURLs.count > 0 else {
 			return nil
 		}
 
