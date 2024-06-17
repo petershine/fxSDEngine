@@ -31,8 +31,11 @@ extension SDError: LocalizedError {
 }
 
 
-public protocol SDNetworking {
+public protocol SDNetworking: URLSessionDelegate, URLSessionDataDelegate {
 	var SD_SERVER_HOSTNAME: String { get }
+
+	var backgroundSession: URLSession { get }
+	var backgroundOperationQueue: OperationQueue { get }
 
 	func requestToSDServer(
 		quiet: Bool,
@@ -41,6 +44,8 @@ public protocol SDNetworking {
 		query: String?,
 		payload: Data?,
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?)
+
+	var completionHandler: ((Data?, URLResponse?, (any Error)?) -> Void)? { get set }
 
 
 	var sdServerRequestTask: UIBackgroundTaskIdentifier? { get set }
@@ -85,7 +90,7 @@ extension SDNetworking {
 			}
 
 
-			let httpTask = URLSession.shared.dataTask(with: httpRequest) {
+			let completionHandler = {//self.completionHandler = {
 				(data: Data?, response: URLResponse?, error: Error?) in
 
 				fxdPrint("data: ", data, quiet:quiet)
@@ -136,6 +141,9 @@ extension SDNetworking {
 
 				responseHandler?(receivedData, modifiedError)
 			}
+
+
+			let httpTask = URLSession.shared.dataTask(with: httpRequest, completionHandler: completionHandler) //self.backgroundSession.dataTask(with: httpRequest)
 			httpTask.resume()
 		}
 }
