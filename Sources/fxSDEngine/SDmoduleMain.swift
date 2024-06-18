@@ -277,8 +277,8 @@ extension SDmoduleMain {
 						self?.displayedImage = newImage
 
 						let storage = SDmoduleStorage()
-						if let _ = storage.saveGeneratedImage(pngData: pngData) {
-							self?.imageURLs = storage.latestImageURLs
+						if let latestImageURL = storage.saveGeneratedImage(pngData: pngData) {
+							self?.imageURLs?.insert(latestImageURL, at: 0)
 						}
 					}
 					completionHandler?(error)
