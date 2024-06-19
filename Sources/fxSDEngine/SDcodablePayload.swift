@@ -39,7 +39,7 @@ public class SDcodablePayload: Codable {
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? ""
 		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt) ?? ""
 
-		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 35
+		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 30
 
 		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
 
@@ -62,7 +62,7 @@ public class SDcodablePayload: Codable {
 
 		self.sampler_name = "DPM++ 2M SDE"
 		self.scheduler = "Karras"
-		self.cfg_scale = 7.0
+		self.cfg_scale = 6.0
 
 		self.denoising_strength = 0.4
 		self.hr_scale = 1.65
