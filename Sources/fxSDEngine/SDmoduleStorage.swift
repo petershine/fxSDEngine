@@ -110,54 +110,53 @@ extension SDmoduleStorage {
 }
 
 extension SDmoduleStorage {
-	public func deleteOne(fileURL: URL, completionHandler: (() -> Void)?) {
+	public func deleteImageURLs(imageURLs: [URL], completionHandler: (() -> Void)?) {
+		guard imageURLs.count > 0 else {
+			completionHandler?()
+			return
+		}
+
+
+		let message: String = (imageURLs.count > 1) ? "\(imageURLs.count) images" : (imageURLs.first?.absoluteURL.lastPathComponent ?? "")
 
 		UIAlertController.simpleAlert(
 			withTitle: "Do you want to delete?",
-			message: "\(fileURL.absoluteURL.lastPathComponent)",
+			message: message,
 			destructiveText: "DELETE",
 			cancelText: "NO",
 			destructiveHandler: {
 				action in
 
-				if action.style != .cancel {
-					let _ = self.deleteMultiple(imageURLs: [fileURL])
+				guard action.style != .cancel else {
+					completionHandler?()
+					return
+				}
+
+
+				let originalCount = imageURLs.count
+				var deletedCount: Int = 0
+				var deletingError: Error? = nil
+				do {
+					for fileURL in imageURLs {
+						try FileManager.default.removeItem(at: fileURL)
+						deletedCount = deletedCount + 1
+					}
+				}
+				catch {	fxd_log()
+					fxdPrint(error)
+					deletingError = error
+				}
+
+				DispatchQueue.main.async {
+					if deletedCount == originalCount {
+						UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images", message: nil)
+					}
+					else {
+						UIAlertController.errorAlert(error: deletingError)
+					}
 				}
 
 				completionHandler?()
 			})
-	}
-	
-	public func deleteMultiple(imageURLs: [URL]? = nil) -> Int? {
-		let imageURLs = imageURLs ?? self.latestImageURLs ?? []
-		guard imageURLs.count > 0 else {
-			return nil
-		}
-
-
-		let originalCount = imageURLs.count
-		var deletedCount: Int = 0
-		var deletingError: Error? = nil
-		do {
-			for fileURL in imageURLs {
-				try FileManager.default.removeItem(at: fileURL)
-				deletedCount = deletedCount + 1
-			}
-		}
-		catch {	fxd_log()
-			fxdPrint(error)
-			deletingError = error
-		}
-
-		DispatchQueue.main.async {
-			if deletedCount == originalCount {
-				UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images", message: nil)
-			}
-			else {
-				UIAlertController.errorAlert(error: deletingError)
-			}
-		}
-
-		return deletedCount
 	}
 }
