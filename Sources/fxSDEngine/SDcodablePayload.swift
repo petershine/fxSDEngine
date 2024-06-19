@@ -12,8 +12,8 @@ public class SDcodablePayload: Codable {
 
 	var sampler_name: String?
 	var scheduler: String?
-	var steps: Int
-	var cfg_scale: Double?
+	public var steps: Int
+	public var cfg_scale: Double?
 
 	var width: Int
 	var height: Int
@@ -27,7 +27,7 @@ public class SDcodablePayload: Codable {
 	var hr_prompt: String
 	var hr_negative_prompt: String
 
-	var n_iter: Int
+	public var n_iter: Int
 	var batch_size: Int
 
 	var save_images: Bool
