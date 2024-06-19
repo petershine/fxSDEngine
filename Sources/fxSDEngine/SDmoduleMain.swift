@@ -238,14 +238,18 @@ extension SDmoduleMain {
 				}
 
 
-				guard let encodedImage = decodedResponse.images?.first as? String else {	fxd_log()
+				guard let encodedImageArray = decodedResponse.images,
+					  encodedImageArray.count > 0 else {	fxd_log()
 					fxdPrint("receivedData.jsonObject()\n", data?.jsonObject())
 					completionHandler?(error)
 					return
 				}
 
 
-				guard let pngData = Data(base64Encoded: encodedImage) else {
+				let pngDataArray: [Data] = encodedImageArray.map {
+					return Data(base64Encoded: $0 ?? "") ?? Data()
+				}
+				guard pngDataArray.count > 0 else {
 					completionHandler?(error)
 					return
 				}
@@ -259,7 +263,7 @@ extension SDmoduleMain {
 
 
 				let infotext = decodedResponse.infotext() ?? ""
-				let newImage = UIImage(data: pngData)
+				let newImage = UIImage(data: pngDataArray.last!)
 
 				DispatchQueue.main.async {
 					fxd_log()
@@ -275,12 +279,15 @@ extension SDmoduleMain {
 
 					if newImage != nil {
 						self?.displayedImage = newImage
+					}
 
-						let storage = SDmoduleStorage()
-						if let latestImageURL = storage.saveGeneratedImage(pngData: pngData) {
+					let storage = SDmoduleStorage()
+					for (index, pngData) in pngDataArray.enumerated() {
+						if let latestImageURL = storage.saveGeneratedImage(pngData: pngData, index: index) {
 							self?.imageURLs?.insert(latestImageURL, at: 0)
 						}
 					}
+
 					completionHandler?(error)
 				}
 			}

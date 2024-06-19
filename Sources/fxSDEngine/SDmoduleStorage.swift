@@ -13,29 +13,18 @@ open class SDmoduleStorage: NSObject {
 		return fileURL
 	}
 
-	open var savedImageURL: URL? {
-		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-		
-		let dateFormatter = DateFormatter()
-		dateFormatter.dateFormat = "yyyy-MM-dd_HH_mm_ss"
-
-		let fileName = dateFormatter.string(from: Date.now)
-		let fileURL = documentDirectory?.appendingPathComponent("GenerArt_\(fileName).png")
-		return fileURL
-	}
-
 	open var latestImageURLs: [URL]? {
 		guard  let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
 			return nil
 		}
-		
+
 		var fileURLs: [URL]? = nil
 		do {
 			let contents = try FileManager.default.contentsOfDirectory(
 				at: documentDirectory,
 				includingPropertiesForKeys: [.contentModificationDateKey, .contentTypeKey],
 				options: [.skipsSubdirectoryDescendants, .skipsHiddenFiles])
-			
+
 			fileURLs = try contents
 				.filter {
 					let resourceValues: URLResourceValues = try $0.resourceValues(forKeys: [.contentTypeKey])
@@ -88,10 +77,23 @@ open class SDmoduleStorage: NSObject {
 
 		return payloadData
 	}
+}
 
-	func saveGeneratedImage(pngData: Data) -> URL? {	fxd_log()
+extension SDmoduleStorage {
+	func savedImageURL(index: Int) -> URL? {
+		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+
+		let dateFormatter = DateFormatter()
+		dateFormatter.dateFormat = "yyyy-MM-dd_HH_mm_ss"
+
+		let fileName = dateFormatter.string(from: Date.now)
+		let fileURL = documentDirectory?.appendingPathComponent("GenerArt_\(fileName)_\(index).png")
+		return fileURL
+	}
+
+	func saveGeneratedImage(pngData: Data, index: Int = 0) -> URL? {	fxd_log()
 		fxdPrint("pngData: ", pngData)
-		guard let fileURL = savedImageURL else {
+		guard let fileURL = savedImageURL(index: index) else {
 			return nil
 		}
 
