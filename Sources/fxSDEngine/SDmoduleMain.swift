@@ -268,20 +268,21 @@ extension SDmoduleMain {
 				DispatchQueue.main.async {
 					fxd_log()
 
+					if newImage != nil {
+						self?.displayedImage = newImage
+					}
+
+
+					let storage = SDmoduleStorage()
 					if !(infotext.isEmpty),
 					   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {
 						self?.generationPayload = newlyGeneratedPayload
 
 						if let encodedPayload = newlyGeneratedPayload.encodedPayload() {
-							SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
+							storage.savePayloadToFile(payload: encodedPayload)
 						}
 					}
 
-					if newImage != nil {
-						self?.displayedImage = newImage
-					}
-
-					let storage = SDmoduleStorage()
 					for (index, pngData) in pngDataArray.enumerated() {
 						if let latestImageURL = storage.saveGeneratedImage(pngData: pngData, index: index) {
 							self?.imageURLs?.insert(latestImageURL, at: 0)
