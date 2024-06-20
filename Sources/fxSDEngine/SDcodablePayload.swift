@@ -64,7 +64,7 @@ public class SDcodablePayload: Codable {
 		self.scheduler = "Karras"
 		self.cfg_scale = 6.0
 
-		self.denoising_strength = 0.4
+		self.denoising_strength = 0.3
 		self.hr_scale = 1.65
 		self.hr_second_pass_steps = 10
 		self.hr_upscaler = "4x-UltraSharp"
@@ -114,7 +114,7 @@ extension SDcodablePayload {
 			payload = try JSONEncoder().encode(self)
 		}
 		catch {	fxd_log()
-			fxdPrint("error:", error)
+			fxdPrint(error)
 		}
 
 		return payload
