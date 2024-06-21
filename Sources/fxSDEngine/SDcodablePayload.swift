@@ -43,7 +43,7 @@ public class SDcodablePayload: Codable {
 
 		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
 
-		var aspectRatio = UIScreen.main.bounds.size.width/UIScreen.main.bounds.size.height
+		var aspectRatio = UIScreen.main.nativeBounds.size.width/UIScreen.main.nativeBounds.size.height
 		if UIDevice.current.userInterfaceIdiom == .phone {
 			aspectRatio = max(504.0/768.0, aspectRatio)
 		}
