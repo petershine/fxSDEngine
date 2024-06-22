@@ -129,7 +129,11 @@ extension SDcodablePayload {
 
 
 extension SDcodablePayload {
-	func evaluatedPayload(systemInfo: SDcodableSysInfo?, extensionNames: Set<SDExtensionName>?) -> Data? {
+	func evaluatedPayload(sdEngine: SDmoduleMain) -> Data? {
+		if !sdEngine.reuse_lastSeed {
+			self.seed = -1
+		}
+		
 		guard let payload: Data = encodedPayload() else {
 			return nil
 		}
@@ -150,7 +154,7 @@ extension SDcodablePayload {
 
 		var extendedPayload: Data = payload
 
-		let alwayson_scripts = systemInfo?.alwayson_scripts(extensionNames: extensionNames) ?? [:]
+		let alwayson_scripts = sdEngine.systemInfo?.alwayson_scripts(extensionNames: sdEngine.selectedExtensionNames) ?? [:]
 		if alwayson_scripts.count > 0 {
 			payloadDictionary?["alwayson_scripts"] = alwayson_scripts
 
