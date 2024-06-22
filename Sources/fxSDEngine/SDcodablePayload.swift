@@ -32,6 +32,8 @@ public class SDcodablePayload: Codable {
 
 	var save_images: Bool
 
+	public var seed: Int
+
 
 	required public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -59,6 +61,10 @@ public class SDcodablePayload: Codable {
 
 		self.save_images = try container.decodeIfPresent(Bool.self, forKey: .save_images) ?? true
 
+		self.seed = try container.decodeIfPresent(Int.self, forKey: .seed) ?? -1
+
+
+		// Conditionals and ones need alternative keys
 
 		self.sampler_name = "DPM++ 2M SDE"
 		self.scheduler = "Karras"
