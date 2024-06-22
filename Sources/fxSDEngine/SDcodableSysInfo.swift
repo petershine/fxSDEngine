@@ -38,47 +38,43 @@ extension SDcodableSysInfo {
 
 
 extension SDcodableSysInfo {
-	func availableExtensionNames() -> Set<SDExtensionName>? {
-		var availableNames: Set<SDExtensionName> = []
+	var extensionNames: Set<SDExtensionName>? {
+		var extensionNames: Set<SDExtensionName> = []
 
-		for on_script in self.Extensions ?? [] {
-			guard on_script.name != nil,
-				  let extensionName = SDExtensionName(rawValue: on_script.name!) else {
+		for sdExtension in self.Extensions ?? [] {
+			guard sdExtension.name != nil,
+				  let availableName = SDExtensionName(rawValue: sdExtension.name!) else {
 				continue
 			}
 
-			availableNames.insert(extensionName)
+			extensionNames.insert(availableName)
 		}
 
-		return availableNames.count > 0 ? availableNames : nil
+		return extensionNames.count > 0 ? extensionNames : nil
 	}
 
-	private func available_scripts() -> Dictionary<String, Any?> {
-		guard let availableNames = availableExtensionNames() else {
-			return [:]
-		}
+	fileprivate var allExtensionArgs: Dictionary<String, Any?>? {
+		var allArgs: Dictionary<String, Any?> = [:]
 
-
-		var alwayson_scripts: Dictionary<String, Any?> = [:]
-		for extensionName in availableNames {
+		for extensionName in extensionNames ?? [] {
 			if let args = extensionName.arguments() {
-				alwayson_scripts[extensionName.rawValue] = args
+				allArgs[extensionName.rawValue] = args
 			}
 		}
 
-		return alwayson_scripts
+		return (allArgs.count > 0) ? allArgs : nil
 	}
 
 	func alwayson_scripts(extensionNames: Set<SDExtensionName>?) -> Dictionary<String, Any?> {
-		let available_scripts = available_scripts()
-		guard available_scripts.count > 0 else {
+		guard let allExtensionArgs = allExtensionArgs,
+			  allExtensionArgs.count > 0 else {
 			return [:]
 		}
 
 
-		let alwayson_scripts = available_scripts.filter {
-			if let availableName = SDExtensionName(rawValue: $0.key) {
-				return extensionNames?.contains(availableName) ?? false
+		let alwayson_scripts = allExtensionArgs.filter {
+			if let selectedName = SDExtensionName(rawValue: $0.key) {
+				return extensionNames?.contains(selectedName) ?? false
 			}
 			return false
 		}

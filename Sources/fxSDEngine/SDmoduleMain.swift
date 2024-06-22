@@ -56,7 +56,7 @@ extension SDmoduleMain {
 				}
 
 				self?.systemInfo = decodedResponse
-				self?.use_adetailer = self?.systemInfo?.availableExtensionNames()?.contains(.adetailer) ?? false
+				self?.use_adetailer = self?.systemInfo?.extensionNames?.contains(.adetailer) ?? false
 
 				completionHandler?(error)
 			}
