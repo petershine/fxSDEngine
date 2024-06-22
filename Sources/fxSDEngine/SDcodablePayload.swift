@@ -123,7 +123,7 @@ extension SDcodablePayload {
 
 
 extension SDcodablePayload {
-	func evaluatedPayload(extensions: [SDcodableExtension]?) -> Data? {
+	func evaluatedPayload(systemExtensions: [SDcodableExtension]?, selectedExtensions: Set<SDExtensionName>?) -> Data? {
 		guard let payload: Data = encodedPayload() else {
 			return nil
 		}
@@ -142,16 +142,16 @@ extension SDcodablePayload {
 		}
 
 
-		guard (extensions ?? []).count > 0 else {
+		guard (systemExtensions ?? []).count > 0 else {
 			return payload
 		}
 
 
 		var extendedPayload: Data = payload
 
-		let alwayson_scripts = SDcodableExtension.alwayson_scripts(extensions: extensions)
-		if alwayson_scripts.count > 0 {
-			payloadDictionary?["alwayson_scripts"] = alwayson_scripts
+		let selected_scripts = SDcodableExtension.selected_scripts(extensions: systemExtensions, selectedExtensions: selectedExtensions)
+		if selected_scripts.count > 0 {
+			payloadDictionary?["alwayson_scripts"] = selected_scripts
 
 			do {
 				extendedPayload = try JSONSerialization.data(withJSONObject: payloadDictionary!)

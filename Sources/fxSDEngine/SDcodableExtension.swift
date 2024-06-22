@@ -40,21 +40,52 @@ extension SDExtensionName {
 }
 
 extension SDcodableExtension {
-	static func alwayson_scripts(extensions: [Self]?) -> Dictionary<String, Any?> {
-		var alwayson_scripts: Dictionary<String, Any?> = [:]
+	public static func availableExtensionNames(extensions: [Self]?) -> Set<SDExtensionName>? {
+		var availableNames: Set<SDExtensionName> = []
 
 		for on_script in extensions ?? [] {
 			guard on_script.name != nil,
-				  let script_case = SDExtensionName(rawValue: on_script.name!) else {
+				  let extensionName = SDExtensionName(rawValue: on_script.name!) else {
 				continue
 			}
 
-			if let args = script_case.arguments() {
-				alwayson_scripts[script_case.rawValue] = args
+			availableNames.insert(extensionName)
+		}
+
+		return availableNames.count > 0 ? availableNames : nil
+	}
+
+	private static func alwayson_scripts(extensions: [Self]?) -> Dictionary<String, Any?> {
+		guard let availableNames = Self.availableExtensionNames(extensions: extensions) else {
+			return [:]
+		}
+
+
+		var alwayson_scripts: Dictionary<String, Any?> = [:]
+		for extensionName in availableNames {
+			if let args = extensionName.arguments() {
+				alwayson_scripts[extensionName.rawValue] = args
 			}
 		}
 
 		return alwayson_scripts
+	}
+
+	static func selected_scripts(extensions: [Self]?, selectedExtensions: Set<SDExtensionName>?) -> Dictionary<String, Any?> {
+		let alwayson_scripts = Self.alwayson_scripts(extensions: extensions)
+		guard alwayson_scripts.count > 0 else {
+			return [:]
+		}
+
+
+		var selected_scripts: Dictionary<String, Any?> = [:]
+		for extensionName in selectedExtensions ?? [] {
+			if let args = alwayson_scripts[extensionName.rawValue] {
+				selected_scripts[extensionName.rawValue] = args
+			}
+		}
+
+		return selected_scripts
 	}
 }
 
