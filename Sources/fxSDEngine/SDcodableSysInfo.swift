@@ -76,11 +76,11 @@ extension SDcodableSysInfo {
 		}
 
 
-		var alwayson_scripts: Dictionary<String, Any?> = [:]
-		for extensionName in extensionNames ?? [] {
-			if let args = alwayson_scripts[extensionName.rawValue] {
-				alwayson_scripts[extensionName.rawValue] = args
+		let alwayson_scripts = available_scripts.filter {
+			if let availableName = SDExtensionName(rawValue: $0.key) {
+				return extensionNames?.contains(availableName) ?? false
 			}
+			return false
 		}
 
 		return alwayson_scripts
