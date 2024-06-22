@@ -13,7 +13,7 @@ open class SDmoduleStorage: NSObject {
 		return fileURL
 	}
 
-	open var latestImageURLs: [URL]? {
+	public var latestImageURLs: [URL]? {
 		guard  let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
 			return nil
 		}
@@ -47,8 +47,10 @@ open class SDmoduleStorage: NSObject {
 	public override init() {
 		super.init()
 	}
+}
 
-	open func savePayloadToFile(payload: Data) {	fxd_log()
+extension SDmoduleStorage {
+	func savePayloadToFile(payload: Data) {	fxd_log()
 		fxdPrint("payload: ", payload)
 		guard let fileURL = savedPayloadURL else {
 			return
@@ -62,7 +64,7 @@ open class SDmoduleStorage: NSObject {
 		}
 	}
 
-	open func loadPayloadFromFile() throws -> Data? {
+	public func loadPayloadFromFile() throws -> Data? {
 		guard let fileURL = savedPayloadURL else {
 			return nil
 		}
@@ -77,9 +79,7 @@ open class SDmoduleStorage: NSObject {
 
 		return payloadData
 	}
-}
 
-extension SDmoduleStorage {
 	func savedImageURL(index: Int) -> URL? {
 		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
 
