@@ -35,3 +35,54 @@ extension SDcodableSysInfo {
 		return Config?.outdir_samples
 	}
 }
+
+
+extension SDcodableSysInfo {
+	public func availableExtensionNames() -> Set<SDExtensionName>? {
+		var availableNames: Set<SDExtensionName> = []
+
+		for on_script in self.Extensions ?? [] {
+			guard on_script.name != nil,
+				  let extensionName = SDExtensionName(rawValue: on_script.name!) else {
+				continue
+			}
+
+			availableNames.insert(extensionName)
+		}
+
+		return availableNames.count > 0 ? availableNames : nil
+	}
+
+	private func available_scripts() -> Dictionary<String, Any?> {
+		guard let availableNames = availableExtensionNames() else {
+			return [:]
+		}
+
+
+		var alwayson_scripts: Dictionary<String, Any?> = [:]
+		for extensionName in availableNames {
+			if let args = extensionName.arguments() {
+				alwayson_scripts[extensionName.rawValue] = args
+			}
+		}
+
+		return alwayson_scripts
+	}
+
+	func alwayson_scripts(selectedExtensions: Set<SDExtensionName>?) -> Dictionary<String, Any?> {
+		let available_scripts = available_scripts()
+		guard available_scripts.count > 0 else {
+			return [:]
+		}
+
+
+		var alwayson_scripts: Dictionary<String, Any?> = [:]
+		for extensionName in selectedExtensions ?? [] {
+			if let args = alwayson_scripts[extensionName.rawValue] {
+				alwayson_scripts[extensionName.rawValue] = args
+			}
+		}
+
+		return alwayson_scripts
+	}
+}

@@ -54,9 +54,8 @@ extension SDmoduleMain {
 				}
 
 				self?.systemInfo = decodedResponse
-				if (self?.selectedExtensions ?? []).count == 0 {
-					self?.selectedExtensions = SDcodableExtension.availableExtensionNames(extensions: self?.systemInfo?.Extensions)
-				}
+				self?.selectedExtensions = self?.systemInfo?.availableExtensionNames()
+
 				completionHandler?(error)
 			}
 	}
@@ -220,7 +219,7 @@ extension SDmoduleMain {
 extension SDmoduleMain {
 	public func execute_txt2img(backgroundSession: URLSession?, completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
 		let payload: Data? = generationPayload?.evaluatedPayload(
-			systemExtensions: systemInfo?.Extensions,
+			systemInfo: systemInfo,
 			selectedExtensions: selectedExtensions)
 		
 		requestToSDServer(
