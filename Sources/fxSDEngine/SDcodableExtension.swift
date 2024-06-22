@@ -5,7 +5,7 @@ import Foundation
 import fXDKit
 
 
-struct SDcodableExtension: Codable {
+public struct SDcodableExtension: Codable {
 	var branch: String? = nil
 	var name: String? = nil
 	var path: String? = nil
@@ -13,8 +13,8 @@ struct SDcodableExtension: Codable {
 	var version: String? = nil
 }
 
-enum SDExtensionName: String {
-	case ADetailer, adetailer
+public enum SDExtensionName: String {
+	case adetailer
 }
 
 extension SDExtensionName {
@@ -22,7 +22,7 @@ extension SDExtensionName {
 		var args: Dictionary<String, Any?>? = nil
 		do {
 			switch self {
-				case .ADetailer, .adetailer:
+				case .adetailer:
 					args = [
 						"args" : [
 							true,
