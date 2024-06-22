@@ -10,8 +10,8 @@ public protocol SDmoduleMain: SDNetworking, AnyObject {
 	var systemInfo: SDcodableSysInfo? { get set }
 	var generationPayload: SDcodablePayload? { get set }
 
-	var reuse_lastSeed: Bool { get set }
-	var selectedExtensionNames: Set<SDExtensionName>? { get set }
+	var use_lastSeed: Bool { get set }
+	var use_adetailer: Bool { get set }
 
 	var progressObservable: SDcodableProgress? { get set }
 
@@ -56,7 +56,7 @@ extension SDmoduleMain {
 				}
 
 				self?.systemInfo = decodedResponse
-				self?.selectedExtensionNames = self?.systemInfo?.availableExtensionNames()
+				self?.use_adetailer = self?.systemInfo?.availableExtensionNames()?.contains(.adetailer) ?? false
 
 				completionHandler?(error)
 			}

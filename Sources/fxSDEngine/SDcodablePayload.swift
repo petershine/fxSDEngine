@@ -130,10 +130,10 @@ extension SDcodablePayload {
 
 extension SDcodablePayload {
 	func evaluatedPayload(sdEngine: SDmoduleMain) -> Data? {
-		if !sdEngine.reuse_lastSeed {
+		if !sdEngine.use_lastSeed {
 			self.seed = -1
 		}
-		
+
 		guard let payload: Data = encodedPayload() else {
 			return nil
 		}
