@@ -38,7 +38,7 @@ extension SDcodableSysInfo {
 
 
 extension SDcodableSysInfo {
-	public func availableExtensionNames() -> Set<SDExtensionName>? {
+	func availableExtensionNames() -> Set<SDExtensionName>? {
 		var availableNames: Set<SDExtensionName> = []
 
 		for on_script in self.Extensions ?? [] {
@@ -69,7 +69,7 @@ extension SDcodableSysInfo {
 		return alwayson_scripts
 	}
 
-	func alwayson_scripts(selectedExtensions: Set<SDExtensionName>?) -> Dictionary<String, Any?> {
+	func alwayson_scripts(extensionNames: Set<SDExtensionName>?) -> Dictionary<String, Any?> {
 		let available_scripts = available_scripts()
 		guard available_scripts.count > 0 else {
 			return [:]
@@ -77,7 +77,7 @@ extension SDcodableSysInfo {
 
 
 		var alwayson_scripts: Dictionary<String, Any?> = [:]
-		for extensionName in selectedExtensions ?? [] {
+		for extensionName in extensionNames ?? [] {
 			if let args = alwayson_scripts[extensionName.rawValue] {
 				alwayson_scripts[extensionName.rawValue] = args
 			}

@@ -9,7 +9,7 @@ import fXDKit
 public protocol SDmoduleMain: SDNetworking, AnyObject {
 	var systemInfo: SDcodableSysInfo? { get set }
 	var generationPayload: SDcodablePayload? { get set }
-	var selectedExtensions: Set<SDExtensionName>? { get set }
+	var selectedExtensionNames: Set<SDExtensionName>? { get set }
 
 	var progressObservable: SDcodableProgress? { get set }
 
@@ -54,7 +54,7 @@ extension SDmoduleMain {
 				}
 
 				self?.systemInfo = decodedResponse
-				self?.selectedExtensions = self?.systemInfo?.availableExtensionNames()
+				self?.selectedExtensionNames = self?.systemInfo?.availableExtensionNames()
 
 				completionHandler?(error)
 			}
@@ -220,7 +220,7 @@ extension SDmoduleMain {
 	public func execute_txt2img(backgroundSession: URLSession?, completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
 		let payload: Data? = generationPayload?.evaluatedPayload(
 			systemInfo: systemInfo,
-			selectedExtensions: selectedExtensions)
+			extensionNames: selectedExtensionNames)
 		
 		requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,

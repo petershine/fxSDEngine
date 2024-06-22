@@ -5,7 +5,7 @@ import Foundation
 import fXDKit
 
 
-public struct SDcodableExtension: Codable {
+struct SDcodableExtension: Codable {
 	var branch: String? = nil
 	var name: String? = nil
 	var path: String? = nil
