@@ -31,7 +31,7 @@ extension SDError: LocalizedError {
 }
 
 
-public protocol SDNetworking: URLSessionDelegate, URLSessionDataDelegate {
+public protocol SDNetworking: NSObjectProtocol {
 	var SD_SERVER_HOSTNAME: String { get }
 
 	var backgroundSession: URLSession { get }
@@ -48,9 +48,7 @@ public protocol SDNetworking: URLSessionDelegate, URLSessionDataDelegate {
 
 	var completionHandler: ((Data?, URLResponse?, (any Error)?) -> Void)? { get set }
 
-
 	var sdServerRequestTask: UIBackgroundTaskIdentifier? { get set }
-	@MainActor func generatingAsBackgroundTask()
 }
 
 extension SDNetworking {

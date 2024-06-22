@@ -6,7 +6,9 @@ import UIKit
 import fXDKit
 
 
-public protocol SDmoduleMain: SDNetworking, AnyObject {
+public protocol SDmoduleMain: NSObject {
+	var networkingModule: SDNetworking { get set }
+
 	var systemInfo: SDcodableSysInfo? { get set }
 	var generationPayload: SDcodablePayload? { get set }
 
@@ -14,12 +16,10 @@ public protocol SDmoduleMain: SDNetworking, AnyObject {
 	var use_adetailer: Bool { get set }
 
 	var progressObservable: SDcodableProgress? { get set }
-
 	var shouldContinueRefreshing: Bool { get set }
+	var isEngineRunning: Bool { get }
 
 	var displayedImage: UIImage? { get set }
-
-	var isEngineRunning: Bool { get }
 
 	var imageURLs: [URL]? { get set }
 
@@ -35,12 +35,14 @@ public protocol SDmoduleMain: SDNetworking, AnyObject {
 	func execute_progress(skipImageDecoding: Bool, quiet: Bool, completionHandler: ((_ lastProgress: SDcodableProgress?, _ error: Error?)->Void)?)
 	func continueRefreshing()
 	func interrupt(completionHandler: ((_ error: Error?)->Void)?)
+
+	@MainActor func generatingAsBackgroundTask()
 }
 
 
 extension SDmoduleMain {
 	public func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?) {
-		requestToSDServer(
+		networkingModule.requestToSDServer(
 			api_endpoint: .INTERNAL_SYSINFO) {
 				[weak self] (data, error) in
 
@@ -112,7 +114,7 @@ extension SDmoduleMain {
 
 extension SDmoduleMain {
 	public func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?) {
-		requestToSDServer(
+		networkingModule.requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
 			query: "folder_path=\(path)") {
 				[weak self] (data, error) in
@@ -157,7 +159,7 @@ extension SDmoduleMain {
 				}
 
 
-				self?.requestToSDServer(
+				self?.networkingModule.requestToSDServer(
 					api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
 					query: "path=\(fullpath)&t=file") {
 						(received, error) in
@@ -200,7 +202,7 @@ extension SDmoduleMain {
 		}
 
 
-		requestToSDServer(
+		networkingModule.requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
 			query: "path=\(imagePath)",
 			responseHandler: {
@@ -222,7 +224,7 @@ extension SDmoduleMain {
 	public func execute_txt2img(backgroundSession: URLSession?, completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
 		let payload: Data? = generationPayload?.evaluatedPayload(sdEngine: self)
 		
-		requestToSDServer(
+		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			payload: payload,
 			backgroundSession: backgroundSession) {
@@ -308,7 +310,7 @@ extension SDmoduleMain {
 		quiet: Bool = false,
 		completionHandler: ((_ lastProgress: SDcodableProgress?, _ error: Error?)->Void)?) {
 
-		requestToSDServer(
+			networkingModule.requestToSDServer(
 			quiet: quiet,
 			api_endpoint: .SDAPI_V1_PROGRESS) {
 				[weak self] (data, error) in
@@ -345,7 +347,7 @@ extension SDmoduleMain {
 	}
 
 	public func interrupt(completionHandler: ((_ error: Error?)->Void)?) {
-		requestToSDServer(
+		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_INTERRUPT,
 			method: "POST") {
 				[weak self] (receivedData, error) in
