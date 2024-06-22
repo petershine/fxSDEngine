@@ -128,14 +128,14 @@ extension SDmoduleMain {
 
 				let latestFileORfolder = filesORfolders
 					.sorted {
-						($0?.updated_time())! > ($1?.updated_time())!
+						($0?.updated_time)! > ($1?.updated_time)!
 					}
 					.filter {
 						!($0?.fullpath?.contains("DS_Store") ?? false)
 					}
 					.first as? SDcodableFile
 
-				fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time())
+				fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time)
 				fxdPrint("latestFileORfolder?.fullpath: ", latestFileORfolder?.fullpath)
 				guard latestFileORfolder != nil,
 					  let fullpath = latestFileORfolder?.fullpath

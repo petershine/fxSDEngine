@@ -18,7 +18,7 @@ struct SDcodableFile: Codable {
 }
 
 extension SDcodableFile {
-	func updated_time() -> Date? {
+	var updated_time: Date? {
 		guard date != nil else {
 			return nil
 		}
