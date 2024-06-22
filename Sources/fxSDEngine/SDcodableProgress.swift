@@ -26,7 +26,7 @@ public struct SDcodableState: Codable {
 }
 
 extension SDcodableState {
-	public func isJobRunning() -> Bool {
+	public var isJobRunning: Bool {
 		return !((job ?? "").isEmpty || interrupted ?? true)
 	}
 }
