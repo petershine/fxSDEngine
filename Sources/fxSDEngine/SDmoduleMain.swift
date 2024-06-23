@@ -51,15 +51,13 @@ extension SDmoduleMain {
 				}
 				#endif
 
-				guard error == nil, let decodedResponse = data?.decode(SDcodableSysInfo.self) else {
+				DispatchQueue.main.async {
+					if let decodedResponse = data?.decode(SDcodableSysInfo.self) {
+						self.systemInfo = decodedResponse
+						self.use_adetailer = self.systemInfo?.extensionNames?.contains(.adetailer) ?? false
+					}
 					completionHandler?(error)
-					return
 				}
-
-				self.systemInfo = decodedResponse
-				self.use_adetailer = self.systemInfo?.extensionNames?.contains(.adetailer) ?? false
-
-				completionHandler?(error)
 			}
 	}
 
@@ -68,7 +66,7 @@ extension SDmoduleMain {
 			(error) in
 
 			// TODO: find better evaluation for NEWly started server
-			guard error == nil, let folderPath = self.systemInfo?.generationFolder else {
+			guard let folderPath = self.systemInfo?.generationFolder else {
 				DispatchQueue.main.async {
 					self.generationPayload = SDcodablePayload.minimalPayload()
 				}
@@ -247,22 +245,26 @@ extension SDmoduleMain {
 				guard let encodedImageArray = decodedResponse.images,
 					  encodedImageArray.count > 0 else {	fxd_log()
 					fxdPrint("receivedData.jsonObject()\n", data?.jsonObject())
-					completionHandler?(error)
+					DispatchQueue.main.async {
+						completionHandler?(error)
+					}
 					return
 				}
 
 
-				let pngDataArray: [Data] = encodedImageArray.map {
-					return Data(base64Encoded: $0 ?? "") ?? Data()
-				}
+				let pngDataArray: [Data] = encodedImageArray.map { Data(base64Encoded: $0 ?? "") ?? Data() }
 				guard pngDataArray.count > 0 else {
-					completionHandler?(error)
+					DispatchQueue.main.async {
+						completionHandler?(error)
+					}
 					return
 				}
 
 
 				guard self.progressObservable?.state?.interrupted ?? false == false else {	fxd_log()
-					completionHandler?(error)
+					DispatchQueue.main.async {
+						completionHandler?(error)
+					}
 					return
 				}
 
@@ -343,7 +345,9 @@ extension SDmoduleMain {
 			method: "POST") {
 				(receivedData, error) in
 
-				completionHandler?(error)
+				DispatchQueue.main.async {
+					completionHandler?(error)
+				}
 			}
 	}
 }
