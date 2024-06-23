@@ -16,7 +16,7 @@ public protocol SDmoduleMain: NSObject {
 	var use_adetailer: Bool { get set }
 
 	var progressObservable: SDcodableProgress? { get set }
-	var isEngineRunning: Bool { get }
+	var isEngineRunning: Bool { get set }
 
 	var displayedImage: UIImage? { get set }
 
@@ -321,6 +321,8 @@ extension SDmoduleMain {
 
 				DispatchQueue.main.async {
 					self?.progressObservable = decodedResponse
+					self?.isEngineRunning = self?.progressObservable?.state?.isJobRunning ?? false
+
 					completionHandler?(decodedResponse, error)
 				}
 			}
