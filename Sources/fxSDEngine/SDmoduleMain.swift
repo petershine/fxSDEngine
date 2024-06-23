@@ -51,7 +51,7 @@ extension SDmoduleMain {
 				}
 				#endif
 
-				guard error != nil, let decodedResponse = data?.decode(SDcodableSysInfo.self) else {
+				guard error == nil, let decodedResponse = data?.decode(SDcodableSysInfo.self) else {
 					completionHandler?(error)
 					return
 				}
@@ -68,7 +68,7 @@ extension SDmoduleMain {
 			(error) in
 
 			// TODO: find better evaluation for NEWly started server
-			guard error != nil, let folderPath = self.systemInfo?.generationFolder else {
+			guard error == nil, let folderPath = self.systemInfo?.generationFolder else {
 				DispatchQueue.main.async {
 					self.generationPayload = SDcodablePayload.minimalPayload()
 				}
