@@ -43,7 +43,7 @@ extension SDmoduleMain {
 	public func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?) {
 		networkingModule.requestToSDServer(
 			api_endpoint: .INTERNAL_SYSINFO) {
-				[weak self] (data, error) in
+				(data, error) in
 
 				#if DEBUG
 				if let jsonObject = data?.jsonObject(quiet: true) {
@@ -51,13 +51,13 @@ extension SDmoduleMain {
 				}
 				#endif
 
-				guard let decodedResponse = data?.decode(SDcodableSysInfo.self) else {
+				guard error != nil, let decodedResponse = data?.decode(SDcodableSysInfo.self) else {
 					completionHandler?(error)
 					return
 				}
 
-				self?.systemInfo = decodedResponse
-				self?.use_adetailer = self?.systemInfo?.extensionNames?.contains(.adetailer) ?? false
+				self.systemInfo = decodedResponse
+				self.use_adetailer = self.systemInfo?.extensionNames?.contains(.adetailer) ?? false
 
 				completionHandler?(error)
 			}
@@ -65,22 +65,22 @@ extension SDmoduleMain {
 
 	public func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?) {
 		execute_internalSysInfo {
-			[weak self] (error) in
+			(error) in
 
 			// TODO: find better evaluation for NEWly started server
-			guard let folderPath = self?.systemInfo?.generationFolder else {
+			guard error != nil, let folderPath = self.systemInfo?.generationFolder else {
 				DispatchQueue.main.async {
-					self?.generationPayload = SDcodablePayload.minimalPayload()
-					completionHandler?(error)
+					self.generationPayload = SDcodablePayload.minimalPayload()
 				}
+				completionHandler?(error)
 				return
 			}
 
 
-			self?.obtain_latestPNGData(
+			self.obtain_latestPNGData(
 				path: folderPath,
 				completionHandler: {
-					[weak self] (pngData, fullPath, error) in
+					(pngData, fullPath, error) in
 
 					guard pngData != nil else {
 						completionHandler?(error)
@@ -93,7 +93,7 @@ extension SDmoduleMain {
 					}
 
 
-					self?.prepare_generationPayload(
+					self.prepare_generationPayload(
 						pngData: pngData!,
 						imagePath: imagePath) {
 							error in
@@ -101,7 +101,7 @@ extension SDmoduleMain {
 							if pngData != nil,
 							   let latestImage = UIImage(data: pngData!) {
 								DispatchQueue.main.async {
-									self?.displayedImage = latestImage
+									self.displayedImage = latestImage
 								}
 							}
 							completionHandler?(error)
@@ -116,7 +116,7 @@ extension SDmoduleMain {
 		networkingModule.requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
 			query: "folder_path=\(path)") {
-				[weak self] (data, error) in
+				(data, error) in
 
 				guard let decodedResponse = data?.decode(SDcodableFiles.self),
 					  let filesORfolders = decodedResponse.files
@@ -151,14 +151,14 @@ extension SDmoduleMain {
 						  type != "dir"
 				else {
 					//recursive
-					self?.obtain_latestPNGData(
+					self.obtain_latestPNGData(
 						path: fullpath,
 						completionHandler: completionHandler)
 					return
 				}
 
 
-				self?.networkingModule.requestToSDServer(
+				self.networkingModule.requestToSDServer(
 					api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
 					query: "path=\(fullpath)&t=file") {
 						(received, error) in
@@ -176,7 +176,7 @@ extension SDmoduleMain {
 
 	public func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?) {
 		let _assignPayload: (String, Error?) -> Void = {
-			[weak self] (infotext: String, error: Error?) in
+			(infotext: String, error: Error?) in
 
 			guard !infotext.isEmpty, error == nil else {
 				completionHandler?(error)
@@ -190,7 +190,7 @@ extension SDmoduleMain {
 
 			DispatchQueue.main.async {
 				fxd_log()
-				self?.generationPayload = obtainedPayload
+				self.generationPayload = obtainedPayload
 
 				if let encodedPayload = obtainedPayload.encodedPayload() {
 					SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
@@ -226,7 +226,7 @@ extension SDmoduleMain {
 		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			payload: payload) {
-				[weak self] (data, error) in
+				(data, error) in
 
 				#if DEBUG
 				if data != nil,
@@ -261,7 +261,7 @@ extension SDmoduleMain {
 				}
 
 
-				guard self?.progressObservable?.state?.interrupted ?? false == false else {	fxd_log()
+				guard self.progressObservable?.state?.interrupted ?? false == false else {	fxd_log()
 					completionHandler?(error)
 					return
 				}
@@ -275,14 +275,14 @@ extension SDmoduleMain {
 					fxd_log()
 
 					if newImage != nil {
-						self?.displayedImage = newImage
+						self.displayedImage = newImage
 					}
 
 
 					let storage = SDmoduleStorage()
 					if !(infotext.isEmpty),
 					   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {
-						self?.generationPayload = newlyGeneratedPayload
+						self.generationPayload = newlyGeneratedPayload
 
 						if let encodedPayload = newlyGeneratedPayload.encodedPayload() {
 							storage.savePayloadToFile(payload: encodedPayload)
@@ -291,7 +291,7 @@ extension SDmoduleMain {
 
 					for (index, pngData) in pngDataArray.enumerated() {
 						if let latestImageURL = storage.saveGeneratedImage(pngData: pngData, index: index) {
-							self?.imageURLs?.insert(latestImageURL, at: 0)
+							self.imageURLs?.insert(latestImageURL, at: 0)
 						}
 					}
 
@@ -311,7 +311,7 @@ extension SDmoduleMain {
 			networkingModule.requestToSDServer(
 			quiet: quiet,
 			api_endpoint: .SDAPI_V1_PROGRESS) {
-				[weak self] (data, error) in
+				(data, error) in
 
 				guard let decodedResponse = data?.decode(SDcodableProgress.self) else {
 					completionHandler?(nil, error)
@@ -320,8 +320,8 @@ extension SDmoduleMain {
 
 
 				DispatchQueue.main.async {
-					self?.progressObservable = decodedResponse
-					self?.isEngineRunning = self?.progressObservable?.state?.isJobRunning ?? false
+					self.progressObservable = decodedResponse
+					self.isEngineRunning = self.progressObservable?.state?.isJobRunning ?? false
 
 					completionHandler?(decodedResponse, error)
 				}
@@ -333,10 +333,10 @@ extension SDmoduleMain {
 			skipImageDecoding: false,
 			quiet: true,
 			completionHandler: {
-				[weak self] (lastProgress, error) in
+				(lastProgress, error) in
 
 				DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-					self?.continueRefreshing()
+					self.continueRefreshing()
 				}
 		})
 	}
@@ -345,17 +345,9 @@ extension SDmoduleMain {
 		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_INTERRUPT,
 			method: "POST") {
-				[weak self] (receivedData, error) in
+				(receivedData, error) in
 
-				self?.execute_progress(
-					skipImageDecoding: true,
-					quiet: true,
-					completionHandler: {
-						lastProgress, error in
-
-						fxdPrint("[lastProgress?.state]: ", lastProgress?.state)
-						completionHandler?(error)
-					})
+				completionHandler?(error)
 			}
 	}
 }
