@@ -313,12 +313,8 @@ extension SDmoduleMain {
 			api_endpoint: .SDAPI_V1_PROGRESS) {
 				(data, error) in
 
-				guard let decodedResponse = data?.decode(SDcodableProgress.self) else {
-					completionHandler?(nil, error)
-					return
-				}
-
-
+				let decodedResponse = data?.decode(SDcodableProgress.self)
+				
 				DispatchQueue.main.async {
 					self.progressObservable = decodedResponse
 					self.isEngineRunning = self.progressObservable?.state?.isJobRunning ?? false
