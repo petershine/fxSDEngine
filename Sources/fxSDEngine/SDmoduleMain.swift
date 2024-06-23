@@ -16,7 +16,6 @@ public protocol SDmoduleMain: NSObject {
 	var use_adetailer: Bool { get set }
 
 	var progressObservable: SDcodableProgress? { get set }
-	var shouldContinueRefreshing: Bool { get set }
 	var isEngineRunning: Bool { get }
 
 	var displayedImage: UIImage? { get set }
@@ -328,11 +327,6 @@ extension SDmoduleMain {
 	}
 
 	public func continueRefreshing() {
-		guard shouldContinueRefreshing else {
-			return
-		}
-
-
 		execute_progress(
 			skipImageDecoding: false,
 			quiet: true,
