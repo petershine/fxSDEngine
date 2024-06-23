@@ -34,8 +34,7 @@ extension SDError: LocalizedError {
 public protocol SDNetworking: NSObjectProtocol {
 	var SD_SERVER_HOSTNAME: String { get }
 
-	var backgroundSession: URLSession { get }
-	var backgroundOperationQueue: OperationQueue { get }
+	var networkingTaskIdentifier: UIBackgroundTaskIdentifier? { get set }
 
 	func requestToSDServer(
 		quiet: Bool,
@@ -43,12 +42,7 @@ public protocol SDNetworking: NSObjectProtocol {
 		method: String?,
 		query: String?,
 		payload: Data?,
-		backgroundSession: URLSession?,
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?)
-
-	var completionHandler: ((Data?, URLResponse?, (any Error)?) -> Void)? { get set }
-
-	var sdServerRequestTask: UIBackgroundTaskIdentifier? { get set }
 }
 
 extension SDNetworking {
@@ -58,7 +52,6 @@ extension SDNetworking {
 		method: String? = nil,
 		query: String? = nil,
 		payload: Data? = nil,
-		backgroundSession: URLSession? = nil,
 		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?) {
 			if !quiet {
 				fxd_log()
@@ -143,14 +136,34 @@ extension SDNetworking {
 			}
 
 
-			var httpTask: URLSessionDataTask? = nil
-			if backgroundSession != nil {
-				self.completionHandler = completionHandler
-				httpTask = backgroundSession?.dataTask(with: httpRequest)
-			}
-			else {
-				httpTask = URLSession.shared.dataTask(with: httpRequest, completionHandler: completionHandler)
-			}
-			httpTask?.resume()
+			let httpTask = URLSession.shared.dataTask(with: httpRequest, completionHandler: completionHandler)
+			httpTask.resume()
 		}
+}
+
+
+extension SDNetworking {
+	func getRequest(api_endpoint: SDAPIendpoint) async -> [(Data, URLResponse)]? {
+		let requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
+
+		fxdPrint("requestPath: ", requestPath)
+		guard let requestURL = URL(string: requestPath) else {
+			return nil
+		}
+
+
+		var SD_RESPONSE: DataAndResponseActor? = nil
+		let SD_REQUEST: URLRequest = URLRequest(url: requestURL)
+		do {
+			SD_RESPONSE = try await URLSession.shared.startSerializedURLRequest(urlRequests: [SD_REQUEST])
+		}
+		catch {
+			fxdPrint(await SD_RESPONSE?.caughtError)
+			fxdPrint(await SD_RESPONSE?.dataAndResponseTuples)
+			return nil
+		}
+
+
+		return await SD_RESPONSE?.dataAndResponseTuples.count == 0 ? nil : SD_RESPONSE?.dataAndResponseTuples
+	}
 }
