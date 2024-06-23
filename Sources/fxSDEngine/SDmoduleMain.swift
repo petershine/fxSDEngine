@@ -16,15 +16,15 @@ public protocol SDmoduleMain: NSObject {
 	var use_adetailer: Bool { get set }
 
 	var progressObservable: SDcodableProgress? { get set }
-	var isEngineRunning: Bool { get set }
+	var isSystemBusy: Bool { get set }
 
 	var displayedImage: UIImage? { get set }
 
 	var imageURLs: [URL]? { get set }
 
 
-	func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?)
-	func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?)
+	func synchronize_withSystem(completionHandler: ((_ error: Error?)->Void)?)
+	func refresh_systemInfo(completionHandler: ((_ error: Error?)->Void)?)
 
 	func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
 	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
@@ -40,29 +40,8 @@ public protocol SDmoduleMain: NSObject {
 
 
 extension SDmoduleMain {
-	public func execute_internalSysInfo(completionHandler: ((_ error: Error?)->Void)?) {
-		networkingModule.requestToSDServer(
-			api_endpoint: .INTERNAL_SYSINFO) {
-				(data, error) in
-
-				#if DEBUG
-				if let jsonObject = data?.jsonObject(quiet: true) {
-					fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonObject)
-				}
-				#endif
-
-				DispatchQueue.main.async {
-					if let decodedResponse = data?.decode(SDcodableSysInfo.self) {
-						self.systemInfo = decodedResponse
-						self.use_adetailer = self.systemInfo?.extensionNames?.contains(.adetailer) ?? false
-					}
-					completionHandler?(error)
-				}
-			}
-	}
-
-	public func refresh_sysInfo(completionHandler: ((_ error: Error?)->Void)?) {
-		execute_internalSysInfo {
+	public func synchronize_withSystem(completionHandler: ((_ error: Error?)->Void)?) {
+		refresh_systemInfo {
 			(error) in
 
 			// TODO: find better evaluation for NEWly started server
@@ -78,14 +57,11 @@ extension SDmoduleMain {
 			self.obtain_latestPNGData(
 				path: folderPath,
 				completionHandler: {
-					(pngData, fullPath, error) in
+					(pngData, imagePath, error) in
 
-					guard pngData != nil else {
-						completionHandler?(error)
-						return
-					}
-
-					guard let imagePath = fullPath else {
+					guard pngData != nil
+							&& imagePath != nil
+					else {
 						completionHandler?(error)
 						return
 					}
@@ -93,7 +69,7 @@ extension SDmoduleMain {
 
 					self.prepare_generationPayload(
 						pngData: pngData!,
-						imagePath: imagePath) {
+						imagePath: imagePath!) {
 							error in
 
 							if pngData != nil,
@@ -107,6 +83,28 @@ extension SDmoduleMain {
 				})
 		}
 	}
+
+	public func refresh_systemInfo(completionHandler: ((_ error: Error?)->Void)?) {
+		networkingModule.requestToSDServer(
+			api_endpoint: .INTERNAL_SYSINFO) {
+				(data, error) in
+
+#if DEBUG
+				if let jsonObject = data?.jsonObject(quiet: true) {
+					fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonObject)
+				}
+#endif
+
+				DispatchQueue.main.async {
+					if let decodedResponse = data?.decode(SDcodableSysInfo.self) {
+						self.systemInfo = decodedResponse
+						self.use_adetailer = self.systemInfo?.extensionNames?.contains(.adetailer) ?? false
+					}
+					completionHandler?(error)
+				}
+			}
+	}
+
 }
 
 extension SDmoduleMain {
@@ -319,7 +317,7 @@ extension SDmoduleMain {
 				
 				DispatchQueue.main.async {
 					self.progressObservable = decodedResponse
-					self.isEngineRunning = self.progressObservable?.state?.isJobRunning ?? false
+					self.isSystemBusy = self.progressObservable?.state?.isJobRunning ?? false
 
 					completionHandler?(decodedResponse, error)
 				}
