@@ -134,7 +134,7 @@ extension SDmoduleMain {
 		}
 
 
-		let payload = "{sd_model_checkpoint : \(checkpointTitle)}".processedJSONData()
+		let payload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
 		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_OPTIONS,
 			payload: payload) {
