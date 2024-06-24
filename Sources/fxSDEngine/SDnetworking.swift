@@ -79,7 +79,7 @@ extension SDNetworking {
 
 			httpRequest.httpMethod = method ?? "GET"
 			if payload != nil {	fxd_log()
-				fxdPrint(name: "payload", dictionary: payload?.jsonObject() ?? [:])
+				fxdPrint(name: "PAYLOAD", dictionary: payload?.jsonDictionary() ?? [:])
 				httpRequest.httpMethod = "POST"
 				httpRequest.httpBody = payload
 			}
@@ -109,7 +109,7 @@ extension SDNetworking {
 				   httpResponseCode != 200 {
 					fxdPrint("httpResponse: ", httpResponse)
 
-					let jsonObject: [String:Any?]? = receivedData.jsonObject()
+					let jsonDictionary: [String:Any?]? = receivedData.jsonDictionary()
 
 					var errorDescription = "Problem with server"
 					switch httpResponseCode {
@@ -119,8 +119,8 @@ extension SDNetworking {
 							break
 					}
 
-					let errorFailureReason = jsonObject?["msg"] as? String
-					let errorDetail = jsonObject?["detail"] as? String
+					let errorFailureReason = jsonDictionary?["msg"] as? String
+					let errorDetail = jsonDictionary?["detail"] as? String
 
 
 					let responseUserInfo = [

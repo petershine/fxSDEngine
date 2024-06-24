@@ -90,16 +90,14 @@ extension SDmoduleMain {
 		networkingModule.requestToSDServer(
 			api_endpoint: .INTERNAL_SYSINFO) {
 				(data, error) in
-
-#if DEBUG
-				if let jsonObject = data?.jsonObject(quiet: true) {
-					fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonObject)
+				#if DEBUG
+				if let jsonDictionary = data?.jsonDictionary(quiet: true) {
+					fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonDictionary)
 				}
-#endif
-
+				#endif
 				DispatchQueue.main.async {
-					if let decodedResponse = data?.decode(SDcodableSysInfo.self) {
-						self.systemInfo = decodedResponse
+					if let decodedSystemInfo = data?.decode(SDcodableSysInfo.self) {
+						self.systemInfo = decodedSystemInfo
 						self.use_adetailer = self.systemInfo?.extensionNames?.contains(.adetailer) ?? false
 					}
 					completionHandler?(error)
@@ -111,11 +109,11 @@ extension SDmoduleMain {
 		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_MODELS) {
 				(data, error) in
-#if DEBUG
+				#if DEBUG
 				if let jsonObject = data?.jsonObject(quiet: true) {
 					fxdPrint("MODELS", jsonObject)
 				}
-#endif
+				#endif
 				DispatchQueue.main.async {
 					if let decodedSystemCheckpoints = data?.decode(Array<SDcodableModel>.self) {
 						self.systemCheckpoints = decodedSystemCheckpoints
@@ -245,9 +243,9 @@ extension SDmoduleMain {
 
 				#if DEBUG
 				if data != nil,
-				   var jsonObject = data!.jsonObject() {	fxd_log()
-					jsonObject["images"] = ["<IMAGES ENCODED>"]
-					fxdPrint(jsonObject)
+				   var jsonDictionary = data!.jsonDictionary() {	fxd_log()
+					jsonDictionary["images"] = ["<IMAGES ENCODED>"]
+					fxdPrint(dictionary: jsonDictionary)
 				}
 				#endif
 
@@ -260,8 +258,7 @@ extension SDmoduleMain {
 
 
 				guard let encodedImageArray = decodedResponse.images,
-					  encodedImageArray.count > 0 else {	fxd_log()
-					fxdPrint("receivedData.jsonObject()\n", data?.jsonObject())
+					  encodedImageArray.count > 0 else {
 					DispatchQueue.main.async {
 						completionHandler?(error)
 					}

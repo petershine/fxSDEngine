@@ -27,7 +27,7 @@ extension SDExtensionName {
 						"args" : [
 							true,
 							false,
-							try JSONEncoder().encode(SDextensionADetailer()).jsonObject() ?? [:],
+							try JSONEncoder().encode(SDextensionADetailer()).jsonDictionary() ?? [:],
 						]
 					]
 			}
