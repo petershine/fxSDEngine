@@ -124,6 +124,7 @@ extension SDmoduleMain {
 			}
 	}
 
+	//https://github.com/AUTOMATIC1111/stable-diffusion-webui/discussions/7839
 	public func change_systemCheckpoints(checkpoint: SDcodableModel, completionHandler: ((_ error: Error?)->Void)?) {
 		let checkpointTitle = checkpoint.title ?? ""
 		guard !(checkpointTitle.isEmpty) else {
