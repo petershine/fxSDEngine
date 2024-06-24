@@ -27,6 +27,7 @@ public protocol SDmoduleMain: NSObject {
 	func synchronize_withSystem(completionHandler: ((_ error: Error?)->Void)?)
 	func refresh_systemInfo(completionHandler: ((_ error: Error?)->Void)?)
 	func refresh_systemCheckpoints(completionHandler: ((_ error: Error?)->Void)?)
+	func change_systemCheckpoints(checkpoint: SDcodableModel, completionHandler: ((_ error: Error?)->Void)?)
 
 	func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
 	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
@@ -118,6 +119,28 @@ extension SDmoduleMain {
 					if let decodedSystemCheckpoints = data?.decode(Array<SDcodableModel>.self) {
 						self.systemCheckpoints = decodedSystemCheckpoints
 					}
+					completionHandler?(error)
+				}
+			}
+	}
+
+	public func change_systemCheckpoints(checkpoint: SDcodableModel, completionHandler: ((_ error: Error?)->Void)?) {
+		let checkpointTitle = checkpoint.title ?? ""
+		guard !(checkpointTitle.isEmpty) else {
+			DispatchQueue.main.async {
+				completionHandler?(nil)
+			}
+			return
+		}
+
+
+		let payload = "{sd_model_checkpoint : \(checkpointTitle)}".processedJSONData()
+		networkingModule.requestToSDServer(
+			api_endpoint: .SDAPI_V1_OPTIONS,
+			payload: payload) {
+				(data, error) in
+
+				DispatchQueue.main.async {
 					completionHandler?(error)
 				}
 			}

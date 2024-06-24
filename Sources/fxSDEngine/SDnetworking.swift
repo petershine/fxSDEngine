@@ -11,6 +11,7 @@ public enum SDAPIendpoint: String, CaseIterable {
 	case SDAPI_V1_TXT2IMG = "sdapi/v1/txt2img"
 	case SDAPI_V1_PROGRESS = "sdapi/v1/progress"
 	case SDAPI_V1_INTERRUPT = "sdapi/v1/interrupt"
+	case SDAPI_V1_OPTIONS = "sdapi/v1/options"
 	case SDAPI_V1_MODELS = "sdapi/v1/sd-models"
 
 
