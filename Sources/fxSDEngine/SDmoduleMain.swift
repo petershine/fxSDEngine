@@ -34,7 +34,7 @@ public protocol SDmoduleMain: NSObject {
 
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
 
-	func execute_progress(skipImageDecoding: Bool, quiet: Bool, completionHandler: ((_ lastProgress: SDcodableProgress?, _ error: Error?)->Void)?)
+	func execute_progress(skipImageDecoding: Bool, quiet: Bool, completionHandler: ((_ error: Error?)->Void)?)
 	func continueRefreshing()
 	func interrupt(completionHandler: ((_ error: Error?)->Void)?)
 
@@ -51,8 +51,8 @@ extension SDmoduleMain {
 			guard let folderPath = self.systemInfo?.Config?.outdir_samples else {
 				DispatchQueue.main.async {
 					self.generationPayload = SDcodablePayload.minimalPayload()
+					completionHandler?(error)
 				}
-				completionHandler?(error)
 				return
 			}
 
@@ -65,7 +65,9 @@ extension SDmoduleMain {
 					guard pngData != nil
 							&& imagePath != nil
 					else {
-						completionHandler?(error)
+						DispatchQueue.main.async {
+							completionHandler?(error)
+						}
 						return
 					}
 
@@ -75,13 +77,13 @@ extension SDmoduleMain {
 						imagePath: imagePath!) {
 							error in
 
-							if pngData != nil,
-							   let latestImage = UIImage(data: pngData!) {
-								DispatchQueue.main.async {
+							DispatchQueue.main.async {
+								if pngData != nil,
+								   let latestImage = UIImage(data: pngData!) {
 									self.displayedImage = latestImage
 								}
+								completionHandler?(error)
 							}
-							completionHandler?(error)
 						}
 				})
 		}
@@ -258,6 +260,7 @@ extension SDmoduleMain {
 
 extension SDmoduleMain {
 	public func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
+		self.isSystemBusy = true
 		let payload: Data? = generationPayload?.evaluatedPayload(sdEngine: self)
 		
 		networkingModule.requestToSDServer(
@@ -346,20 +349,19 @@ extension SDmoduleMain {
 	public func execute_progress(
 		skipImageDecoding: Bool = false,
 		quiet: Bool = false,
-		completionHandler: ((_ lastProgress: SDcodableProgress?, _ error: Error?)->Void)?) {
+		completionHandler: ((_ error: Error?)->Void)?) {
 
 			networkingModule.requestToSDServer(
 			quiet: quiet,
 			api_endpoint: .SDAPI_V1_PROGRESS) {
 				(data, error) in
 
-				let decodedResponse = data?.decode(SDcodableProgress.self)
 				
 				DispatchQueue.main.async {
-					self.progressObservable = decodedResponse
+					self.progressObservable = data?.decode(SDcodableProgress.self)
 					self.isSystemBusy = self.progressObservable?.state?.isJobRunning ?? false
 
-					completionHandler?(decodedResponse, error)
+					completionHandler?(error)
 				}
 			}
 	}
@@ -369,7 +371,7 @@ extension SDmoduleMain {
 			skipImageDecoding: false,
 			quiet: true,
 			completionHandler: {
-				(lastProgress, error) in
+				(error) in
 
 				DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
 					self.continueRefreshing()

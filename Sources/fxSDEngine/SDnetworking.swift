@@ -79,7 +79,7 @@ extension SDNetworking {
 			httpRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
 			httpRequest.httpMethod = method ?? "GET"
-			if payload != nil {	fxd_log()
+			if payload != nil {
 				fxdPrint(name: "PAYLOAD", dictionary: payload?.jsonDictionary() ?? [:])
 				httpRequest.httpMethod = "POST"
 				httpRequest.httpBody = payload
