@@ -47,7 +47,7 @@ extension SDmoduleMain {
 			(error) in
 
 			// TODO: find better evaluation for NEWly started server
-			guard let folderPath = self.systemInfo?.generationFolder else {
+			guard let folderPath = self.systemInfo?.Config?.outdir_samples else {
 				DispatchQueue.main.async {
 					self.generationPayload = SDcodablePayload.minimalPayload()
 				}

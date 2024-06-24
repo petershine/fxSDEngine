@@ -1,8 +1,8 @@
 
 
-public struct SDcodableModel: Codable {
+public struct SDcodableModel: Codable, Hashable {
+	public var model_name: String?
 	var title: String?
-	var model_name: String?
 	var hash: String?
 	var sha256: String?
 	var filename: String?

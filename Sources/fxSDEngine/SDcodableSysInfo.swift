@@ -6,18 +6,12 @@ import Foundation
 public struct SDcodableSysInfo: Codable {
 	var Extensions: [SDcodableExtension]? = nil
 
-	var Config: SDcodableConfig? = nil
-	struct SDcodableConfig: Codable {
-		var outdir_samples: String? = nil
-		
-		var sd_checkpoint_hash: String? = nil
-		var sd_model_checkpoint: String? = nil
-	}
-}
+	public var Config: SDcodableConfig? = nil
+	public struct SDcodableConfig: Codable {
+		public var outdir_samples: String? = nil
 
-extension SDcodableSysInfo {
-	var generationFolder: String? {
-		return Config?.outdir_samples
+		var sd_checkpoint_hash: String? = nil
+		public var sd_model_checkpoint: String? = nil
 	}
 }
 
