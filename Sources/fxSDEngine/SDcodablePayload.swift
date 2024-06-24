@@ -68,7 +68,7 @@ public class SDcodablePayload: Codable {
 
 		self.sampler_name = "DPM++ 2M SDE"
 		self.scheduler = "Karras"
-		self.cfg_scale = 6.0
+		self.cfg_scale = 7.0
 
 		self.denoising_strength = 0.3
 		self.hr_scale = 1.65
