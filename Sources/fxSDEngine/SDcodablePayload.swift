@@ -20,7 +20,7 @@ public class SDcodablePayload: Codable {
 
 	var enable_hr: Bool
 	var denoising_strength: Double?
-	var hr_scale: Double?
+	public var hr_scale: Double?
 	var hr_second_pass_steps: Int?
 	var hr_upscaler: String?
 	var hr_scheduler: String
