@@ -50,7 +50,7 @@ struct SDextensionADetailer: Codable {
 	var ad_controlnet_model: String = "None"
 	var ad_controlnet_module: String = "None"
 	var ad_controlnet_weight: Int = 1
-	var ad_denoising_strength: Double = 0.4
+	var ad_denoising_strength: Double = 0.3
 	var ad_dilate_erode: Int = 4
 	var ad_inpaint_height: Int = 512
 	var ad_inpaint_only_masked: Bool = true
