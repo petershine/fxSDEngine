@@ -53,8 +53,8 @@ public class SDcodablePayload: Codable {
 
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? false
 		self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler) ?? "Karras"
-		self.hr_prompt = try container.decodeIfPresent(String.self, forKey: .hr_prompt) ?? self.prompt
-		self.hr_negative_prompt = try container.decodeIfPresent(String.self, forKey: .hr_negative_prompt) ?? self.negative_prompt
+		self.hr_prompt = try container.decodeIfPresent(String.self, forKey: .hr_prompt) ?? ""
+		self.hr_negative_prompt = try container.decodeIfPresent(String.self, forKey: .hr_negative_prompt) ?? ""
 
 		self.n_iter = try container.decodeIfPresent(Int.self, forKey: .n_iter) ?? 1
 		self.batch_size = try container.decodeIfPresent(Int.self, forKey: .batch_size) ?? 1
@@ -284,12 +284,10 @@ extension SDcodablePayload {
 
 		if didChangePrompt {
 			self.prompt = editedPrompt
-			self.hr_prompt = self.prompt
 		}
 
 		if didChangeNegativePrompt {
 			self.negative_prompt = editedNegativePrompt
-			self.hr_negative_prompt = self.negative_prompt
 		}
 
 		return self
