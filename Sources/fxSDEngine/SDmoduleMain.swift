@@ -32,6 +32,7 @@ public protocol SDmoduleMain: NSObject {
 	func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
 	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
 
+	var didStartGenerating: Bool { get set }
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
 
 	func execute_progress(skipImageDecoding: Bool, quiet: Bool, completionHandler: ((_ error: Error?)->Void)?)
@@ -260,7 +261,7 @@ extension SDmoduleMain {
 
 extension SDmoduleMain {
 	public func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
-		self.isSystemBusy = true
+		self.didStartGenerating = true
 		let payload: Data? = generationPayload?.evaluatedPayload(sdEngine: self)
 		
 		networkingModule.requestToSDServer(
@@ -298,6 +299,7 @@ extension SDmoduleMain {
 
 				guard let decodedResponse = data?.decode(SDcodableGenerated.self) else {
 					DispatchQueue.main.async {
+						self.didStartGenerating = false
 						completionHandler?(modifiedError)
 					}
 					return
@@ -307,6 +309,7 @@ extension SDmoduleMain {
 				guard let encodedImageArray = decodedResponse.images,
 					  encodedImageArray.count > 0 else {
 					DispatchQueue.main.async {
+						self.didStartGenerating = false
 						completionHandler?(modifiedError)
 					}
 					return
@@ -316,6 +319,7 @@ extension SDmoduleMain {
 				let pngDataArray: [Data] = encodedImageArray.map { Data(base64Encoded: $0 ?? "") ?? Data() }
 				guard pngDataArray.count > 0 else {
 					DispatchQueue.main.async {
+						self.didStartGenerating = false
 						completionHandler?(modifiedError)
 					}
 					return
@@ -324,6 +328,7 @@ extension SDmoduleMain {
 
 				guard self.progressObservable?.state?.interrupted ?? false == false else {	fxd_log()
 					DispatchQueue.main.async {
+						self.didStartGenerating = false
 						completionHandler?(modifiedError)
 					}
 					return
@@ -358,6 +363,7 @@ extension SDmoduleMain {
 						}
 					}
 
+					self.didStartGenerating = false
 					completionHandler?(modifiedError)
 				}
 			}
