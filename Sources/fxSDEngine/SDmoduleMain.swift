@@ -114,7 +114,7 @@ extension SDmoduleMain {
 				(data, error) in
 				#if DEBUG
 				if let jsonObject = data?.jsonObject(quiet: true) {
-					fxdPrint("MODELS", jsonObject)
+					fxdPrint("MODELS", (jsonObject as? Array<Any>)?.count)
 				}
 				#endif
 				DispatchQueue.main.async {
@@ -273,12 +273,32 @@ extension SDmoduleMain {
 				   var jsonDictionary = data!.jsonDictionary() {	fxd_log()
 					jsonDictionary["images"] = ["<IMAGES ENCODED>"]
 					fxdPrint(dictionary: jsonDictionary)
+					fxdPrint(error)
 				}
 				#endif
 
+				var modifiedError = error
+				if modifiedError != nil,
+				   data != nil,
+				   let jsonDictionary = data!.jsonDictionary(),
+				   let errorType = jsonDictionary["error"],
+				   let errorDescription = jsonDictionary["errors"] {
+
+					let errorUserInfo: [String : Any] = [
+						NSLocalizedDescriptionKey : (error as? NSError)?.localizedDescription ?? "",
+						NSLocalizedFailureReasonErrorKey : "[\(errorType ?? "")]:\n\(errorDescription ?? "")"
+					]
+
+					modifiedError = NSError(
+						domain: "SDEngine",
+						code: (error as? NSError)?.code ?? -1,
+						userInfo: errorUserInfo)
+					fxdPrint(modifiedError)
+				}
+
 				guard let decodedResponse = data?.decode(SDcodableGenerated.self) else {
 					DispatchQueue.main.async {
-						completionHandler?(error)
+						completionHandler?(modifiedError)
 					}
 					return
 				}
@@ -287,7 +307,7 @@ extension SDmoduleMain {
 				guard let encodedImageArray = decodedResponse.images,
 					  encodedImageArray.count > 0 else {
 					DispatchQueue.main.async {
-						completionHandler?(error)
+						completionHandler?(modifiedError)
 					}
 					return
 				}
@@ -296,7 +316,7 @@ extension SDmoduleMain {
 				let pngDataArray: [Data] = encodedImageArray.map { Data(base64Encoded: $0 ?? "") ?? Data() }
 				guard pngDataArray.count > 0 else {
 					DispatchQueue.main.async {
-						completionHandler?(error)
+						completionHandler?(modifiedError)
 					}
 					return
 				}
@@ -304,7 +324,7 @@ extension SDmoduleMain {
 
 				guard self.progressObservable?.state?.interrupted ?? false == false else {	fxd_log()
 					DispatchQueue.main.async {
-						completionHandler?(error)
+						completionHandler?(modifiedError)
 					}
 					return
 				}
@@ -338,7 +358,7 @@ extension SDmoduleMain {
 						}
 					}
 
-					completionHandler?(error)
+					completionHandler?(modifiedError)
 				}
 			}
 	}

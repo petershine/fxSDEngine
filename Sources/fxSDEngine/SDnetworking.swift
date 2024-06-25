@@ -124,7 +124,7 @@ extension SDNetworking {
 					let errorDetail = jsonDictionary?["detail"] as? String
 
 
-					let responseUserInfo = [
+					let errorUserInfo = [
 						NSLocalizedDescriptionKey : errorDescription,
 						NSLocalizedFailureReasonErrorKey : "\(errorFailureReason ?? "")\n\(errorDetail ?? "")"
 					]
@@ -132,7 +132,7 @@ extension SDNetworking {
 					modifiedError = NSError(
 						domain: "SDEngine",
 						code: httpResponseCode,
-						userInfo: responseUserInfo)
+						userInfo: errorUserInfo)
 				}
 
 				responseHandler?(receivedData, modifiedError)
