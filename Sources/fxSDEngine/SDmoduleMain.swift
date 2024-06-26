@@ -21,8 +21,6 @@ public protocol SDmoduleMain: NSObject {
 
 	var displayedImage: UIImage? { get set }
 
-	var imageURLs: [URL]? { get set }
-
 
 	func synchronize_withSystem(completionHandler: ((_ error: Error?)->Void)?)
 	func refresh_systemInfo(completionHandler: ((_ error: Error?)->Void)?)
@@ -359,7 +357,7 @@ extension SDmoduleMain {
 
 					for (index, pngData) in pngDataArray.enumerated() {
 						if let latestImageURL = storage.saveGeneratedImage(pngData: pngData, index: index) {
-							self.imageURLs?.insert(latestImageURL, at: 0)
+//							self.imageURLs?.insert(latestImageURL, at: 0)
 						}
 					}
 
