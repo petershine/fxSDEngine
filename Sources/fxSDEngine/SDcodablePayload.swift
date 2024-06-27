@@ -15,8 +15,8 @@ public class SDcodablePayload: Codable {
 	public var steps: Int
 	public var cfg_scale: Double?
 
-	var width: Int
-	var height: Int
+	public var width: Int
+	public var height: Int
 
 	var enable_hr: Bool
 	var denoising_strength: Double?
