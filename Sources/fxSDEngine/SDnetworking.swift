@@ -20,19 +20,6 @@ public enum SDAPIendpoint: String, CaseIterable {
 	case INFINITE_IMAGE_BROWSING_GENINFO = "infinite_image_browsing/image_geninfo"
 }
 
-enum SDError: Error {
-	case reason(msg: String?)
-}
-
-extension SDError: LocalizedError {
-	var errorDescription: String? {
-		switch self {
-			case .reason(let msg):
-				return NSLocalizedString("\(msg ?? "(Unknown reason)")", comment: "")
-		}
-	}
-}
-
 
 public protocol SDNetworking: NSObjectProtocol {
 	var SD_SERVER_HOSTNAME: String { get }
@@ -142,6 +129,57 @@ extension SDNetworking {
 			let httpTask = URLSession.shared.dataTask(with: httpRequest, completionHandler: completionHandler)
 			httpTask.resume()
 		}
+}
+
+class SDError: NSError, @unchecked Sendable {
+	func processsed(httpResponse: HTTPURLResponse, receivedData: Data?, error: Error?) -> NSError? {
+
+		guard error != nil && httpResponse.statusCode != 200 else {
+			return error as? NSError
+		}
+
+
+		fxd_log()
+		let jsonDictionary: [String:Any?]? = receivedData?.jsonDictionary()
+
+		fxdPrint(httpResponse)
+		fxdPrint(dictionary: jsonDictionary ?? [:])
+		fxdPrint(error)
+
+
+		let assumedDescription = "Problem with server"
+		var assumedFailureReason = ""
+		switch httpResponse.statusCode {
+			case 404:
+				assumedFailureReason = "Possibly, your Stable Diffusion server is not operating."
+			default:
+				break
+		}
+
+
+		var errorDescription = (error as? NSError)?.localizedDescription ?? assumedDescription
+		errorDescription += "\n\(jsonDictionary?["error"] as? String ?? "")"
+		errorDescription += "\n\(jsonDictionary?["detail"] as? String ?? "")"
+		errorDescription = errorDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+
+		var errorFailureReason = (error as? NSError)?.localizedFailureReason ?? assumedFailureReason
+		errorFailureReason += "\n\(jsonDictionary?["errors"] as? String ?? "")"
+		errorFailureReason += "\n\(jsonDictionary?["msg"] as? String ?? "")"
+		errorFailureReason = errorFailureReason.trimmingCharacters(in: .whitespacesAndNewlines)
+
+		let errorUserInfo = [
+			NSLocalizedDescriptionKey : errorDescription,
+			NSLocalizedFailureReasonErrorKey : errorFailureReason
+		]
+
+		let processed = NSError(
+			domain: "SDEngine",
+			code: httpResponse.statusCode,
+			userInfo: errorUserInfo)
+		fxdPrint(processed)
+
+		return processed
+	}
 }
 
 
