@@ -333,17 +333,8 @@ extension SDmoduleMain {
 				}
 
 
-
-				let infotext = decodedResponse.infotext() ?? ""
-				let newImage = UIImage(data: pngDataArray.last!)
-
-				DispatchQueue.main.async {
-					fxd_log()
-
-					if newImage != nil {
-						self.displayedImage = newImage
-					}
-
+				Task {
+					let infotext = decodedResponse.infotext() ?? ""
 
 					let storage = SDmoduleStorage()
 					if !(infotext.isEmpty),
@@ -356,10 +347,17 @@ extension SDmoduleMain {
 					}
 
 					for (index, pngData) in pngDataArray.enumerated() {
-						if let latestImageURL = storage.saveGeneratedImage(pngData: pngData, index: index) {
-//							self.imageURLs?.insert(latestImageURL, at: 0)
+						if let _ = await storage.saveGeneratedImage(pngData: pngData, index: index) {
+							//self.imageURLs?.insert(latestImageURL, at: 0)
 						}
 					}
+				}
+
+
+				let newImage = UIImage(data: pngDataArray.last!)
+
+				DispatchQueue.main.async {
+					self.displayedImage = newImage
 
 					self.didStartGenerating = false
 					completionHandler?(modifiedError)

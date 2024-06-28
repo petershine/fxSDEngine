@@ -80,7 +80,7 @@ extension SDmoduleStorage {
 		return payloadData
 	}
 
-	func savedImageURL(index: Int) -> URL? {
+	fileprivate func newImageURL(index: Int) -> URL? {
 		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
 
 		let dateFormatter = DateFormatter()
@@ -91,9 +91,9 @@ extension SDmoduleStorage {
 		return fileURL
 	}
 
-	func saveGeneratedImage(pngData: Data, index: Int = 0) -> URL? {	fxd_log()
+	func saveGeneratedImage(pngData: Data, index: Int = 0) async -> URL? {	fxd_log()
 		fxdPrint("pngData: ", pngData)
-		guard let fileURL = savedImageURL(index: index) else {
+		guard let fileURL = newImageURL(index: index) else {
 			return nil
 		}
 
