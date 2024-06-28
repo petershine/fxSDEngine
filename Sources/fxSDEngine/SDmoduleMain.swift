@@ -91,7 +91,7 @@ extension SDmoduleMain {
 	public func refresh_systemInfo(completionHandler: ((_ error: Error?)->Void)?) {
 		networkingModule.requestToSDServer(
 			api_endpoint: .INTERNAL_SYSINFO) {
-				(data, error) in
+				(data, response, error) in
 				#if DEBUG
 				if let jsonDictionary = data?.jsonDictionary(quiet: true) {
 					fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonDictionary)
@@ -110,7 +110,7 @@ extension SDmoduleMain {
 	public func refresh_systemCheckpoints(completionHandler: ((_ error: Error?)->Void)?) {
 		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_MODELS) {
-				(data, error) in
+				(data, response, error) in
 				#if DEBUG
 				if let jsonObject = data?.jsonObject(quiet: true) {
 					fxdPrint("MODELS", (jsonObject as? Array<Any>)?.count)
@@ -140,7 +140,7 @@ extension SDmoduleMain {
 		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_OPTIONS,
 			payload: payload) {
-				(data, error) in
+				(data, response, error) in
 
 				DispatchQueue.main.async {
 					completionHandler?(error)
@@ -154,7 +154,7 @@ extension SDmoduleMain {
 		networkingModule.requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
 			query: "folder_path=\(path)") {
-				(data, error) in
+				(data, response, error) in
 
 				guard let decodedResponse = data?.decode(SDcodableFiles.self),
 					  let filesORfolders = decodedResponse.files
@@ -199,15 +199,9 @@ extension SDmoduleMain {
 				self.networkingModule.requestToSDServer(
 					api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
 					query: "path=\(fullpath)&t=file") {
-						(received, error) in
+						(data, response, error) in
 
-						guard let pngData = received else {
-							completionHandler?(nil, fullpath, error)
-							return
-						}
-
-
-						completionHandler?(pngData, fullpath, error)
+						completionHandler?(data, fullpath, error)
 					}
 			}
 	}
@@ -243,10 +237,10 @@ extension SDmoduleMain {
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
 			query: "path=\(imagePath)",
 			responseHandler: {
-				(received, error) in
+				(data, response, error) in
 
-				guard let receivedData = received,
-					  let infotext = String(data: receivedData, encoding: .utf8)
+				guard let data,
+					  let infotext = String(data: data, encoding: .utf8)
 				else {
 					_assignPayload("", error)
 					return
@@ -265,7 +259,7 @@ extension SDmoduleMain {
 		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			payload: payload) {
-				(data, error) in
+				(data, response, error) in
 
 				#if DEBUG
 				if data != nil,
@@ -276,67 +270,34 @@ extension SDmoduleMain {
 				}
 				#endif
 
-				var modifiedError = error
-				if modifiedError != nil,
-				   data != nil,
-				   let jsonDictionary = data!.jsonDictionary(),
-				   let errorType = jsonDictionary["error"],
-				   let errorDescription = jsonDictionary["errors"] {
 
-					let errorUserInfo: [String : Any] = [
-						NSLocalizedDescriptionKey : (error as? NSError)?.localizedDescription ?? "",
-						NSLocalizedFailureReasonErrorKey : "[\(errorType ?? "")]:\n\(errorDescription ?? "")"
-					]
-
-					modifiedError = NSError(
-						domain: "SDEngine",
-						code: (error as? NSError)?.code ?? -1,
-						userInfo: errorUserInfo)
-					fxdPrint(modifiedError)
-				}
-
-				guard let decodedResponse = data?.decode(SDcodableGenerated.self) else {
-					DispatchQueue.main.async {
-						self.didStartGenerating = false
-						completionHandler?(modifiedError)
-					}
-					return
-				}
-
-
-				guard let encodedImageArray = decodedResponse.images,
-					  encodedImageArray.count > 0 else {
-					DispatchQueue.main.async {
-						self.didStartGenerating = false
-						completionHandler?(modifiedError)
-					}
-					return
-				}
-
-
-				let pngDataArray: [Data] = encodedImageArray.map { Data(base64Encoded: $0 ?? "") ?? Data() }
-				guard pngDataArray.count > 0 else {
-					DispatchQueue.main.async {
-						self.didStartGenerating = false
-						completionHandler?(modifiedError)
-					}
-					return
-				}
-
+				let processedError = SDError().processsed(data, response, error)
 
 				guard self.progressObservable?.state?.interrupted ?? false == false else {	fxd_log()
 					DispatchQueue.main.async {
 						self.didStartGenerating = false
-						completionHandler?(modifiedError)
+						completionHandler?(processedError)
+					}
+					return
+				}
+
+
+				let decodedResponse = data?.decode(SDcodableGenerated.self)
+				let encodedImageArray = decodedResponse?.images
+				let pngDataArray: [Data] = encodedImageArray?.map { Data(base64Encoded: $0 ?? "") ?? Data() } ?? []
+				guard pngDataArray.count > 0 else {
+					DispatchQueue.main.async {
+						self.didStartGenerating = false
+						completionHandler?(processedError)
 					}
 					return
 				}
 
 
 				Task {
-					let infotext = decodedResponse.infotext() ?? ""
-
 					let storage = SDmoduleStorage()
+
+					let infotext = decodedResponse?.infotext() ?? ""
 					if !(infotext.isEmpty),
 					   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {
 						self.generationPayload = newlyGeneratedPayload
@@ -360,7 +321,7 @@ extension SDmoduleMain {
 					self.displayedImage = newImage
 
 					self.didStartGenerating = false
-					completionHandler?(modifiedError)
+					completionHandler?(processedError)
 				}
 			}
 	}
@@ -376,7 +337,7 @@ extension SDmoduleMain {
 			networkingModule.requestToSDServer(
 			quiet: quiet,
 			api_endpoint: .SDAPI_V1_PROGRESS) {
-				(data, error) in
+				(data, response, error) in
 
 				
 				DispatchQueue.main.async {
@@ -414,7 +375,7 @@ extension SDmoduleMain {
 		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_INTERRUPT,
 			method: "POST") {
-				(receivedData, error) in
+				(data, response, error) in
 
 				DispatchQueue.main.async {
 					completionHandler?(error)

@@ -32,7 +32,7 @@ public protocol SDNetworking: NSObjectProtocol {
 		method: String?,
 		query: String?,
 		payload: Data?,
-		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?)
+		responseHandler: ((_ received: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void)?)
 }
 
 extension SDNetworking {
@@ -42,7 +42,7 @@ extension SDNetworking {
 		method: String? = nil,
 		query: String? = nil,
 		payload: Data? = nil,
-		responseHandler: ((_ received: Data?, _ error: Error?) -> Void)?) {
+		responseHandler: ((_ received: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void)?) {
 			if !quiet {
 				fxd_log()
 			}
@@ -56,7 +56,7 @@ extension SDNetworking {
 			fxdPrint("requestPath: ", requestPath, quiet:quiet)
 
 			guard let requestURL = URL(string: requestPath) else {
-				responseHandler?(nil, nil)
+				responseHandler?(nil, nil, nil)
 				return
 			}
 
@@ -83,46 +83,13 @@ extension SDNetworking {
 					fxdPrint("httpRequest.allHTTPHeaderFields: ", httpRequest.allHTTPHeaderFields)
 					fxdPrint("httpRequest.httpMethod: ", httpRequest.httpMethod)
 					fxdPrint("httpRequest.httpBody: ", httpRequest.httpBody)
-					responseHandler?(nil, error)
+					responseHandler?(nil, (response as? HTTPURLResponse), error)
 					return
 				}
 
 
-				var modifiedError = error
-				let httpResponse = response as? HTTPURLResponse
-				let httpResponseCode = httpResponse?.statusCode ?? 200
-
-				if modifiedError == nil,
-				   httpResponse != nil,
-				   httpResponseCode != 200 {
-					fxdPrint("httpResponse: ", httpResponse)
-
-					let jsonDictionary: [String:Any?]? = receivedData.jsonDictionary()
-
-					var errorDescription = "Problem with server"
-					switch httpResponseCode {
-						case 404:
-							errorDescription = "Possibly, your Stable Diffusion server is not operating."
-						default:
-							break
-					}
-
-					let errorFailureReason = jsonDictionary?["msg"] as? String
-					let errorDetail = jsonDictionary?["detail"] as? String
-
-
-					let errorUserInfo = [
-						NSLocalizedDescriptionKey : errorDescription,
-						NSLocalizedFailureReasonErrorKey : "\(errorFailureReason ?? "")\n\(errorDetail ?? "")"
-					]
-
-					modifiedError = NSError(
-						domain: "SDEngine",
-						code: httpResponseCode,
-						userInfo: errorUserInfo)
-				}
-
-				responseHandler?(receivedData, modifiedError)
+				let processedError = SDError().processsed(data, response, error)
+				responseHandler?(receivedData, (response as? HTTPURLResponse), processedError)
 			}
 
 
@@ -131,25 +98,26 @@ extension SDNetworking {
 		}
 }
 
-class SDError: NSError, @unchecked Sendable {
-	func processsed(httpResponse: HTTPURLResponse, receivedData: Data?, error: Error?) -> NSError? {
 
-		guard error != nil && httpResponse.statusCode != 200 else {
+class SDError: NSError, @unchecked Sendable {
+	func processsed(_ data: Data?, _ response: URLResponse?, _ error: Error?) -> NSError? {
+
+		guard error != nil && (response as? HTTPURLResponse)?.statusCode != 200 else {
 			return error as? NSError
 		}
 
 
 		fxd_log()
-		let jsonDictionary: [String:Any?]? = receivedData?.jsonDictionary()
+		let jsonDictionary: [String:Any?]? = data?.jsonDictionary()
 
-		fxdPrint(httpResponse)
+		fxdPrint(response)
 		fxdPrint(dictionary: jsonDictionary ?? [:])
 		fxdPrint(error)
 
 
 		let assumedDescription = "Problem with server"
 		var assumedFailureReason = ""
-		switch httpResponse.statusCode {
+		switch (response as? HTTPURLResponse)?.statusCode {
 			case 404:
 				assumedFailureReason = "Possibly, your Stable Diffusion server is not operating."
 			default:
@@ -174,7 +142,7 @@ class SDError: NSError, @unchecked Sendable {
 
 		let processed = NSError(
 			domain: "SDEngine",
-			code: httpResponse.statusCode,
+			code: (response as? HTTPURLResponse)?.statusCode ?? -1,
 			userInfo: errorUserInfo)
 		fxdPrint(processed)
 
