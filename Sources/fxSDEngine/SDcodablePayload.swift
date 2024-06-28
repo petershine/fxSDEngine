@@ -10,19 +10,19 @@ public class SDcodablePayload: Codable {
 	public var prompt: String
 	public var negative_prompt: String
 
-	var sampler_name: String?
-	var scheduler: String?
+	var sampler_name: String
+	var scheduler: String
 	public var steps: Int
-	public var cfg_scale: Double?
+	public var cfg_scale: Double
 
 	public var width: Int
 	public var height: Int
 
 	var enable_hr: Bool
-	var denoising_strength: Double?
-	public var hr_scale: Double?
-	var hr_second_pass_steps: Int?
-	var hr_upscaler: String?
+	var denoising_strength: Double
+	public var hr_scale: Double
+	var hr_second_pass_steps: Int
+	var hr_upscaler: String
 	var hr_scheduler: String
 	var hr_prompt: String
 	var hr_negative_prompt: String
@@ -41,7 +41,10 @@ public class SDcodablePayload: Codable {
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? ""
 		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt) ?? ""
 
+		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "DPM++ 2M SDE"
+		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Karras"
 		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 30
+		self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 7.0
 
 		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
 
@@ -52,6 +55,10 @@ public class SDcodablePayload: Codable {
 		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? Int(CGFloat(self.height) * aspectRatio)
 
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? false
+		self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength) ?? 0.3
+		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale) ?? 1.65
+		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps) ?? 10
+		self.hr_upscaler = try container.decodeIfPresent(String.self, forKey: .hr_upscaler) ?? "4x-UltraSharp"
 		self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler) ?? "Karras"
 		self.hr_prompt = try container.decodeIfPresent(String.self, forKey: .hr_prompt) ?? ""
 		self.hr_negative_prompt = try container.decodeIfPresent(String.self, forKey: .hr_negative_prompt) ?? ""
@@ -62,54 +69,6 @@ public class SDcodablePayload: Codable {
 		self.save_images = try container.decodeIfPresent(Bool.self, forKey: .save_images) ?? true
 
 		self.seed = try container.decodeIfPresent(Int.self, forKey: .seed) ?? -1
-
-
-		// Conditionals and ones need alternative keys
-
-		self.sampler_name = "DPM++ 2M SDE"
-		self.scheduler = "Karras"
-		self.cfg_scale = 7.0
-
-		self.denoising_strength = 0.3
-		self.hr_scale = 1.65
-		self.hr_second_pass_steps = 10
-		self.hr_upscaler = "4x-UltraSharp"
-
-		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name)
-		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler)
-		self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale)
-
-		self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength)
-		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale)
-		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps)
-		self.hr_upscaler = try container.decodeIfPresent(String.self, forKey: .hr_upscaler)
-
-
-		if self.cfg_scale == nil
-			|| self.sampler_name == nil {
-
-			enum AlternativeCodingKeys: String, CodingKey {
-				case sampler_name = "sampler"
-				case scheduler = "schedule type"
-				case cfg_scale = "cfg scale"
-
-				case denoising_strength = "denoising strength"
-				case hr_scale = "hires upscale"
-				case hr_second_pass_steps = "hires steps"
-				case hr_upscaler = "hires upscaler"
-			}
-
-			let alternativeContainer = try decoder.container(keyedBy: AlternativeCodingKeys.self)
-
-			self.sampler_name = try alternativeContainer.decodeIfPresent(String.self, forKey: .sampler_name)
-			self.scheduler = try alternativeContainer.decodeIfPresent(String.self, forKey: .scheduler)
-			self.cfg_scale = try alternativeContainer.decodeIfPresent(Double.self, forKey: .cfg_scale)
-
-			self.denoising_strength = try alternativeContainer.decodeIfPresent(Double.self, forKey: .denoising_strength)
-			self.hr_scale = try alternativeContainer.decodeIfPresent(Double.self, forKey: .hr_scale)
-			self.hr_second_pass_steps = try alternativeContainer.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps)
-			self.hr_upscaler = try alternativeContainer.decodeIfPresent(String.self, forKey: .hr_upscaler)
-		}
 	}
 }
 
@@ -220,7 +179,7 @@ extension SDcodablePayload {
 		}
 
 
-		var parametersDictionary: [String:Any] = [
+		var parametersDictionary: [String:Any?] = [
 			"prompt" : prompt,
 			"negative_prompt" : negative_prompt
 		]
@@ -248,11 +207,27 @@ extension SDcodablePayload {
 			}
 		}
 
-		let hr_scale = (parametersDictionary["hr_scale"] ?? parametersDictionary["hires upscale"]) as? Double ?? 1.0
-		if hr_scale > 1.0,
-		   parametersDictionary["enable_hr"] == nil {
+		if let sizeComponents = (parametersDictionary["size"] as? String)?.components(separatedBy: "x"),
+		   sizeComponents.count == 2 {
+			parametersDictionary["width"] = Int(sizeComponents.first ?? "504")
+			parametersDictionary["height"] = Int(sizeComponents.last ?? "768")
+		}
+
+		parametersDictionary["sampler_name"] = parametersDictionary["sampler"]
+		parametersDictionary["scheduler"] = parametersDictionary["schedule type"]
+		parametersDictionary["cfg_scale"] = parametersDictionary["cfg scale"]
+		
+		parametersDictionary["denoising_strength"] = parametersDictionary["denoising strength"]
+		parametersDictionary["hr_scale"] = parametersDictionary["hires upscale"]
+		parametersDictionary["hr_second_pass_steps"] = parametersDictionary["hires steps"]
+		parametersDictionary["hr_upscaler"] = parametersDictionary["hires upscaler"]
+
+
+		let hr_scale = parametersDictionary["hr_scale"] as? Double ?? 1.0
+		if hr_scale > 1.0 {
 			parametersDictionary["enable_hr"] = true
 		}
+
 
 		fxdPrint(name: "parametersDictionary", dictionary: parametersDictionary)
 
