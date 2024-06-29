@@ -264,7 +264,7 @@ extension SDmoduleMain {
 				#if DEBUG
 				if var jsonDictionary = data?.jsonDictionary() {	fxd_log()
 					jsonDictionary["images"] = ["<IMAGES ENCODED>"]
-					fxdPrint(dictionary: jsonDictionary)
+					fxdPrint(name: "TXT2IMG", dictionary: jsonDictionary)
 				}
 				#endif
 

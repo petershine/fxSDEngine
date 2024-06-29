@@ -77,7 +77,9 @@ extension SDNetworking {
 				(data: Data?, response: URLResponse?, error: Error?) in
 
 				fxdPrint("data: ", data, quiet:quiet)
+				fxdPrint("response: ", response, quiet:quiet)
 				fxdPrint("error: ", error, quiet:quiet)
+				
 				if data == nil {
 					fxdPrint("httpRequest.url: ", httpRequest.url)
 					fxdPrint("httpRequest.allHTTPHeaderFields: ", httpRequest.allHTTPHeaderFields)
@@ -173,8 +175,8 @@ extension SDNetworking {
 	func getRequest(api_endpoint: SDAPIendpoint) async -> [(Data, URLResponse)]? {
 		let requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
 
-		fxdPrint("requestPath: ", requestPath)
 		guard let requestURL = URL(string: requestPath) else {
+			fxdPrint("requestPath: ", requestPath)
 			return nil
 		}
 

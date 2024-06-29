@@ -109,7 +109,7 @@ extension SDcodablePayload {
 			payloadDictionary = try JSONSerialization.jsonObject(with: payload) as? Dictionary<String, Any?>
 		}
 		catch {	fxd_log()
-			fxdPrint("error:", error)
+			fxdPrint(error)
 		}
 
 		guard payloadDictionary != nil else {
@@ -132,7 +132,7 @@ extension SDcodablePayload {
 				extendedPayload = try JSONSerialization.data(withJSONObject: payloadDictionary!)
 			}
 			catch {	fxd_log()
-				fxdPrint("error:", error)
+				fxdPrint(error)
 			}
 		}
 
