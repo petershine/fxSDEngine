@@ -273,15 +273,6 @@ extension SDmoduleMain {
 
 				let processedError = SDError().processsed(data, response, error)
 
-				guard self.progressObservable?.state?.interrupted ?? false == false else {	fxd_log()
-					DispatchQueue.main.async {
-						self.didStartGenerating = false
-						completionHandler?(processedError)
-					}
-					return
-				}
-
-
 				let decodedResponse = data?.decode(SDcodableGenerated.self)
 				let encodedImageArray = decodedResponse?.images
 				let pngDataArray: [Data] = encodedImageArray?.map { Data(base64Encoded: $0 ?? "") ?? Data() } ?? []
