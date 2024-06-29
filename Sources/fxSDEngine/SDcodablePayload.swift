@@ -18,9 +18,9 @@ public class SDcodablePayload: Codable {
 	public var width: Int
 	public var height: Int
 
-	var enable_hr: Bool
 	var denoising_strength: Double
 	public var hr_scale: Double
+	public var enable_hr: Bool
 	var hr_second_pass_steps: Int
 	var hr_upscaler: String
 	var hr_scheduler: String
@@ -54,9 +54,15 @@ public class SDcodablePayload: Codable {
 		}
 		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? Int(CGFloat(self.height) * aspectRatio)
 
-		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? false
 		self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength) ?? 0.3
 		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale) ?? 1.65
+
+		var shouldEnable_hr = false
+		if self.hr_scale > 1.0 {
+			shouldEnable_hr = true
+		}
+		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? shouldEnable_hr
+
 		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps) ?? 10
 		self.hr_upscaler = try container.decodeIfPresent(String.self, forKey: .hr_upscaler) ?? "4x-UltraSharp"
 		self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler) ?? "Karras"
@@ -221,13 +227,6 @@ extension SDcodablePayload {
 		parametersDictionary["hr_scale"] = parametersDictionary["hires upscale"]
 		parametersDictionary["hr_second_pass_steps"] = parametersDictionary["hires steps"]
 		parametersDictionary["hr_upscaler"] = parametersDictionary["hires upscaler"]
-
-
-		let hr_scale = parametersDictionary["hr_scale"] as? Double ?? 1.0
-		if hr_scale > 1.0 {
-			parametersDictionary["enable_hr"] = true
-		}
-
 
 		fxdPrint(name: "parametersDictionary", dictionary: parametersDictionary)
 
