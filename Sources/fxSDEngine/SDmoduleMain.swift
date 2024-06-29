@@ -136,10 +136,10 @@ extension SDmoduleMain {
 		}
 
 
-		let payload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
+		let overridePayload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
 		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_OPTIONS,
-			payload: payload) {
+			payload: overridePayload) {
 				(data, response, error) in
 
 				DispatchQueue.main.async {

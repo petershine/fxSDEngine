@@ -38,8 +38,11 @@ public class SDcodablePayload: Codable {
 	var do_not_save_samples: Bool
 	var do_not_save_grid: Bool
 
-	var override_settings: SDcodableOverride?
 	var override_settings_restore_afterwards: Bool = true
+	var override_settings: SDcodableOverride?
+	struct SDcodableOverride: Codable {
+		var sd_model_checkpoint: String?
+	}
 
 
 	required public init(from decoder: any Decoder) throws {
