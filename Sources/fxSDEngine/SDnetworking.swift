@@ -99,24 +99,30 @@ extension SDNetworking {
 class SDError: NSError, @unchecked Sendable {
 	func processsed(_ data: Data?, _ response: URLResponse?, _ error: Error?) -> SDError? {
 
-		guard error != nil || (response as? HTTPURLResponse)?.statusCode != 200 else {
-			return error as? SDError
-		}
-
 		guard !(error is SDError) else {
 			return error as? SDError
 		}
 
+		guard error != nil
+				|| data != nil
+				|| response != nil else {
+			return error as? SDError
+		}
 
+
+		let errorStatusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+		
 		let assumedDescription = "Problem with server"
 		var assumedFailureReason = ""
-		switch (response as? HTTPURLResponse)?.statusCode {
+		switch errorStatusCode {
 			case 404:
 				assumedFailureReason = "Possibly, your Stable Diffusion server is not operating."
 			default:
 				break
 		}
 
+
+		let jsonDictionary: [String:Any?]? = data?.jsonDictionary()
 
 		var errorDescription = (error as? NSError)?.localizedDescription ?? assumedDescription
 		errorDescription += "\n\(jsonDictionary?["error"] as? String ?? "")"
@@ -145,7 +151,7 @@ class SDError: NSError, @unchecked Sendable {
 
 		let processed = SDError(
 			domain: "SDEngine",
-			code: (response as? HTTPURLResponse)?.statusCode ?? -1,
+			code: errorStatusCode,
 			userInfo: errorUserInfo)
 
 
