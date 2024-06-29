@@ -109,9 +109,12 @@ class SDError: NSError, @unchecked Sendable {
 			return error as? SDError
 		}
 
-
-		let errorStatusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+		guard let errorStatusCode = (response as? HTTPURLResponse)?.statusCode,
+			  errorStatusCode != 200 else {
+			return error as? SDError
+		}
 		
+
 		let assumedDescription = "Problem with server"
 		var assumedFailureReason = ""
 		switch errorStatusCode {
