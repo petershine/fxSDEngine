@@ -87,7 +87,7 @@ extension SDNetworking {
 					fxdPrint("httpRequest.httpBody: ", httpRequest.httpBody)
 				}
 
-				let processedError = SDError().processsed(data, response, error)
+				let processedError = SDError.processsed(data, response, error)
 				responseHandler?(data, response, processedError)
 			}
 
@@ -99,23 +99,22 @@ extension SDNetworking {
 
 
 class SDError: NSError, @unchecked Sendable {
-	func processsed(_ data: Data?, _ response: URLResponse?, _ error: Error?) -> SDError? {
-
-		guard !(error is SDError) else {
-			return error as? SDError
+	class func processsed(_ data: Data?, _ response: URLResponse?, _ error: Error?) -> SDError? {
+		guard !(error is Self) else {
+			return error as? Self
 		}
 
 		guard error != nil
 				|| data != nil
 				|| response != nil else {
-			return error as? SDError
+			return error as? Self
 		}
 
-		guard let errorStatusCode = (response as? HTTPURLResponse)?.statusCode,
-			  errorStatusCode != 200 else {
-			return error as? SDError
+		let errorStatusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+		guard errorStatusCode != 200 else {
+			return error as? Self
 		}
-		
+
 
 		let assumedDescription = "Problem with server"
 		var assumedFailureReason = ""
