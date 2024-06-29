@@ -78,7 +78,7 @@ extension SDNetworking {
 
 				fxdPrint("data: ", data, quiet:quiet)
 				fxdPrint("error: ", error, quiet:quiet)
-				if let data {} else {
+				if data == nil {
 					fxdPrint("httpRequest.url: ", httpRequest.url)
 					fxdPrint("httpRequest.allHTTPHeaderFields: ", httpRequest.allHTTPHeaderFields)
 					fxdPrint("httpRequest.httpMethod: ", httpRequest.httpMethod)
@@ -106,10 +106,10 @@ class SDError: NSError, @unchecked Sendable {
 
 		fxd_log()
 		let jsonDictionary: [String:Any?]? = data?.jsonDictionary()
+		fxdPrint(name: "DATA", dictionary: jsonDictionary ?? [:])
 
-		fxdPrint(response)
-		fxdPrint(dictionary: jsonDictionary ?? [:])
-		fxdPrint(error)
+		fxdPrint("RESPONSE", response)
+		fxdPrint("ERROR", error)
 
 
 		let assumedDescription = "Problem with server"
@@ -124,14 +124,24 @@ class SDError: NSError, @unchecked Sendable {
 
 		var errorDescription = (error as? NSError)?.localizedDescription ?? assumedDescription
 		errorDescription += "\n\(jsonDictionary?["error"] as? String ?? "")"
-		errorDescription += "\n\(jsonDictionary?["detail"] as? String ?? "")"
+
+		let receivedDetail = "\n\(jsonDictionary?["detail"] as? String ?? "")"
+		if receivedDetail != errorDescription {
+			errorDescription += receivedDetail
+		}
 		errorDescription = errorDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+
 
 		var errorFailureReason = (error as? NSError)?.localizedFailureReason ?? assumedFailureReason
 		errorFailureReason += "\n\(jsonDictionary?["errors"] as? String ?? "")"
-		errorFailureReason += "\n\(jsonDictionary?["msg"] as? String ?? "")"
+		
+		let receivedMSG = "\n\(jsonDictionary?["msg"] as? String ?? "")"
+		if receivedMSG != errorFailureReason {
+			errorFailureReason += receivedMSG
+		}
 		errorFailureReason = errorFailureReason.trimmingCharacters(in: .whitespacesAndNewlines)
 
+		
 		let errorUserInfo = [
 			NSLocalizedDescriptionKey : errorDescription,
 			NSLocalizedFailureReasonErrorKey : errorFailureReason
