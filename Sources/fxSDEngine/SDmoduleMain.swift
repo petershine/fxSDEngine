@@ -281,6 +281,12 @@ extension SDmoduleMain {
 				}
 
 
+				let newImage = UIImage(data: pngDataArray.last!)
+
+				DispatchQueue.main.async {
+					self.displayedImage = newImage
+				}
+
 				Task {
 					let storage = SDmoduleStorage()
 
@@ -299,16 +305,12 @@ extension SDmoduleMain {
 							//self.imageURLs?.insert(latestImageURL, at: 0)
 						}
 					}
-				}
 
 
-				let newImage = UIImage(data: pngDataArray.last!)
-
-				DispatchQueue.main.async {
-					self.displayedImage = newImage
-
-					self.didStartGenerating = false
-					completionHandler?(processedError)
+					DispatchQueue.main.async {
+						self.didStartGenerating = false
+						completionHandler?(error)
+					}
 				}
 			}
 	}
