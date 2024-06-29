@@ -31,8 +31,15 @@ public class SDcodablePayload: Codable {
 	var batch_size: Int
 
 	var save_images: Bool
+	var send_images: Bool
 
 	public var seed: Int
+
+	var do_not_save_samples: Bool
+	var do_not_save_grid: Bool
+
+	var override_settings: SDcodableOverride?
+	var override_settings_restore_afterwards: Bool = true
 
 
 	required public init(from decoder: any Decoder) throws {
@@ -73,8 +80,12 @@ public class SDcodablePayload: Codable {
 		self.batch_size = try container.decodeIfPresent(Int.self, forKey: .batch_size) ?? 1
 
 		self.save_images = try container.decodeIfPresent(Bool.self, forKey: .save_images) ?? true
+		self.send_images = try container.decodeIfPresent(Bool.self, forKey: .send_images) ?? true
 
 		self.seed = try container.decodeIfPresent(Int.self, forKey: .seed) ?? -1
+
+		self.do_not_save_samples = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_samples) ?? false
+		self.do_not_save_grid = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_grid) ?? false
 	}
 }
 
