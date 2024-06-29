@@ -54,7 +54,7 @@ public class SDcodablePayload: Codable {
 		}
 		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? Int(CGFloat(self.height) * aspectRatio)
 
-		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale) ?? 1.65
+		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale) ?? 1.0
 
 		var shouldEnable_hr = false
 		if self.hr_scale > 1.0 {
