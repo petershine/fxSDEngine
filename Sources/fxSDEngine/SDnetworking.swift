@@ -97,10 +97,14 @@ extension SDNetworking {
 
 
 class SDError: NSError, @unchecked Sendable {
-	func processsed(_ data: Data?, _ response: URLResponse?, _ error: Error?) -> NSError? {
+	func processsed(_ data: Data?, _ response: URLResponse?, _ error: Error?) -> SDError? {
 
 		guard error != nil || (response as? HTTPURLResponse)?.statusCode != 200 else {
-			return error as? NSError
+			return error as? SDError
+		}
+
+		guard !(error is SDError) else {
+			return error as? SDError
 		}
 
 
@@ -141,13 +145,13 @@ class SDError: NSError, @unchecked Sendable {
 		}
 		errorFailureReason = errorFailureReason.trimmingCharacters(in: .whitespacesAndNewlines)
 
-		
+
 		let errorUserInfo = [
 			NSLocalizedDescriptionKey : errorDescription,
 			NSLocalizedFailureReasonErrorKey : errorFailureReason
 		]
 
-		let processed = NSError(
+		let processed = SDError(
 			domain: "SDEngine",
 			code: (response as? HTTPURLResponse)?.statusCode ?? -1,
 			userInfo: errorUserInfo)
