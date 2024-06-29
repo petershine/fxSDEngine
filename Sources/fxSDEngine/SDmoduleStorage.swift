@@ -50,16 +50,18 @@ open class SDmoduleStorage: NSObject {
 }
 
 extension SDmoduleStorage {
-	func savePayloadToFile(payload: Data) {	fxd_log()
-		fxdPrint("payload: ", payload)
+	func savePayloadToFile(payload: Data) {
 		guard let fileURL = savedPayloadURL else {
 			return
 		}
 
 		do {
 			try payload.write(to: fileURL)
+
+			fxd_log()
+			fxdPrint("payload: ", payload)
 			fxdPrint("[PAYLOAD JSON SAVED]: ", fileURL)
-		} catch {
+		} catch {	fxd_log()
 			fxdPrint(error)
 		}
 	}
@@ -91,18 +93,20 @@ extension SDmoduleStorage {
 		return fileURL
 	}
 
-	func saveGeneratedImage(pngData: Data, index: Int = 0) async -> URL? {	fxd_log()
-		fxdPrint("pngData: ", pngData)
+	func saveGeneratedImage(pngData: Data, index: Int = 0) async -> URL? {
 		guard let fileURL = newImageURL(index: index) else {
 			return nil
 		}
 
 		do {
 			try pngData.write(to: fileURL)
+
+			fxd_log()
+			fxdPrint("pngData: ", pngData)
 			fxdPrint("[IMAGE FILE SAVED]: ", fileURL)
 			return fileURL
 
-		} catch {
+		} catch {	fxd_log()
 			fxdPrint(error)
 			return nil
 		}

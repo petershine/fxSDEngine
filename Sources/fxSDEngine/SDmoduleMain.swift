@@ -262,16 +262,12 @@ extension SDmoduleMain {
 				(data, response, error) in
 
 				#if DEBUG
-				if data != nil,
-				   var jsonDictionary = data!.jsonDictionary() {	fxd_log()
+				if var jsonDictionary = data?.jsonDictionary() {	fxd_log()
 					jsonDictionary["images"] = ["<IMAGES ENCODED>"]
 					fxdPrint(dictionary: jsonDictionary)
-					fxdPrint(error)
 				}
 				#endif
 
-
-				let processedError = SDError().processsed(data, response, error)
 
 				let decodedResponse = data?.decode(SDcodableGenerated.self)
 				let encodedImageArray = decodedResponse?.images
@@ -279,7 +275,7 @@ extension SDmoduleMain {
 				guard pngDataArray.count > 0 else {
 					DispatchQueue.main.async {
 						self.didStartGenerating = false
-						completionHandler?(processedError)
+						completionHandler?(error)
 					}
 					return
 				}

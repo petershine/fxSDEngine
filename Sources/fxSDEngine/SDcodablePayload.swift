@@ -161,11 +161,11 @@ extension SDcodablePayload {
 		return minimalPayload
 	}
 
-	public static func decoded(infotext: String) -> Self? {	fxd_log()
-		fxdPrint("[infotext]", infotext)
+	public static func decoded(infotext: String) -> Self? {
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Steps:"))
-		else {
+		else {	fxd_log()
+			fxdPrint("[infotext]", infotext)
 			return nil
 		}
 
@@ -180,7 +180,8 @@ extension SDcodablePayload {
 
 		let negative_prompt = promptPair?.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
-		guard !(prompt.isEmpty) else {
+		guard !(prompt.isEmpty) else {	fxd_log()
+			fxdPrint("[infotext]", infotext)
 			return nil
 		}
 
@@ -228,6 +229,9 @@ extension SDcodablePayload {
 		parametersDictionary["hr_second_pass_steps"] = parametersDictionary["hires steps"]
 		parametersDictionary["hr_upscaler"] = parametersDictionary["hires upscaler"]
 
+		
+		fxd_log()
+		fxdPrint("[infotext]", infotext)
 		fxdPrint(name: "parametersDictionary", dictionary: parametersDictionary)
 
 		var decodedPayload: Self? = nil

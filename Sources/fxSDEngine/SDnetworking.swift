@@ -32,7 +32,7 @@ public protocol SDNetworking: NSObjectProtocol {
 		method: String?,
 		query: String?,
 		payload: Data?,
-		responseHandler: ((_ received: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void)?)
+		responseHandler: ((_ data: Data?, _ response: URLResponse?, _ error: Error?) -> Void)?)
 }
 
 extension SDNetworking {
@@ -42,7 +42,7 @@ extension SDNetworking {
 		method: String? = nil,
 		query: String? = nil,
 		payload: Data? = nil,
-		responseHandler: ((_ received: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void)?) {
+		responseHandler: ((_ data: Data?, _ response: URLResponse?, _ error: Error?) -> Void)?) {
 			if !quiet {
 				fxd_log()
 			}
@@ -67,7 +67,7 @@ extension SDNetworking {
 
 			httpRequest.httpMethod = method ?? "GET"
 			if payload != nil {
-				fxdPrint(name: "PAYLOAD", dictionary: payload?.jsonDictionary() ?? [:])
+				fxdPrint(name: "PAYLOAD", dictionary: payload?.jsonDictionary())
 				httpRequest.httpMethod = "POST"
 				httpRequest.httpBody = payload
 			}
@@ -86,7 +86,7 @@ extension SDNetworking {
 				}
 
 				let processedError = SDError().processsed(data, response, error)
-				responseHandler?(data, (response as? HTTPURLResponse), processedError)
+				responseHandler?(data, response, processedError)
 			}
 
 
@@ -106,14 +106,6 @@ class SDError: NSError, @unchecked Sendable {
 		guard !(error is SDError) else {
 			return error as? SDError
 		}
-
-
-		fxd_log()
-		let jsonDictionary: [String:Any?]? = data?.jsonDictionary()
-		fxdPrint(name: "DATA", dictionary: jsonDictionary ?? [:])
-
-		fxdPrint("RESPONSE", response)
-		fxdPrint("ERROR", error)
 
 
 		let assumedDescription = "Problem with server"
@@ -155,7 +147,13 @@ class SDError: NSError, @unchecked Sendable {
 			domain: "SDEngine",
 			code: (response as? HTTPURLResponse)?.statusCode ?? -1,
 			userInfo: errorUserInfo)
-		fxdPrint(processed)
+
+
+		fxd_log()
+		fxdPrint(name: "DATA", dictionary: jsonDictionary)
+		fxdPrint("RESPONSE", response)
+		fxdPrint("ERROR", error)
+		fxdPrint("PROCESSED", processed)
 
 		return processed
 	}
