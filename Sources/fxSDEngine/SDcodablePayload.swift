@@ -10,17 +10,17 @@ public class SDcodablePayload: Codable {
 	public var prompt: String
 	public var negative_prompt: String
 
-	var sampler_name: String
-	var scheduler: String
 	public var steps: Int
 	public var cfg_scale: Double
+	var sampler_name: String
+	var scheduler: String
 
 	public var width: Int
 	public var height: Int
 
-	var denoising_strength: Double
 	public var hr_scale: Double
 	public var enable_hr: Bool
+	var denoising_strength: Double
 	var hr_second_pass_steps: Int
 	var hr_upscaler: String
 	var hr_scheduler: String
@@ -41,20 +41,19 @@ public class SDcodablePayload: Codable {
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? ""
 		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt) ?? ""
 
-		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "DPM++ 2M SDE"
-		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Karras"
 		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 30
 		self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 7.0
+		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "DPM++ 2M SDE"
+		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Karras"
+
 
 		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
-
 		var aspectRatio = UIScreen.main.nativeBounds.size.width/UIScreen.main.nativeBounds.size.height
 		if UIDevice.current.userInterfaceIdiom == .phone {
 			aspectRatio = max(504.0/768.0, aspectRatio)
 		}
 		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? Int(CGFloat(self.height) * aspectRatio)
 
-		self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength) ?? 0.3
 		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale) ?? 1.65
 
 		var shouldEnable_hr = false
@@ -63,6 +62,7 @@ public class SDcodablePayload: Codable {
 		}
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? shouldEnable_hr
 
+		self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength) ?? 0.3
 		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps) ?? 10
 		self.hr_upscaler = try container.decodeIfPresent(String.self, forKey: .hr_upscaler) ?? "4x-UltraSharp"
 		self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler) ?? "Karras"
