@@ -76,11 +76,14 @@ extension SDNetworking {
 			let completionHandler = {
 				(data: Data?, response: URLResponse?, error: Error?) in
 
+				let statusCode = (response as? HTTPURLResponse)?.statusCode
+				fxdPrint("response.statusCode: ", statusCode, quiet:quiet)
 				fxdPrint("data: ", data, quiet:quiet)
-				fxdPrint("response: ", response, quiet:quiet)
 				fxdPrint("error: ", error, quiet:quiet)
 				
-				if data == nil {
+				if data == nil || statusCode != 200 {
+					fxdPrint("httpURLResponse: ", (response as? HTTPURLResponse), quiet:quiet)
+					
 					fxdPrint("httpRequest.url: ", httpRequest.url)
 					fxdPrint("httpRequest.allHTTPHeaderFields: ", httpRequest.allHTTPHeaderFields)
 					fxdPrint("httpRequest.httpMethod: ", httpRequest.httpMethod)
