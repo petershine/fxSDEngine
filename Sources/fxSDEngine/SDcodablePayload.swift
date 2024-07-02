@@ -129,14 +129,15 @@ extension SDcodablePayload {
 		}
 		
 
-		var extensionNames: Set<SDExtensionName> = []
-		if sdEngine.isEnabledAdetailer && sdEngine.extensionADetailer != nil {
-			extensionNames.insert(.adetailer)
+		var alwayson_scripts: Dictionary<String, Any?> = [:]
+		if sdEngine.isEnabledAdetailer,
+		   sdEngine.extensionADetailer != nil,
+		   let adetailerArgs = sdEngine.extensionADetailer?.args {
+			alwayson_scripts[SDExtensionName.adetailer.rawValue] = adetailerArgs
 		}
 
 		var extendedPayload: Data = payload
 
-		let alwayson_scripts = sdEngine.systemInfo?.alwayson_scripts(extensionNames: extensionNames) ?? [:]
 		if alwayson_scripts.count > 0 {
 			payloadDictionary?["alwayson_scripts"] = alwayson_scripts
 

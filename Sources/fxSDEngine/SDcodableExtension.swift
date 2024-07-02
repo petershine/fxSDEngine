@@ -84,3 +84,23 @@ public struct SDextensionADetailer: Codable {
 	var ad_y_offset: Int = 0
 	var is_api: Array<Bool> = []
 }
+
+extension SDextensionADetailer {
+	public var args: Dictionary<String, Any?>? {
+		var args: Dictionary<String, Any?>? = nil
+		do {
+			args = [
+				"args" : [
+					true,
+					false,
+					try JSONEncoder().encode(self).jsonDictionary() ?? [:],
+				]
+			]
+		}
+		catch {	fxd_log()
+			fxdPrint(error)
+		}
+
+		return args
+	}
+}
