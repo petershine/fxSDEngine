@@ -226,10 +226,28 @@ extension SDcodablePayload {
 			payloadDictionary[replacedKey] = nil
 		}
 
+
+		var adetailerDictionary: [String:Any?] = [:]
+		let extractingKeyPairs_adetailer = [
+			("ad_confidence", "adetailer confidence"),
+			("ad_denoising_strength", "adetailer denoising strength"),
+			("ad_dilate_erode", "adetailer dilate erode"),
+			("ad_inpaint_only_masked", "adetailer inpaint only masked"),
+			("ad_inpaint_only_masked_padding", "adetailer inpaint padding"),
+			("ad_mask_blur", "adetailer mask blur"),
+			("ad_mask_k_largest", "adetailer mask only top k largest"),
+			("ad_model", "adetailer model"),
+		]
+		for (key, extractedKey) in extractingKeyPairs_adetailer {
+			adetailerDictionary[key] = payloadDictionary[extractedKey]
+			payloadDictionary[extractedKey] = nil
+		}
+
 		
 		fxd_log()
 		fxdPrint("[infotext]", infotext)
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
+		fxdPrint(name: "adetailerDictionary", dictionary: adetailerDictionary)
 
 		var decodedPayload: Self? = nil
 		do {
