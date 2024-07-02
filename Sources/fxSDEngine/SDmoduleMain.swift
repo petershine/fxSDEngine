@@ -226,6 +226,7 @@ extension SDmoduleMain {
 				fxd_log()
 				self.generationPayload = obtainedPayload
 				self.extensionADetailer = extracted.1
+
 				self.use_adetailer = (self.isEnabledAdetailer && self.extensionADetailer != nil)
 
 				if let encodedPayload = obtainedPayload.encodedPayload() {
@@ -402,7 +403,6 @@ extension SDmoduleMain {
 						if let newlyGeneratedPayload = extracted.0 {
 							self.generationPayload = newlyGeneratedPayload
 							self.extensionADetailer = extracted.1
-							self.use_adetailer = (self.isEnabledAdetailer && self.extensionADetailer != nil)
 
 							if let encodedPayload = newlyGeneratedPayload.encodedPayload() {
 								storage.savePayloadToFile(payload: encodedPayload)
