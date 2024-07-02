@@ -198,7 +198,7 @@ extension SDcodablePayload {
 		}
 
 
-		var parametersDictionary: [String:Any?] = [
+		var jsonDictionary: [String:Any?] = [
 			"prompt" : prompt,
 			"negative_prompt" : negative_prompt
 		]
@@ -212,24 +212,24 @@ extension SDcodablePayload {
 			if !key.isEmpty {
 				let value: String = key_value.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 				if let doubleValue = Double(value) {
-					parametersDictionary[key] = doubleValue
+					jsonDictionary[key] = doubleValue
 				}
 				else if let integerValue = Int(value) {
-					parametersDictionary[key] = integerValue
+					jsonDictionary[key] = integerValue
 				}
 				else if let boolValue = Bool(value) {
-					parametersDictionary[key] = boolValue
+					jsonDictionary[key] = boolValue
 				}
 				else {
-					parametersDictionary[key] = value
+					jsonDictionary[key] = value
 				}
 			}
 		}
 
-		if let sizeComponents = (parametersDictionary["size"] as? String)?.components(separatedBy: "x"),
+		if let sizeComponents = (jsonDictionary["size"] as? String)?.components(separatedBy: "x"),
 		   sizeComponents.count == 2 {
-			parametersDictionary["width"] = Int(sizeComponents.first ?? "504")
-			parametersDictionary["height"] = Int(sizeComponents.last ?? "768")
+			jsonDictionary["width"] = Int(sizeComponents.first ?? "504")
+			jsonDictionary["height"] = Int(sizeComponents.last ?? "768")
 		}
 
 		parametersDictionary["sampler_name"] = parametersDictionary["sampler"]
@@ -244,11 +244,11 @@ extension SDcodablePayload {
 		
 		fxd_log()
 		fxdPrint("[infotext]", infotext)
-		fxdPrint(name: "parametersDictionary", dictionary: parametersDictionary)
+		fxdPrint(name: "parametersDictionary", dictionary: jsonDictionary)
 
 		var decodedPayload: Self? = nil
 		do {
-			let payloadData = try JSONSerialization.data(withJSONObject: parametersDictionary)
+			let payloadData = try JSONSerialization.data(withJSONObject: jsonDictionary)
 			decodedPayload = try JSONDecoder().decode(Self.self, from: payloadData)
 			fxdPrint(decodedPayload!)
 		}
