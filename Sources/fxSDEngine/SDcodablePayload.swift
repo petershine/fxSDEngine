@@ -198,33 +198,7 @@ extension SDcodablePayload {
 		}
 
 
-		var jsonDictionary: [String:Any?] = [
-			"prompt" : prompt,
-			"negative_prompt" : negative_prompt
-		]
-
 		let parametersString = "Steps: \(infoComponents.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")"
-		let parameters = parametersString.components(separatedBy: ",")
-		for parameter in parameters {
-			let key_value = parameter.components(separatedBy: ":")
-
-			let key: String = key_value.first?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() ?? ""
-			if !key.isEmpty {
-				let value: String = key_value.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-				if let doubleValue = Double(value) {
-					jsonDictionary[key] = doubleValue
-				}
-				else if let integerValue = Int(value) {
-					jsonDictionary[key] = integerValue
-				}
-				else if let boolValue = Bool(value) {
-					jsonDictionary[key] = boolValue
-				}
-				else {
-					jsonDictionary[key] = value
-				}
-			}
-		}
 
 		if let sizeComponents = (jsonDictionary["size"] as? String)?.components(separatedBy: "x"),
 		   sizeComponents.count == 2 {
