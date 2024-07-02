@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public class SDcodablePayload: Codable {
+public struct SDcodablePayload: Codable {
 	public var prompt: String
 	public var negative_prompt: String
 
@@ -45,7 +45,7 @@ public class SDcodablePayload: Codable {
 	}
 
 
-	required public init(from decoder: any Decoder) throws {
+	public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? ""
@@ -108,7 +108,7 @@ extension SDcodablePayload {
 
 
 extension SDcodablePayload {
-	func evaluatedPayload(sdEngine: SDmoduleMain) -> Data? {
+	mutating func evaluatedPayload(sdEngine: SDmoduleMain) -> Data? {
 		self.seed = sdEngine.use_lastSeed ? self.seed : -1
 
 		guard let payload: Data = encodedPayload() else {
@@ -183,7 +183,7 @@ extension SDcodablePayload {
 }
 
 extension SDcodablePayload {
-	public func modified(editedPrompt: String, editedNegativePrompt: String) -> Self? {
+	public mutating func modified(editedPrompt: String, editedNegativePrompt: String) -> Self? {
 		let didChangePrompt = !(self.prompt == editedPrompt)
 		let didChangeNegativePrompt = !(self.negative_prompt == editedNegativePrompt)
 
