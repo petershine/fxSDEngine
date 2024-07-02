@@ -232,14 +232,21 @@ extension SDcodablePayload {
 			jsonDictionary["height"] = Int(sizeComponents.last ?? "768")
 		}
 
-		parametersDictionary["sampler_name"] = parametersDictionary["sampler"]
-		parametersDictionary["scheduler"] = parametersDictionary["schedule type"]
-		parametersDictionary["cfg_scale"] = parametersDictionary["cfg scale"]
-		
-		parametersDictionary["denoising_strength"] = parametersDictionary["denoising strength"]
-		parametersDictionary["hr_scale"] = parametersDictionary["hires upscale"]
-		parametersDictionary["hr_second_pass_steps"] = parametersDictionary["hires steps"]
-		parametersDictionary["hr_upscaler"] = parametersDictionary["hires upscaler"]
+		let replacingKeyPairs = [
+			("sampler_name", "sampler"),
+			("scheduler", "schedule type"),
+			("cfg_scale", "cfg scale"),
+
+			("denoising_strength", "denoising strength"),
+			("hr_scale", "hires upscale"),
+			("hr_second_pass_steps", "hires steps"),
+			("hr_upscaler", "hires upscaler"),
+		]
+
+		for (key, replacedKey) in replacingKeyPairs {
+			jsonDictionary[key] = jsonDictionary[replacedKey]
+			jsonDictionary[replacedKey] = nil
+		}
 
 		
 		fxd_log()
