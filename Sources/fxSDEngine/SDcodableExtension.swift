@@ -41,14 +41,14 @@ extension SDExtensionName {
 
 
 public struct SDextensionADetailer: Codable {
-	var ad_confidence: Double = 0.3
-	var ad_denoising_strength: Double = 0.3
-	var ad_dilate_erode: Int = 4
-	var ad_inpaint_only_masked: Bool = true
-	var ad_inpaint_only_masked_padding: Int = 32
-	var ad_mask_blur: Int = 4
-	var ad_mask_k_largest: Int = 2
-	var ad_model: String = "face_yolov8n.pt"
+	var ad_confidence: Double
+	var ad_denoising_strength: Double
+	var ad_dilate_erode: Int
+	var ad_inpaint_only_masked: Bool
+	var ad_inpaint_only_masked_padding: Int
+	var ad_mask_blur: Int
+	var ad_mask_k_largest: Int
+	var ad_model: String
 
 	var ad_cfg_scale: Int? = 7
 	var ad_checkpoint: String? = "Use same checkpoint"
@@ -88,15 +88,15 @@ public struct SDextensionADetailer: Codable {
 	public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 
-		self.ad_confidence = try container.decode(Double.self, forKey: .ad_confidence)
-		self.ad_denoising_strength = try container.decode(Double.self, forKey: .ad_denoising_strength)
-		self.ad_dilate_erode = try container.decode(Int.self, forKey: .ad_dilate_erode)
-		self.ad_inpaint_only_masked = try container.decode(Bool.self, forKey: .ad_inpaint_only_masked)
-		self.ad_inpaint_only_masked_padding = try container.decode(Int.self, forKey: .ad_inpaint_only_masked_padding)
-		self.ad_mask_blur = try container.decode(Int.self, forKey: .ad_mask_blur)
-		self.ad_mask_k_largest = try container.decode(Int.self, forKey: .ad_mask_k_largest)
-		self.ad_model = try container.decode(String.self, forKey: .ad_model)
-		
+		self.ad_confidence = try container.decodeIfPresent(Double.self, forKey: .ad_confidence) ?? 0.3
+		self.ad_denoising_strength = try container.decodeIfPresent(Double.self, forKey: .ad_denoising_strength) ?? 0.3
+		self.ad_dilate_erode = try container.decodeIfPresent(Int.self, forKey: .ad_dilate_erode) ?? 4
+		self.ad_inpaint_only_masked = try container.decodeIfPresent(Bool.self, forKey: .ad_inpaint_only_masked) ?? true
+		self.ad_inpaint_only_masked_padding = try container.decodeIfPresent(Int.self, forKey: .ad_inpaint_only_masked_padding) ?? 31
+		self.ad_mask_blur = try container.decodeIfPresent(Int.self, forKey: .ad_mask_blur) ?? 4
+		self.ad_mask_k_largest = try container.decodeIfPresent(Int.self, forKey: .ad_mask_k_largest) ?? 2
+		self.ad_model = try container.decodeIfPresent(String.self, forKey: .ad_model) ?? "face_yolov8n.pt"
+
 		self.ad_cfg_scale = try container.decodeIfPresent(Int.self, forKey: .ad_cfg_scale)
 		self.ad_checkpoint = try container.decodeIfPresent(String.self, forKey: .ad_checkpoint)
 		self.ad_clip_skip = try container.decodeIfPresent(Int.self, forKey: .ad_clip_skip)
