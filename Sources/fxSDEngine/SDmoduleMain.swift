@@ -12,9 +12,11 @@ public protocol SDmoduleMain: NSObject {
 	var systemInfo: SDcodableSysInfo? { get set }
 	var systemCheckpoints: [SDcodableModel]? { get set }
 	var generationPayload: SDcodablePayload? { get set }
+	var extensionADetailer: SDextensionADetailer? { get set }
 
 	var use_lastSeed: Bool { get set }
 	var use_adetailer: Bool { get set }
+	var isEnabledAdetailer: Bool { get set }
 
 	var progressObservable: SDcodableProgress? { get set }
 	var isSystemBusy: Bool { get set }
@@ -29,6 +31,7 @@ public protocol SDmoduleMain: NSObject {
 
 	func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
 	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
+	func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?)
 
 	var didStartGenerating: Bool { get set }
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
@@ -98,10 +101,8 @@ extension SDmoduleMain {
 				}
 				#endif
 				DispatchQueue.main.async {
-					if let decodedSystemInfo = data?.decode(SDcodableSysInfo.self) {
-						self.systemInfo = decodedSystemInfo
-						self.use_adetailer = self.systemInfo?.extensionNames?.contains(.adetailer) ?? false
-					}
+					self.systemInfo = data?.decode(SDcodableSysInfo.self)
+					self.isEnabledAdetailer = self.systemInfo?.extensionNames?.contains(.adetailer) ?? false
 					completionHandler?(error)
 				}
 			}
@@ -215,7 +216,8 @@ extension SDmoduleMain {
 				return
 			}
 
-			guard let obtainedPayload = SDcodablePayload.decoded(infotext: infotext) else {
+			let extracted = self.extract_fromInfotext(infotext: infotext)
+			guard let obtainedPayload = extracted.0 else {
 				completionHandler?(error)
 				return
 			}
@@ -223,10 +225,13 @@ extension SDmoduleMain {
 			DispatchQueue.main.async {
 				fxd_log()
 				self.generationPayload = obtainedPayload
+				self.extensionADetailer = extracted.1
+				self.use_adetailer = (self.isEnabledAdetailer && self.extensionADetailer != nil)
 
 				if let encodedPayload = obtainedPayload.encodedPayload() {
 					SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
 				}
+				//TODO: save last ADetailer
 
 				completionHandler?(error)
 			}
@@ -248,6 +253,107 @@ extension SDmoduleMain {
 
 				_assignPayload(infotext, error)
 			})
+	}
+
+	public func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?) {
+		guard !(infotext.isEmpty)
+				&& (infotext.contains("Steps:"))
+		else {	fxd_log()
+			fxdPrint("[infotext]", infotext)
+			return (nil, nil)
+		}
+
+
+		let infoComponents = infotext.lineReBroken().components(separatedBy: "Steps:")
+		let promptPair = infoComponents.first?.components(separatedBy: "Negative prompt:")
+
+		var prompt = promptPair?.first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+		if prompt.first == "\"" {
+			prompt.removeFirst()
+		}
+
+		let negative_prompt = promptPair?.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+		guard !(prompt.isEmpty) else {	fxd_log()
+			fxdPrint("[infotext]", infotext)
+			return (nil, nil)
+		}
+
+
+		let parametersString = "Steps: \(infoComponents.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")"
+
+		var payloadDictionary: [String:Any?] = parametersString.jsonDictionary() ?? [:]
+		payloadDictionary["prompt"] = prompt
+		payloadDictionary["negative_prompt"] = negative_prompt
+
+		if let sizeComponents = (payloadDictionary["size"] as? String)?.components(separatedBy: "x"),
+		   sizeComponents.count == 2 {
+			payloadDictionary["width"] = Int(sizeComponents.first ?? "504")
+			payloadDictionary["height"] = Int(sizeComponents.last ?? "768")
+		}
+
+		let replacingKeyPairs = [
+			("sampler_name", "sampler"),
+			("scheduler", "schedule type"),
+			("cfg_scale", "cfg scale"),
+
+			("denoising_strength", "denoising strength"),
+			("hr_scale", "hires upscale"),
+			("hr_second_pass_steps", "hires steps"),
+			("hr_upscaler", "hires upscaler"),
+		]
+
+		for (key, replacedKey) in replacingKeyPairs {
+			payloadDictionary[key] = payloadDictionary[replacedKey]
+			payloadDictionary[replacedKey] = nil
+		}
+
+
+		var adetailerDictionary: [String:Any?] = [:]
+		let extractingKeyPairs_adetailer = [
+			("ad_confidence", "adetailer confidence"),
+			("ad_denoising_strength", "adetailer denoising strength"),
+			("ad_dilate_erode", "adetailer dilate erode"),
+			("ad_inpaint_only_masked", "adetailer inpaint only masked"),
+			("ad_inpaint_only_masked_padding", "adetailer inpaint padding"),
+			("ad_mask_blur", "adetailer mask blur"),
+			("ad_mask_k_largest", "adetailer mask only top k largest"),
+			("ad_model", "adetailer model"),
+		]
+		for (key, extractedKey) in extractingKeyPairs_adetailer {
+			adetailerDictionary[key] = payloadDictionary[extractedKey]
+			payloadDictionary[extractedKey] = nil
+		}
+
+
+		fxd_log()
+		fxdPrint("[infotext]", infotext)
+		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
+		fxdPrint(name: "adetailerDictionary", dictionary: adetailerDictionary)
+
+		var decodedPayload: SDcodablePayload? = nil
+		do {
+			let payloadData = try JSONSerialization.data(withJSONObject: payloadDictionary)
+			decodedPayload = try JSONDecoder().decode(SDcodablePayload.self, from: payloadData)
+			fxdPrint(decodedPayload!)
+		}
+		catch {
+			fxdPrint(error)
+		}
+
+		var decodedADetailer: SDextensionADetailer? = nil
+		if adetailerDictionary.count > 0 {
+			do {
+				let adetailerData = try JSONSerialization.data(withJSONObject: adetailerDictionary)
+				decodedADetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: adetailerData)
+				fxdPrint(decodedADetailer!)
+			}
+			catch {
+				fxdPrint(error)
+			}
+		}
+
+		return (decodedPayload, decodedADetailer)
 	}
 }
 
@@ -291,12 +397,16 @@ extension SDmoduleMain {
 					let storage = SDmoduleStorage()
 
 					let infotext = decodedResponse?.infotext() ?? ""
-					if !(infotext.isEmpty),
-					   let newlyGeneratedPayload = SDcodablePayload.decoded(infotext: infotext) {
-						self.generationPayload = newlyGeneratedPayload
+					if !(infotext.isEmpty) {
+						let extracted = self.extract_fromInfotext(infotext: infotext)
+						if let newlyGeneratedPayload = extracted.0 {
+							self.generationPayload = newlyGeneratedPayload
+							self.extensionADetailer = extracted.1
+							self.use_adetailer = (self.isEnabledAdetailer && self.extensionADetailer != nil)
 
-						if let encodedPayload = newlyGeneratedPayload.encodedPayload() {
-							storage.savePayloadToFile(payload: encodedPayload)
+							if let encodedPayload = newlyGeneratedPayload.encodedPayload() {
+								storage.savePayloadToFile(payload: encodedPayload)
+							}
 						}
 					}
 

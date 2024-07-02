@@ -40,7 +40,7 @@ extension SDExtensionName {
 }
 
 
-struct SDextensionADetailer: Codable {
+public struct SDextensionADetailer: Codable {
 	var ad_cfg_scale: Int = 7
 	var ad_checkpoint: String = "Use same checkpoint"
 	var ad_clip_skip: Int = 1
