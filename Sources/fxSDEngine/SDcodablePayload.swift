@@ -200,10 +200,14 @@ extension SDcodablePayload {
 
 		let parametersString = "Steps: \(infoComponents.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")"
 
-		if let sizeComponents = (jsonDictionary["size"] as? String)?.components(separatedBy: "x"),
+		var payloadDictionary: [String:Any?] = parametersString.jsonDictionary() ?? [:]
+		payloadDictionary["prompt"] = prompt
+		payloadDictionary["negative_prompt"] = negative_prompt
+
+		if let sizeComponents = (payloadDictionary["size"] as? String)?.components(separatedBy: "x"),
 		   sizeComponents.count == 2 {
-			jsonDictionary["width"] = Int(sizeComponents.first ?? "504")
-			jsonDictionary["height"] = Int(sizeComponents.last ?? "768")
+			payloadDictionary["width"] = Int(sizeComponents.first ?? "504")
+			payloadDictionary["height"] = Int(sizeComponents.last ?? "768")
 		}
 
 		let replacingKeyPairs = [
@@ -218,18 +222,18 @@ extension SDcodablePayload {
 		]
 
 		for (key, replacedKey) in replacingKeyPairs {
-			jsonDictionary[key] = jsonDictionary[replacedKey]
-			jsonDictionary[replacedKey] = nil
+			payloadDictionary[key] = payloadDictionary[replacedKey]
+			payloadDictionary[replacedKey] = nil
 		}
 
 		
 		fxd_log()
 		fxdPrint("[infotext]", infotext)
-		fxdPrint(name: "parametersDictionary", dictionary: jsonDictionary)
+		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
 
 		var decodedPayload: Self? = nil
 		do {
-			let payloadData = try JSONSerialization.data(withJSONObject: jsonDictionary)
+			let payloadData = try JSONSerialization.data(withJSONObject: payloadDictionary)
 			decodedPayload = try JSONDecoder().decode(Self.self, from: payloadData)
 			fxdPrint(decodedPayload!)
 		}
