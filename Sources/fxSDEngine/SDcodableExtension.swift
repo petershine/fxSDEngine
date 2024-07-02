@@ -27,7 +27,7 @@ extension SDExtensionName {
 						"args" : [
 							true,
 							false,
-							try JSONEncoder().encode(SDextensionADetailer()).jsonDictionary() ?? [:],
+							try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data()),
 						]
 					]
 			}
@@ -84,6 +84,54 @@ public struct SDextensionADetailer: Codable {
 	var ad_x_offset: Int? = 0
 	var ad_y_offset: Int? = 0
 	var is_api: Array<Bool?>? = []
+
+	public init(from decoder: any Decoder) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+
+		self.ad_confidence = try container.decode(Double.self, forKey: .ad_confidence)
+		self.ad_denoising_strength = try container.decode(Double.self, forKey: .ad_denoising_strength)
+		self.ad_dilate_erode = try container.decode(Int.self, forKey: .ad_dilate_erode)
+		self.ad_inpaint_only_masked = try container.decode(Bool.self, forKey: .ad_inpaint_only_masked)
+		self.ad_inpaint_only_masked_padding = try container.decode(Int.self, forKey: .ad_inpaint_only_masked_padding)
+		self.ad_mask_blur = try container.decode(Int.self, forKey: .ad_mask_blur)
+		self.ad_mask_k_largest = try container.decode(Int.self, forKey: .ad_mask_k_largest)
+		self.ad_model = try container.decode(String.self, forKey: .ad_model)
+		
+		self.ad_cfg_scale = try container.decodeIfPresent(Int.self, forKey: .ad_cfg_scale)
+		self.ad_checkpoint = try container.decodeIfPresent(String.self, forKey: .ad_checkpoint)
+		self.ad_clip_skip = try container.decodeIfPresent(Int.self, forKey: .ad_clip_skip)
+		self.ad_controlnet_guidance_end = try container.decodeIfPresent(Int.self, forKey: .ad_controlnet_guidance_end)
+		self.ad_controlnet_guidance_start = try container.decodeIfPresent(Int.self, forKey: .ad_controlnet_guidance_start)
+		self.ad_controlnet_model = try container.decodeIfPresent(String.self, forKey: .ad_controlnet_model)
+		self.ad_controlnet_module = try container.decodeIfPresent(String.self, forKey: .ad_controlnet_module)
+		self.ad_controlnet_weight = try container.decodeIfPresent(Int.self, forKey: .ad_controlnet_weight)
+		self.ad_inpaint_height = try container.decodeIfPresent(Int.self, forKey: .ad_inpaint_height)
+		self.ad_inpaint_width = try container.decodeIfPresent(Int.self, forKey: .ad_inpaint_width)
+		self.ad_mask_max_ratio = try container.decodeIfPresent(Int.self, forKey: .ad_mask_max_ratio)
+		self.ad_mask_merge_invert = try container.decodeIfPresent(String.self, forKey: .ad_mask_merge_invert)
+		self.ad_mask_min_ratio = try container.decodeIfPresent(Int.self, forKey: .ad_mask_min_ratio)
+		self.ad_model_classes = try container.decodeIfPresent(String.self, forKey: .ad_model_classes)
+		self.ad_negative_prompt = try container.decodeIfPresent(String.self, forKey: .ad_negative_prompt)
+		self.ad_noise_multiplier = try container.decodeIfPresent(Int.self, forKey: .ad_noise_multiplier)
+		self.ad_prompt = try container.decodeIfPresent(String.self, forKey: .ad_prompt)
+		self.ad_restore_face = try container.decodeIfPresent(Bool.self, forKey: .ad_restore_face)
+		self.ad_sampler = try container.decodeIfPresent(String.self, forKey: .ad_sampler)
+		self.ad_scheduler = try container.decodeIfPresent(String.self, forKey: .ad_scheduler)
+		self.ad_steps = try container.decodeIfPresent(Int.self, forKey: .ad_steps)
+		self.ad_tab_enable = try container.decodeIfPresent(Bool.self, forKey: .ad_tab_enable)
+		self.ad_use_cfg_scale = try container.decodeIfPresent(Bool.self, forKey: .ad_use_cfg_scale)
+		self.ad_use_checkpoint = try container.decodeIfPresent(Bool.self, forKey: .ad_use_checkpoint)
+		self.ad_use_clip_skip = try container.decodeIfPresent(Bool.self, forKey: .ad_use_clip_skip)
+		self.ad_use_inpaint_width_height = try container.decodeIfPresent(Bool.self, forKey: .ad_use_inpaint_width_height)
+		self.ad_use_noise_multiplier = try container.decodeIfPresent(Bool.self, forKey: .ad_use_noise_multiplier)
+		self.ad_use_sampler = try container.decodeIfPresent(Bool.self, forKey: .ad_use_sampler)
+		self.ad_use_steps = try container.decodeIfPresent(Bool.self, forKey: .ad_use_steps)
+		self.ad_use_vae = try container.decodeIfPresent(Bool.self, forKey: .ad_use_vae)
+		self.ad_vae = try container.decodeIfPresent(String.self, forKey: .ad_vae)
+		self.ad_x_offset = try container.decodeIfPresent(Int.self, forKey: .ad_x_offset)
+		self.ad_y_offset = try container.decodeIfPresent(Int.self, forKey: .ad_y_offset)
+		self.is_api = try container.decodeIfPresent([Bool?].self, forKey: .is_api)
+	}
 }
 
 extension SDextensionADetailer {

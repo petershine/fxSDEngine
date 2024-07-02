@@ -133,7 +133,12 @@ extension SDcodablePayload {
 		if sdEngine.isEnabledAdetailer,
 		   sdEngine.use_adetailer {
 			if sdEngine.extensionADetailer == nil {
-				sdEngine.extensionADetailer = SDextensionADetailer()
+				do {
+					sdEngine.extensionADetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data())
+				}
+				catch {	fxd_log()
+					fxdPrint(error)
+				}
 			}
 			alwayson_scripts[SDExtensionName.adetailer.rawValue] = sdEngine.extensionADetailer?.args
 		}
