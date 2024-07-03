@@ -28,6 +28,18 @@ open class SDmoduleStorage: NSObject {
 }
 
 extension SDmoduleStorage {
+	fileprivate func newFileURL(index: Int, contentType: UTType) -> URL? {
+		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+
+		let dateFormatter = DateFormatter()
+		dateFormatter.dateFormat = "yyyy-MM-dd_HH_mm_ss"
+
+		let fileName = dateFormatter.string(from: Date.now)
+		let fileURL = documentDirectory?.appendingPathComponent("GenerArt_\(fileName)_\(index).\(contentType.preferredFilenameExtension ?? contentType.identifier.components(separatedBy: ".").last ?? "png")")
+		return fileURL
+	}
+
+
 	func savePayloadToFile(payload: Data) {
 		guard let fileURL = savedPayloadURL else {
 			return
@@ -60,19 +72,10 @@ extension SDmoduleStorage {
 		return payloadData
 	}
 
-	fileprivate func newImageURL(index: Int) -> URL? {
-		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
 
-		let dateFormatter = DateFormatter()
-		dateFormatter.dateFormat = "yyyy-MM-dd_HH_mm_ss"
-
-		let fileName = dateFormatter.string(from: Date.now)
-		let fileURL = documentDirectory?.appendingPathComponent("GenerArt_\(fileName)_\(index).png")
-		return fileURL
-	}
 
 	func saveGeneratedImage(pngData: Data, index: Int = 0) async -> URL? {
-		guard let fileURL = newImageURL(index: index) else {
+		guard let fileURL = newFileURL(index: index, contentType: UTType.png) else {
 			return nil
 		}
 
