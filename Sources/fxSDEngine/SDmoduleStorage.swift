@@ -11,7 +11,7 @@ open class SDmoduleStorage: NSObject {
 		return FileManager.default.fileURLs(contentType: .png)
 	}
 
-	public var latestPayloadURLs: [URL]? {
+	public var latestJsonURLs: [URL]? {
 		return FileManager.default.fileURLs(contentType: .json)
 	}
 
