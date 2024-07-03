@@ -39,23 +39,6 @@ extension SDmoduleStorage {
 		return fileURL
 	}
 
-
-	func savePayloadToFile(payload: Data) {
-		guard let fileURL = savedPayloadURL else {
-			return
-		}
-
-		do {
-			try payload.write(to: fileURL)
-
-			fxd_log()
-			fxdPrint("payload: ", payload)
-			fxdPrint("[PAYLOAD JSON SAVED]: ", fileURL)
-		} catch {	fxd_log()
-			fxdPrint(error)
-		}
-	}
-
 	public func loadPayloadFromFile() throws -> Data? {
 		guard let fileURL = savedPayloadURL else {
 			return nil
@@ -74,12 +57,14 @@ extension SDmoduleStorage {
 
 
 
-	func saveGenerated(pngData: Data, payload: Data?, index: Int = 0) async -> (imageURL: URL?, payloadURL: URL?) {
+	func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async -> (imageURL: URL?, payloadURL: URL?) {
 		guard let imageURL = newFileURL(index: index, contentType: UTType.png) else {
 			return (nil, nil)
 		}
 		
-		let payloadURL = imageURL.deletingPathExtension().appendingPathExtension(UTType.json.preferredFilenameExtension ?? UTType.json.identifier.components(separatedBy: ".").last ?? "json")
+		let jsonURL = imageURL
+			.deletingPathExtension()
+			.appendingPathExtension(UTType.json.preferredFilenameExtension ?? UTType.json.identifier.components(separatedBy: ".").last ?? "json")
 
 
 		fxd_log()
@@ -89,11 +74,11 @@ extension SDmoduleStorage {
 			fxdPrint("[IMAGE FILE SAVED]: ", imageURL)
 
 
-			fxdPrint("payload: ", payload)
-			try payload?.write(to: payloadURL)
-			fxdPrint("[PAYLOAD JSON SAVED]: ", payloadURL)
+			fxdPrint("payloadData: ", payloadData)
+			try payloadData?.write(to: jsonURL)
+			fxdPrint("[PAYLOAD JSON SAVED]: ", jsonURL)
 
-			return (imageURL, payloadURL)
+			return (imageURL, jsonURL)
 
 		} catch {
 			fxdPrint(error)

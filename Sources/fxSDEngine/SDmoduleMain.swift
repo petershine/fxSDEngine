@@ -222,19 +222,23 @@ extension SDmoduleMain {
 				return
 			}
 
-			DispatchQueue.main.async {
-				fxd_log()
-				self.generationPayload = obtainedPayload
-				self.extensionADetailer = extracted.1
 
-				self.use_adetailer = (self.isEnabledAdetailer && self.extensionADetailer != nil)
+			Task {
+				let payloadData = obtainedPayload.encodedPayload()
+				let (_, _) = await SDmoduleStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
 
-				if let encodedPayload = obtainedPayload.encodedPayload() {
-					SDmoduleStorage().savePayloadToFile(payload: encodedPayload)
-				}
 				//TODO: save last ADetailer
 
-				completionHandler?(error)
+
+				DispatchQueue.main.async {
+					fxd_log()
+					self.generationPayload = obtainedPayload
+					self.extensionADetailer = extracted.1
+
+					self.use_adetailer = (self.isEnabledAdetailer && self.extensionADetailer != nil)
+
+					completionHandler?(error)
+				}
 			}
 		}
 
@@ -406,9 +410,9 @@ extension SDmoduleMain {
 
 
 					let storage = SDmoduleStorage()
-					let payload = self.generationPayload?.encodedPayload()
+					let payloadData = self.generationPayload?.encodedPayload()
 					for (index, pngData) in pngDataArray.enumerated() {
-						let (_, _) = await storage.saveGenerated(pngData: pngData, payload: payload, index: index)
+						let (_, _) = await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)
 					}
 
 
