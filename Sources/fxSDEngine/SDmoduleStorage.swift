@@ -7,12 +7,6 @@ import UniformTypeIdentifiers
 
 
 open class SDmoduleStorage: NSObject {
-	var savedPayloadURL: URL? {
-		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-		let fileURL = documentDirectory?.appendingPathComponent("savedPayload.json")
-		return fileURL
-	}
-
 	public var latestImageURLs: [URL]? {
 		return FileManager.default.fileURLs(contentType: .png)
 	}
@@ -39,32 +33,10 @@ extension SDmoduleStorage {
 		return fileURL
 	}
 
-	public func loadPayloadFromFile() throws -> Data? {
-		guard let fileURL = savedPayloadURL else {
-			return nil
-		}
-
-
-		var payloadData: Data? = nil
-		do {
-			payloadData = try Data(contentsOf: fileURL)
-		} catch {
-			throw error
-		}
-
-		return payloadData
-	}
-
-
-
 	func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async -> (imageURL: URL?, payloadURL: URL?) {
 		guard let imageURL = newFileURL(index: index, contentType: UTType.png) else {
 			return (nil, nil)
 		}
-		
-		let jsonURL = imageURL
-			.deletingPathExtension()
-			.appendingPathExtension(UTType.json.preferredFilenameExtension ?? UTType.json.identifier.components(separatedBy: ".").last ?? "json")
 
 
 		fxd_log()
@@ -75,10 +47,10 @@ extension SDmoduleStorage {
 
 
 			fxdPrint("payloadData: ", payloadData)
-			try payloadData?.write(to: jsonURL)
-			fxdPrint("[PAYLOAD JSON SAVED]: ", jsonURL)
+			try payloadData?.write(to: imageURL.jsonURL)
+			fxdPrint("[PAYLOAD JSON SAVED]: ", imageURL.jsonURL)
 
-			return (imageURL, jsonURL)
+			return (imageURL, imageURL.jsonURL)
 
 		} catch {
 			fxdPrint(error)
@@ -88,14 +60,14 @@ extension SDmoduleStorage {
 }
 
 extension SDmoduleStorage {
-	public func deleteImageURLs(imageURLs: [URL], completionHandler: (() -> Void)?) {
-		guard imageURLs.count > 0 else {
+	public func deleteFileURLs(fileURLs: [URL], completionHandler: (() -> Void)?) {
+		guard fileURLs.count > 0 else {
 			completionHandler?()
 			return
 		}
 
 
-		let message: String = (imageURLs.count > 1) ? "\(imageURLs.count) images" : (imageURLs.first?.absoluteURL.lastPathComponent ?? "")
+		let message: String = (fileURLs.count > 1) ? "\(fileURLs.count) images" : (fileURLs.first?.absoluteURL.lastPathComponent ?? "")
 
 		UIAlertController.simpleAlert(
 			withTitle: "Do you want to delete?",
@@ -111,12 +83,14 @@ extension SDmoduleStorage {
 				}
 
 
-				let originalCount = imageURLs.count
+				let originalCount = fileURLs.count
 				var deletedCount: Int = 0
 				var deletingError: Error? = nil
 				do {
-					for fileURL in imageURLs {
-						try FileManager.default.removeItem(at: fileURL)
+					for imageURL in fileURLs {
+						try FileManager.default.removeItem(at: imageURL)
+						try FileManager.default.removeItem(at: imageURL.jsonURL)
+
 						deletedCount = deletedCount + 1
 					}
 				}
@@ -136,5 +110,14 @@ extension SDmoduleStorage {
 
 				completionHandler?()
 			})
+	}
+}
+
+
+fileprivate extension URL {
+	var jsonURL: URL {
+		return self
+			.deletingPathExtension()
+			.appendingPathExtension(UTType.json.preferredFilenameExtension ?? UTType.json.identifier.components(separatedBy: ".").last ?? "json")
 	}
 }
