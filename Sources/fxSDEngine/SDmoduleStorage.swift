@@ -14,33 +14,11 @@ open class SDmoduleStorage: NSObject {
 	}
 
 	public var latestImageURLs: [URL]? {
-		guard  let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
-			return nil
-		}
+		return FileManager.default.fileURLs(contentType: .png)
+	}
 
-		var fileURLs: [URL]? = nil
-		do {
-			let contents = try FileManager.default.contentsOfDirectory(
-				at: documentDirectory,
-				includingPropertiesForKeys: [.contentModificationDateKey, .contentTypeKey],
-				options: [.skipsSubdirectoryDescendants, .skipsHiddenFiles])
-
-			fileURLs = try contents
-				.filter {
-					let resourceValues: URLResourceValues = try $0.resourceValues(forKeys: [.contentTypeKey])
-					return resourceValues.contentType == UTType.png
-				}
-				.sorted {
-					let resourceValues_0: URLResourceValues = try $0.resourceValues(forKeys: [.contentModificationDateKey])
-					let resourceValues_1: URLResourceValues = try $1.resourceValues(forKeys: [.contentModificationDateKey])
-					return resourceValues_0.contentModificationDate  ?? Date.now > resourceValues_1.contentModificationDate ?? Date.now
-				}
-		}
-		catch {	fxd_log()
-			fxdPrint(error)
-		}
-
-		return fileURLs
+	public var latestPayloadURLs: [URL]? {
+		return FileManager.default.fileURLs(contentType: .json)
 	}
 
 
