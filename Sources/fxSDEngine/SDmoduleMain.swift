@@ -395,25 +395,20 @@ extension SDmoduleMain {
 				}
 
 				Task {
-					let storage = SDmoduleStorage()
-
 					let infotext = decodedResponse?.infotext() ?? ""
 					if !(infotext.isEmpty) {
 						let extracted = self.extract_fromInfotext(infotext: infotext)
 						if let newlyGeneratedPayload = extracted.0 {
 							self.generationPayload = newlyGeneratedPayload
 							self.extensionADetailer = extracted.1
-
-							if let encodedPayload = newlyGeneratedPayload.encodedPayload() {
-								storage.savePayloadToFile(payload: encodedPayload)
-							}
 						}
 					}
 
+
+					let storage = SDmoduleStorage()
+					let payload = self.generationPayload?.encodedPayload()
 					for (index, pngData) in pngDataArray.enumerated() {
-						if let _ = await storage.saveGeneratedImage(pngData: pngData, index: index) {
-							//self.imageURLs?.insert(latestImageURL, at: 0)
-						}
+						let (_, _) = await storage.saveGenerated(pngData: pngData, payload: payload, index: index)
 					}
 
 

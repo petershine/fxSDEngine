@@ -74,22 +74,30 @@ extension SDmoduleStorage {
 
 
 
-	func saveGeneratedImage(pngData: Data, index: Int = 0) async -> URL? {
-		guard let fileURL = newFileURL(index: index, contentType: UTType.png) else {
-			return nil
+	func saveGenerated(pngData: Data, payload: Data?, index: Int = 0) async -> (imageURL: URL?, payloadURL: URL?) {
+		guard let imageURL = newFileURL(index: index, contentType: UTType.png) else {
+			return (nil, nil)
 		}
+		
+		let payloadURL = imageURL.deletingPathExtension().appendingPathExtension(UTType.json.preferredFilenameExtension ?? UTType.json.identifier.components(separatedBy: ".").last ?? "json")
 
+
+		fxd_log()
 		do {
-			try pngData.write(to: fileURL)
-
-			fxd_log()
 			fxdPrint("pngData: ", pngData)
-			fxdPrint("[IMAGE FILE SAVED]: ", fileURL)
-			return fileURL
+			try pngData.write(to: imageURL)
+			fxdPrint("[IMAGE FILE SAVED]: ", imageURL)
 
-		} catch {	fxd_log()
+
+			fxdPrint("payload: ", payload)
+			try payload?.write(to: payloadURL)
+			fxdPrint("[PAYLOAD JSON SAVED]: ", payloadURL)
+
+			return (imageURL, payloadURL)
+
+		} catch {
 			fxdPrint(error)
-			return nil
+			return (nil, nil)
 		}
 	}
 }
