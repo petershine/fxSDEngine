@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public protocol SDmoduleMain: NSObject {
+public protocol SDEngine: NSObject {
 	var networkingModule: SDNetworking { get set }
 
 	var systemInfo: SDcodableSysInfo? { get set }
@@ -44,7 +44,7 @@ public protocol SDmoduleMain: NSObject {
 }
 
 
-extension SDmoduleMain {
+extension SDEngine {
 	public func synchronize_withSystem(completionHandler: ((_ error: Error?)->Void)?) {
 		refresh_systemInfo {
 			(error) in
@@ -150,7 +150,7 @@ extension SDmoduleMain {
 	}
 }
 
-extension SDmoduleMain {
+extension SDEngine {
 	public func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?) {
 		networkingModule.requestToSDServer(
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
@@ -362,7 +362,7 @@ extension SDmoduleMain {
 	}
 }
 
-extension SDmoduleMain {
+extension SDEngine {
 	public func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
 		self.didStartGenerating = true
 		let payload: Data? = generationPayload?.evaluatedPayload(sdEngine: self)
@@ -426,7 +426,7 @@ extension SDmoduleMain {
 }
 
 
-extension SDmoduleMain {
+extension SDEngine {
 	public func execute_progress(
 		skipImageDecoding: Bool = false,
 		quiet: Bool = false,

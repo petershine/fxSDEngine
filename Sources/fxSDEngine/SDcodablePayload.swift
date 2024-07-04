@@ -108,7 +108,7 @@ extension SDcodablePayload {
 
 
 extension SDcodablePayload {
-	mutating func evaluatedPayload(sdEngine: SDmoduleMain) -> Data? {
+	mutating func evaluatedPayload(sdEngine: SDEngine) -> Data? {
 		self.seed = sdEngine.use_lastSeed ? self.seed : -1
 
 		guard let payload: Data = encodedPayload() else {
