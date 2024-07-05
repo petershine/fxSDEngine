@@ -181,27 +181,3 @@ extension SDcodablePayload {
 		return minimalPayload
 	}
 }
-
-extension SDcodablePayload {
-	public mutating func modified(editedPrompt: String, editedNegativePrompt: String) -> Self? {
-		let didChangePrompt = !(self.prompt == editedPrompt)
-		let didChangeNegativePrompt = !(self.negative_prompt == editedNegativePrompt)
-
-		guard (didChangePrompt
-			   || didChangeNegativePrompt)
-		else {
-			return nil
-		}
-
-
-		if didChangePrompt {
-			self.prompt = editedPrompt
-		}
-
-		if didChangeNegativePrompt {
-			self.negative_prompt = editedNegativePrompt
-		}
-
-		return self
-	}
-}
