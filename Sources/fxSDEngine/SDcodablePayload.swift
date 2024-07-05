@@ -57,20 +57,16 @@ public struct SDcodablePayload: Codable {
 		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Karras"
 
 
-		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
 		var aspectRatio = UIScreen.main.nativeBounds.size.width/UIScreen.main.nativeBounds.size.height
 		if UIDevice.current.userInterfaceIdiom == .phone {
 			aspectRatio = max(504.0/768.0, aspectRatio)
 		}
+		
+		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
 		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? Int(CGFloat(self.height) * aspectRatio)
 
 		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale) ?? 1.0
-
-		var shouldEnable_hr = false
-		if self.hr_scale > 1.0 {
-			shouldEnable_hr = true
-		}
-		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? shouldEnable_hr
+		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? (self.hr_scale > 1.0)
 
 		self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength) ?? 0.3
 		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps) ?? 10
@@ -157,27 +153,5 @@ extension SDcodablePayload {
 		}
 
 		return extendedPayload
-	}
-}
-
-extension SDcodablePayload {
-	public static func minimalPayload() -> Self? {
-		let minimalJSON =
-"""
-{
-"prompt" : "(the most beautiful photo), deep forest",
-"negative_prompt" : "(random painting)"
-}
-"""
-
-		var minimalPayload: Self? = nil
-		do {
-			minimalPayload = try JSONDecoder().decode(Self.self, from: minimalJSON.data(using: .utf8) ?? Data())
-		}
-		catch {	fxd_log()
-			fxdPrint(error)
-		}
-
-		return minimalPayload
 	}
 }

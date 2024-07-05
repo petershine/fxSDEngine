@@ -52,7 +52,6 @@ extension SDEngine {
 			// TODO: find better evaluation for NEWly started server
 			guard let folderPath = self.systemInfo?.Config?.outdir_samples else {
 				DispatchQueue.main.async {
-					self.generationPayload = SDcodablePayload.minimalPayload()
 					completionHandler?(error)
 				}
 				return
