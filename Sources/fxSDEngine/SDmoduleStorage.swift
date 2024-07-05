@@ -114,8 +114,8 @@ extension SDmoduleStorage {
 }
 
 
-fileprivate extension URL {
-	var jsonURL: URL {
+extension URL {
+	public var jsonURL: URL {
 		return self
 			.deletingPathExtension()
 			.appendingPathExtension(UTType.json.preferredFilenameExtension ?? UTType.json.identifier.components(separatedBy: ".").last ?? "json")
