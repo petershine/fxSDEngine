@@ -89,7 +89,13 @@ extension SDmoduleStorage {
 				do {
 					for imageURL in fileURLs {
 						try FileManager.default.removeItem(at: imageURL)
-						try FileManager.default.removeItem(at: imageURL.jsonURL)
+
+						do {
+							try FileManager.default.removeItem(at: imageURL.jsonURL)
+						}
+						catch {
+							// attempt with paired .jsonURL don't need to be caught
+						}
 
 						deletedCount = deletedCount + 1
 					}
