@@ -391,12 +391,6 @@ extension SDEngine {
 				}
 
 
-				let newImage = UIImage(data: pngDataArray.last!)
-
-				DispatchQueue.main.async {
-					self.displayedImage = newImage
-				}
-
 				Task {
 					let infotext = decodedResponse?.infotext() ?? ""
 					if !(infotext.isEmpty) {
@@ -415,8 +409,12 @@ extension SDEngine {
 					}
 
 
+					let newImage = UIImage(data: pngDataArray.last!)
+
 					DispatchQueue.main.async {
+						self.displayedImage = newImage
 						self.didStartGenerating = false
+						
 						completionHandler?(error)
 					}
 				}
