@@ -7,9 +7,9 @@ import UniformTypeIdentifiers
 
 
 open class SDStorage: NSObject {
-	public var latestImageURLs: [URL]? {
-		return FileManager.default.fileURLs(contentType: .png)
-	}
+	@Published open var latestImageURLs: [URL] = {
+		return FileManager.default.fileURLs(contentType: .png) ?? []
+	}()
 
 	public var latestJsonURLs: [URL]? {
 		return FileManager.default.fileURLs(contentType: .json)
