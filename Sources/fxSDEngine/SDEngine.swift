@@ -34,14 +34,14 @@ public protocol SDEngine: NSObject {
 	func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?)
 
 	var didStartGenerating: Bool { get set }
-	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
+	func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?)
 	func finish_txt2img(decodedResponse: SDcodableGenerated?, pngDataArray: [Data]) async
 
 	func execute_progress(quiet: Bool, completionHandler: ((_ error: Error?)->Void)?)
 	func continueRefreshing()
 	func interrupt(completionHandler: ((_ error: Error?)->Void)?)
 
-	@MainActor func generatingAsBackgroundTask()
+	@MainActor func generatingAsBackgroundTask(payload: SDcodablePayload?)
 }
 
 
@@ -363,13 +363,21 @@ extension SDEngine {
 }
 
 extension SDEngine {
-	public func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
+	public func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
 		self.didStartGenerating = true
-		let payload: Data? = generationPayload?.evaluatedPayload(sdEngine: self)
+
+		var receivedPayload = payload
+		var evaluatedPayload: Data? = payload?.encodedPayload()
+		
+		if receivedPayload == nil {
+			receivedPayload = generationPayload
+			evaluatedPayload = receivedPayload?.evaluatedPayload(sdEngine: self)
+		}
+
 		
 		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
-			payload: payload) {
+			payload: evaluatedPayload) {
 				(data, response, error) in
 
 				#if DEBUG
