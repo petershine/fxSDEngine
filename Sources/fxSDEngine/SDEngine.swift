@@ -36,7 +36,7 @@ public protocol SDEngine: NSObject {
 	var didStartGenerating: Bool { get set }
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
 
-	func execute_progress(skipImageDecoding: Bool, quiet: Bool, completionHandler: ((_ error: Error?)->Void)?)
+	func execute_progress(quiet: Bool, completionHandler: ((_ error: Error?)->Void)?)
 	func continueRefreshing()
 	func interrupt(completionHandler: ((_ error: Error?)->Void)?)
 
@@ -427,7 +427,6 @@ extension SDEngine {
 
 extension SDEngine {
 	public func execute_progress(
-		skipImageDecoding: Bool = false,
 		quiet: Bool = false,
 		completionHandler: ((_ error: Error?)->Void)?) {
 
@@ -457,7 +456,6 @@ extension SDEngine {
 		}
 
 		execute_progress(
-			skipImageDecoding: false,
 			quiet: true,
 			completionHandler: {
 				(error) in
