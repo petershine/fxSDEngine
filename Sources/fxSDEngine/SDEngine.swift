@@ -10,7 +10,7 @@ public protocol SDEngine: NSObject {
 	var networkingModule: SDNetworking { get set }
 
 	var systemInfo: SDcodableSysInfo? { get set }
-	var systemCheckpoints: [SDcodableModel]? { get set }
+	var systemCheckpoints: [SDcodableModel] { get set }
 	var generationPayload: SDcodablePayload? { get set }
 	var extensionADetailer: SDextensionADetailer? { get set }
 
@@ -118,9 +118,7 @@ extension SDEngine {
 				}
 				#endif
 				DispatchQueue.main.async {
-					if let decodedSystemCheckpoints = data?.decode(Array<SDcodableModel>.self) {
-						self.systemCheckpoints = decodedSystemCheckpoints
-					}
+					self.systemCheckpoints = data?.decode(Array<SDcodableModel>.self) ?? []
 					completionHandler?(error)
 				}
 			}
