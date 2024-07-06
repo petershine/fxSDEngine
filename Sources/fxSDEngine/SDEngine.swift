@@ -225,7 +225,7 @@ extension SDEngine {
 
 			Task {
 				let payloadData = obtainedPayload.encodedPayload()
-				let (_, _) = await SDmoduleStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
+				let (_, _) = await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
 
 				//TODO: save last ADetailer
 
@@ -422,7 +422,7 @@ extension SDEngine {
 		}
 
 
-		let storage = SDmoduleStorage()
+		let storage = SDStorage()
 		let payloadData = self.generationPayload?.encodedPayload()
 		for (index, pngData) in pngDataArray.enumerated() {
 			let (_, _) = await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)

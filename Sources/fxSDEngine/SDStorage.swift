@@ -6,7 +6,7 @@ import fXDKit
 import UniformTypeIdentifiers
 
 
-open class SDmoduleStorage: NSObject {
+open class SDStorage: NSObject {
 	public var latestImageURLs: [URL]? {
 		return FileManager.default.fileURLs(contentType: .png)
 	}
@@ -21,7 +21,7 @@ open class SDmoduleStorage: NSObject {
 	}
 }
 
-extension SDmoduleStorage {
+extension SDStorage {
 	fileprivate func newFileURL(index: Int, contentType: UTType) -> URL? {
 		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
 
@@ -59,7 +59,7 @@ extension SDmoduleStorage {
 	}
 }
 
-extension SDmoduleStorage {
+extension SDStorage {
 	public func deleteFileURLs(fileURLs: [URL], completionHandler: (() -> Void)?) {
 		guard fileURLs.count > 0 else {
 			completionHandler?()
