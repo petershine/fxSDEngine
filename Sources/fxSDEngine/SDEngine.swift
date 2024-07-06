@@ -33,7 +33,6 @@ public protocol SDEngine: NSObject {
 	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
 	func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?)
 
-	var didStartGenerating: Bool { get set }
 	func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?)
 	func finish_txt2img(decodedResponse: SDcodableGenerated?, pngDataArray: [Data]) async
 
@@ -362,8 +361,6 @@ extension SDEngine {
 
 extension SDEngine {
 	public func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
-		self.didStartGenerating = true
-
 		var receivedPayload = payload
 		var evaluatedPayload: Data? = payload?.encodedPayload()
 		
@@ -391,7 +388,6 @@ extension SDEngine {
 				let pngDataArray: [Data] = encodedImageArray?.map { Data(base64Encoded: $0 ?? "") ?? Data() } ?? []
 				guard pngDataArray.count > 0 else {
 					DispatchQueue.main.async {
-						self.didStartGenerating = false
 						completionHandler?(error)
 					}
 					return
@@ -402,7 +398,6 @@ extension SDEngine {
 					await self.finish_txt2img(decodedResponse: decodedResponse, pngDataArray: pngDataArray)
 
 					DispatchQueue.main.async {
-						self.didStartGenerating = false
 						completionHandler?(error)
 					}
 				}
@@ -431,7 +426,6 @@ extension SDEngine {
 
 		DispatchQueue.main.async {
 			self.displayedImage = newImage
-			self.didStartGenerating = false
 		}
 	}
 }
