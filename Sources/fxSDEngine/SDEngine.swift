@@ -35,6 +35,7 @@ public protocol SDEngine: NSObject {
 
 	var didStartGenerating: Bool { get set }
 	func execute_txt2img(completionHandler: ((_ error: Error?)->Void)?)
+	func finish_txt2img(decodedResponse: SDcodableGenerated?, pngDataArray: [Data]) async
 
 	func execute_progress(quiet: Bool, completionHandler: ((_ error: Error?)->Void)?)
 	func continueRefreshing()
@@ -392,33 +393,40 @@ extension SDEngine {
 
 
 				Task {
-					let infotext = decodedResponse?.infotext() ?? ""
-					if !(infotext.isEmpty) {
-						let extracted = self.extract_fromInfotext(infotext: infotext)
-						if let newlyGeneratedPayload = extracted.0 {
-							self.generationPayload = newlyGeneratedPayload
-							self.extensionADetailer = extracted.1
-						}
-					}
-
-
-					let storage = SDmoduleStorage()
-					let payloadData = self.generationPayload?.encodedPayload()
-					for (index, pngData) in pngDataArray.enumerated() {
-						let (_, _) = await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)
-					}
-
-
-					let newImage = UIImage(data: pngDataArray.last!)
+					await self.finish_txt2img(decodedResponse: decodedResponse, pngDataArray: pngDataArray)
 
 					DispatchQueue.main.async {
-						self.displayedImage = newImage
 						self.didStartGenerating = false
-						
 						completionHandler?(error)
 					}
 				}
 			}
+	}
+
+	public func finish_txt2img(decodedResponse: SDcodableGenerated?, pngDataArray: [Data]) async {
+		let infotext = decodedResponse?.infotext() ?? ""
+		if !(infotext.isEmpty) {
+			let extracted = self.extract_fromInfotext(infotext: infotext)
+			if let newlyGeneratedPayload = extracted.0 {
+				self.generationPayload = newlyGeneratedPayload
+				self.extensionADetailer = extracted.1
+			}
+		}
+
+
+		let storage = SDmoduleStorage()
+		let payloadData = self.generationPayload?.encodedPayload()
+		for (index, pngData) in pngDataArray.enumerated() {
+			let (_, _) = await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)
+		}
+
+
+		let newImage = UIImage(data: pngDataArray.last!)
+
+		DispatchQueue.main.async {
+			self.displayedImage = newImage
+			self.didStartGenerating = false
+		}
 	}
 }
 
