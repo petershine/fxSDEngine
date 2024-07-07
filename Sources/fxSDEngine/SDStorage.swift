@@ -33,7 +33,7 @@ extension SDStorage {
 		return fileURL
 	}
 
-	func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async -> (imageURL: URL?, payloadURL: URL?) {
+	public func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async -> (imageURL: URL?, payloadURL: URL?) {
 		guard let imageURL = newFileURL(index: index, contentType: UTType.png) else {
 			return (nil, nil)
 		}

@@ -401,31 +401,6 @@ extension SDEngine {
 				}
 			}
 	}
-
-	public func finish_txt2img(decodedResponse: SDcodableGenerated?, pngDataArray: [Data]) async {
-		let infotext = decodedResponse?.infotext() ?? ""
-		if !(infotext.isEmpty) {
-			let extracted = self.extract_fromInfotext(infotext: infotext)
-			if let newlyGeneratedPayload = extracted.0 {
-				self.generationPayload = newlyGeneratedPayload
-				self.extensionADetailer = extracted.1
-			}
-		}
-
-
-		let storage = SDStorage()
-		let payloadData = self.generationPayload?.encodedPayload()
-		for (index, pngData) in pngDataArray.enumerated() {
-			let (_, _) = await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)
-		}
-
-
-		let newImage = UIImage(data: pngDataArray.last!)
-
-		DispatchQueue.main.async {
-			self.displayedImage = newImage
-		}
-	}
 }
 
 
