@@ -219,7 +219,7 @@ extension SDEngine {
 
 
 			Task {
-				let payloadData = obtainedPayload.encodedPayload()
+				let payloadData = obtainedPayload.encoded()
 				let (_, _) = await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
 
 				//TODO: save last ADetailer
@@ -360,7 +360,7 @@ extension SDEngine {
 extension SDEngine {
 	public func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
 		var receivedPayload = payload
-		var evaluatedPayload: Data? = payload?.encodedPayload()
+		var evaluatedPayload: Data? = payload?.encoded()
 		
 		if receivedPayload == nil {
 			receivedPayload = generationPayload

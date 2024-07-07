@@ -88,26 +88,12 @@ public struct SDcodablePayload: Codable {
 	}
 }
 
-extension SDcodablePayload {
-	public func encodedPayload() -> Data? {
-		var payload: Data? = nil
-		do {
-			payload = try JSONEncoder().encode(self)
-		}
-		catch {	fxd_log()
-			fxdPrint(error)
-		}
-
-		return payload
-	}
-}
-
 
 extension SDcodablePayload {
 	mutating func evaluatedPayload(sdEngine: SDEngine) -> Data? {
 		self.seed = sdEngine.use_lastSeed ? self.seed : -1
 
-		guard let payload: Data = encodedPayload() else {
+		guard let payload: Data = encoded() else {
 			return nil
 		}
 
