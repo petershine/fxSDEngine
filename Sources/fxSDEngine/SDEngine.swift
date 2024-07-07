@@ -420,8 +420,12 @@ extension SDEngine {
 
 				
 				DispatchQueue.main.async {
-					self.isSystemBusy = self.progressObservable?.state?.isJobRunning ?? false
 					self.currentProgress = data?.decode(SDcodableProgress.self)
+
+					let isJobRunning = self.currentProgress?.state?.isJobRunning ?? false
+					if self.isSystemBusy != isJobRunning {
+						self.isSystemBusy = isJobRunning
+					}
 
 					completionHandler?(error)
 				}
