@@ -18,7 +18,7 @@ public protocol SDEngine: NSObject {
 	var use_adetailer: Bool { get set }
 	var isEnabledAdetailer: Bool { get set }
 
-	var progressObservable: SDcodableProgress? { get set }
+	var currentProgress: SDcodableProgress? { get set }
 	var isSystemBusy: Bool { get set }
 
 	var displayedImage: UIImage? { get set }
@@ -420,8 +420,8 @@ extension SDEngine {
 
 				
 				DispatchQueue.main.async {
-					self.progressObservable = data?.decode(SDcodableProgress.self)
 					self.isSystemBusy = self.progressObservable?.state?.isJobRunning ?? false
+					self.currentProgress = data?.decode(SDcodableProgress.self)
 
 					completionHandler?(error)
 				}
