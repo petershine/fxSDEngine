@@ -34,7 +34,7 @@ public protocol SDEngine: NSObject {
 	func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?)
 
 	func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?)
-	func finish_txt2img(decodedResponse: SDcodableGenerated?, pngDataArray: [Data]) async
+	func finish_txt2img(decodedResponse: SDcodableGenerated?, pngDataArray: [Data], completionHandler: ((_ newImage: UIImage?)->Void)?) async
 
 	func execute_progress(quiet: Bool, completionHandler: ((_ error: Error?)->Void)?)
 	func continueRefreshing()
@@ -393,11 +393,16 @@ extension SDEngine {
 
 
 				Task {
-					await self.finish_txt2img(decodedResponse: decodedResponse, pngDataArray: pngDataArray)
+					await self.finish_txt2img(
+						decodedResponse: decodedResponse,
+						pngDataArray: pngDataArray) { 
+							newImage in
 
-					DispatchQueue.main.async {
-						completionHandler?(error)
-					}
+							DispatchQueue.main.async {
+								self.displayedImage = newImage
+								completionHandler?(error)
+							}
+						}
 				}
 			}
 	}
