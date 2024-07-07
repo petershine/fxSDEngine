@@ -360,18 +360,16 @@ extension SDEngine {
 
 extension SDEngine {
 	public func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
-		var passedPayload = payload
-		var evaluatedPayload: Data? = payload?.encoded()
-		
-		if passedPayload == nil {
-			passedPayload = generationPayload
-			evaluatedPayload = passedPayload?.evaluatedPayload(sdEngine: self)
+		var payloadData: Data? = payload.encoded()
+
+		if payloadData == nil {
+			payloadData = generationPayload?.evaluatedPayload(sdEngine: self)
 		}
 
 		
 		networkingModule.requestToSDServer(
 			api_endpoint: .SDAPI_V1_TXT2IMG,
-			payload: evaluatedPayload) {
+			payload: payloadData) {
 				(data, response, error) in
 
 				#if DEBUG
