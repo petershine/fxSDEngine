@@ -34,7 +34,7 @@ public protocol SDEngine: NSObject {
 	func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?)
 
 	func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?)
-	func finish_txt2img(decodedResponse: SDcodableGenerated?, pngDataArray: [Data], completionHandler: ((_ newImage: UIImage?)->Void)?) async
+	func finish_txt2img(decodedResponse: SDcodableGenerated?, encodedImageArray: [String?], completionHandler: ((_ newImage: UIImage?)->Void)?) async
 
 	func execute_progress(quiet: Bool, completionHandler: ((_ error: Error?)->Void)?)
 	func continueRefreshing()
@@ -359,12 +359,12 @@ extension SDEngine {
 
 extension SDEngine {
 	public func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
-		var receivedPayload = payload
+		var passedPayload = payload
 		var evaluatedPayload: Data? = payload?.encoded()
 		
-		if receivedPayload == nil {
-			receivedPayload = generationPayload
-			evaluatedPayload = receivedPayload?.evaluatedPayload(sdEngine: self)
+		if passedPayload == nil {
+			passedPayload = generationPayload
+			evaluatedPayload = passedPayload?.evaluatedPayload(sdEngine: self)
 		}
 
 		
@@ -382,9 +382,8 @@ extension SDEngine {
 
 
 				let decodedResponse = data?.decode(SDcodableGenerated.self)
-				let encodedImageArray = decodedResponse?.images
-				let pngDataArray: [Data] = encodedImageArray?.map { Data(base64Encoded: $0 ?? "") ?? Data() } ?? []
-				guard pngDataArray.count > 0 else {
+				let encodedImageArray = decodedResponse?.images ?? []
+				guard encodedImageArray.count > 0 else {
 					DispatchQueue.main.async {
 						completionHandler?(error)
 					}
@@ -395,7 +394,7 @@ extension SDEngine {
 				Task {
 					await self.finish_txt2img(
 						decodedResponse: decodedResponse,
-						pngDataArray: pngDataArray) { 
+						encodedImageArray: encodedImageArray) {
 							newImage in
 
 							DispatchQueue.main.async {
