@@ -12,8 +12,8 @@ public struct SDcodablePayload: Codable {
 
 	public var steps: Int
 	public var cfg_scale: Double
-	var sampler_name: String
-	var scheduler: String
+	public var sampler_name: String
+	public var scheduler: String
 
 	public var model_hash: String?
 
