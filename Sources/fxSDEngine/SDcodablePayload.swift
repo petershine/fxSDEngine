@@ -15,6 +15,8 @@ public struct SDcodablePayload: Codable {
 	var sampler_name: String
 	var scheduler: String
 
+	public var model_hash: String?
+
 	public var width: Int
 	public var height: Int
 
@@ -38,6 +40,7 @@ public struct SDcodablePayload: Codable {
 	var do_not_save_samples: Bool
 	var do_not_save_grid: Bool
 
+
 	var override_settings_restore_afterwards: Bool = true
 	var override_settings: SDcodableOverride?
 	struct SDcodableOverride: Codable {
@@ -55,6 +58,8 @@ public struct SDcodablePayload: Codable {
 		self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 7.0
 		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "DPM++ 2M SDE"
 		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Karras"
+
+		self.model_hash = try container.decodeIfPresent(String.self, forKey: .model_hash)
 
 
 		var aspectRatio = UIScreen.main.nativeBounds.size.width/UIScreen.main.nativeBounds.size.height

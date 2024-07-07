@@ -302,6 +302,8 @@ extension SDEngine {
 			("hr_scale", "hires upscale"),
 			("hr_second_pass_steps", "hires steps"),
 			("hr_upscaler", "hires upscaler"),
+
+			("model hash", "model_hash"),
 		]
 
 		for (key, replacedKey) in replacingKeyPairs {
