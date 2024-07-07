@@ -33,6 +33,7 @@ public protocol SDEngine: NSObject {
 	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
 	func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?)
 
+	func action_Generate(payload: SDcodablePayload?)
 	func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?)
 	func finish_txt2img(decodedResponse: SDcodableGenerated?, encodedImageArray: [String?], completionHandler: ((_ newImage: UIImage?)->Void)?) async
 
