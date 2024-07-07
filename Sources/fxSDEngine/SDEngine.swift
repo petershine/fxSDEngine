@@ -360,9 +360,9 @@ extension SDEngine {
 
 extension SDEngine {
 	public func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?) {	fxd_log()
-		var payloadData: Data? = payload.encoded()
+		var payloadData: Data? = payload?.encoded()
 
-		if payloadData == nil {
+		if payload == nil || payloadData == nil {
 			payloadData = generationPayload?.evaluatedPayload(sdEngine: self)
 		}
 
