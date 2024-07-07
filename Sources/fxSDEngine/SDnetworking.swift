@@ -142,7 +142,12 @@ class SDError: NSError, @unchecked Sendable {
 		var errorFailureReason = (error as? NSError)?.localizedFailureReason ?? assumedFailureReason
 		errorFailureReason += "\n\(jsonDictionary?["errors"] as? String ?? "")"
 		
-		let receivedMSG = "\n\(jsonDictionary?["msg"] as? String ?? "")"
+		var receivedMSG = "\n\(jsonDictionary?["msg"] as? String ?? "")"
+		if receivedMSG.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+			if let detail = jsonDictionary?["detail"] as? Array<Dictionary<String, Any>> {
+				receivedMSG = "\n\(detail.first?["msg"] as? String ?? "")"
+			}
+		}
 		if receivedMSG != errorFailureReason {
 			errorFailureReason += receivedMSG
 		}
