@@ -452,7 +452,6 @@ extension SDEngine {
 	public func continueRefreshing() {
 		if UIApplication.shared.applicationState == .background {
 			fxdPrint("UIApplication.shared.backgroundTimeRemaining: \(UIApplication.shared.backgroundTimeRemaining)")
-			fxdPrint("self?.networkingTaskIdentifier: ", self.networkingModule.networkingTaskIdentifier)
 			DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
 				self.continueRefreshing()
 			}
