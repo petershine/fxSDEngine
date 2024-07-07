@@ -105,13 +105,11 @@ extension SDStorage {
 					deletingError = error
 				}
 
-				DispatchQueue.main.async {
-					if deletedCount == originalCount {
-						UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images", message: nil)
-					}
-					else {
-						UIAlertController.errorAlert(error: deletingError)
-					}
+				if deletedCount == originalCount {
+					UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images", message: nil)
+				}
+				else {
+					UIAlertController.errorAlert(error: deletingError)
 				}
 
 				completionHandler?()

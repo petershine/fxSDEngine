@@ -39,8 +39,6 @@ public protocol SDEngine: NSObject {
 	func execute_progress(quiet: Bool, completionHandler: ((_ error: Error?)->Void)?)
 	func continueRefreshing()
 	func interrupt(completionHandler: ((_ error: Error?)->Void)?)
-
-	@MainActor func generatingAsBackgroundTask(payload: SDcodablePayload?)
 }
 
 
