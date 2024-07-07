@@ -303,7 +303,7 @@ extension SDEngine {
 			("hr_second_pass_steps", "hires steps"),
 			("hr_upscaler", "hires upscaler"),
 
-			("model hash", "model_hash"),
+			("model_hash", "model hash"),
 		]
 
 		for (key, replacedKey) in replacingKeyPairs {
