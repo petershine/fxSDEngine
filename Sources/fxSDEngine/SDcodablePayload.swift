@@ -40,10 +40,10 @@ public struct SDcodablePayload: Codable {
 	var do_not_save_grid: Bool
 
 
-	// optionally or externally assigned
-	public var model_hash: String?
-	public var use_lastSeed: Bool?
-	public var use_adetailer: Bool?
+	// externally editable
+	public var model_hash: String
+	public var use_lastSeed: Bool
+	public var use_adetailer: Bool
 
 	var override_settings_restore_afterwards: Bool = true
 	var override_settings: SDcodableOverride?
@@ -95,7 +95,9 @@ public struct SDcodablePayload: Codable {
 
 
 		// optionally or externally assigned
-		self.model_hash = try container.decodeIfPresent(String.self, forKey: .model_hash)
+		self.model_hash = try container.decodeIfPresent(String.self, forKey: .model_hash) ?? ""
+		self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed) ?? false
+		self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer) ?? false
 	}
 }
 
@@ -120,14 +122,14 @@ extension SDcodablePayload {
 		}
 		
 
-		if !(self.use_lastSeed ?? false) {
+		if !(self.use_lastSeed) {
 			payloadDictionary?["seed"] = -1
 		}
 
 
 		var alwayson_scripts: Dictionary<String, Any?> = [:]
 		if sdEngine.isEnabledAdetailer,
-		   (self.use_adetailer ?? false) {
+		   (self.use_adetailer) {
 			if sdEngine.extensionADetailer == nil {
 				do {
 					sdEngine.extensionADetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data())
