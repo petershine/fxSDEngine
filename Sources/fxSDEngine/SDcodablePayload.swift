@@ -101,9 +101,7 @@ public struct SDcodablePayload: Codable {
 
 
 extension SDcodablePayload {
-	mutating func extendedPayload(sdEngine: SDEngine) -> Data? {
-		self.seed = (self.use_lastSeed ?? false) ? self.seed : -1
-
+	func extendedPayload(sdEngine: SDEngine) -> Data? {
 		guard let payload: Data = encoded() else {
 			return nil
 		}
@@ -121,6 +119,11 @@ extension SDcodablePayload {
 			return nil
 		}
 		
+
+		if !(self.use_lastSeed ?? false) {
+			payloadDictionary?["seed"] = -1
+		}
+
 
 		var alwayson_scripts: Dictionary<String, Any?> = [:]
 		if sdEngine.isEnabledAdetailer,
