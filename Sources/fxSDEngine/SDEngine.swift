@@ -361,7 +361,7 @@ extension SDEngine {
 		var payloadData: Data? = payload?.encoded()
 
 		if payload == nil || payloadData == nil {
-			payloadData = generationPayload?.evaluatedPayload(sdEngine: self)
+			payloadData = generationPayload?.extendedPayload(sdEngine: self)
 		}
 
 		

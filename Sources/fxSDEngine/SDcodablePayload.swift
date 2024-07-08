@@ -102,7 +102,7 @@ public struct SDcodablePayload: Codable {
 
 
 extension SDcodablePayload {
-	mutating func evaluatedPayload(sdEngine: SDEngine) -> Data? {
+	mutating func extendedPayload(sdEngine: SDEngine) -> Data? {
 		self.seed = (self.use_lastSeed ?? false) ? self.seed : -1
 
 		guard let payload: Data = encoded() else {
