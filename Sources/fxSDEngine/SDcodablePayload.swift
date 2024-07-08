@@ -109,49 +109,49 @@ extension SDcodablePayload {
 		}
 
 
-		var payloadDictionary: Dictionary<String, Any?>? = nil
+		var extendedDictionary: Dictionary<String, Any?>? = nil
 		do {
-			payloadDictionary = try JSONSerialization.jsonObject(with: payload) as? Dictionary<String, Any?>
+			extendedDictionary = try JSONSerialization.jsonObject(with: payload) as? Dictionary<String, Any?>
 		}
 		catch {	fxd_log()
 			fxdPrint(error)
 		}
 
-		guard payloadDictionary != nil else {
+		guard extendedDictionary != nil else {
 			return nil
 		}
 		
 
-		if !(self.use_lastSeed) {
-			payloadDictionary?["seed"] = -1
+		if !self.use_lastSeed {
+			extendedDictionary?["seed"] = -1
 		}
 
-
-		var alwayson_scripts: Dictionary<String, Any?> = [:]
-		if sdEngine.isEnabledAdetailer,
-		   (self.use_adetailer) {
-			if sdEngine.extensionADetailer == nil {
-				do {
-					sdEngine.extensionADetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data())
+		if self.use_adetailer {
+			var alwayson_scripts: Dictionary<String, Any?> = [:]
+			if sdEngine.isEnabledAdetailer {
+				if sdEngine.extensionADetailer == nil {
+					do {
+						sdEngine.extensionADetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data())
+					}
+					catch {	fxd_log()
+						fxdPrint(error)
+					}
 				}
-				catch {	fxd_log()
-					fxdPrint(error)
-				}
+				alwayson_scripts[SDExtensionName.adetailer.rawValue] = sdEngine.extensionADetailer?.args
 			}
-			alwayson_scripts[SDExtensionName.adetailer.rawValue] = sdEngine.extensionADetailer?.args
+
+			if alwayson_scripts.count > 0 {
+				extendedDictionary?["alwayson_scripts"] = alwayson_scripts
+			}
 		}
+
 
 		var extendedPayload: Data = payload
-
-		if alwayson_scripts.count > 0 {
-			payloadDictionary?["alwayson_scripts"] = alwayson_scripts
-
-			do {
-				extendedPayload = try JSONSerialization.data(withJSONObject: payloadDictionary!)
-			}
-			catch {	fxd_log()
-				fxdPrint(error)
-			}
+		do {
+			extendedPayload = try JSONSerialization.data(withJSONObject: extendedDictionary!)
+		}
+		catch {	fxd_log()
+			fxdPrint(error)
 		}
 
 		return extendedPayload
