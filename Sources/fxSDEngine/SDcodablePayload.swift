@@ -40,16 +40,16 @@ public struct SDcodablePayload: Codable {
 	var do_not_save_grid: Bool
 
 
+	// optionally or externally assigned
+	public var model_hash: String?
+	public var use_lastSeed: Bool?
+	public var use_adetailer: Bool?
+
 	var override_settings_restore_afterwards: Bool = true
 	var override_settings: SDcodableOverride?
 	struct SDcodableOverride: Codable {
 		var sd_model_checkpoint: String?
 	}
-
-	// optionally or externally assigned
-	public var model_hash: String?
-	public var use_lastSeed: Bool?
-	public var use_adetailer: Bool?
 
 
 	public init(from decoder: any Decoder) throws {
@@ -94,9 +94,8 @@ public struct SDcodablePayload: Codable {
 		self.do_not_save_grid = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_grid) ?? false
 
 
+		// optionally or externally assigned
 		self.model_hash = try container.decodeIfPresent(String.self, forKey: .model_hash)
-		self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed)
-		self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer)
 	}
 }
 
