@@ -33,7 +33,7 @@ public protocol SDEngine: NSObject {
 
 	func action_Generate(payload: SDcodablePayload?)
 	func execute_txt2img(payload: SDcodablePayload?, completionHandler: ((_ error: Error?)->Void)?)
-	func finish_txt2img(decodedResponse: SDcodableGenerated?, encodedImageArray: [String?], completionHandler: ((_ newImage: UIImage?)->Void)?) async
+	func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?], completionHandler: ((_ newImage: UIImage?)->Void)?) async
 
 	func execute_progress(quiet: Bool, completionHandler: ((_ error: Error?)->Void)?)
 	func continueRefreshing()
@@ -378,9 +378,9 @@ extension SDEngine {
 				#endif
 
 
-				let decodedResponse = data?.decode(SDcodableGenerated.self)
-				let encodedImageArray = decodedResponse?.images ?? []
-				guard encodedImageArray.count > 0 else {
+				let generated = data?.decode(SDcodableGenerated.self)
+				let encodedImages = generated?.images ?? []
+				guard encodedImages.count > 0 else {
 					DispatchQueue.main.async {
 						completionHandler?(error)
 					}
@@ -390,8 +390,8 @@ extension SDEngine {
 
 				Task {
 					await self.finish_txt2img(
-						decodedResponse: decodedResponse,
-						encodedImageArray: encodedImageArray) {
+						generated: generated,
+						encodedImages: encodedImages) {
 							newImage in
 
 							DispatchQueue.main.async {
