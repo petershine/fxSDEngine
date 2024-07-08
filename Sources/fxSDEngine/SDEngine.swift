@@ -11,8 +11,8 @@ public protocol SDEngine: NSObject {
 
 	var systemInfo: SDcodableSysInfo? { get set }
 	var systemCheckpoints: [SDcodableModel] { get set }
-	var generationPayload: SDcodablePayload? { get set }
 	var extensionADetailer: SDextensionADetailer? { get set }
+	var generationPayload: SDcodablePayload? { get set }
 
 	var use_lastSeed: Bool { get set }
 	var use_adetailer: Bool { get set }
