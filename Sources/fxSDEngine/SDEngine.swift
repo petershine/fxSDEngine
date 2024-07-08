@@ -12,11 +12,9 @@ public protocol SDEngine: NSObject {
 	var systemInfo: SDcodableSysInfo? { get set }
 	var systemCheckpoints: [SDcodableModel] { get set }
 	var extensionADetailer: SDextensionADetailer? { get set }
-	var generationPayload: SDcodablePayload? { get set }
-
-	var use_lastSeed: Bool { get set }
-	var use_adetailer: Bool { get set }
 	var isEnabledAdetailer: Bool { get set }
+	
+	var generationPayload: SDcodablePayload? { get set }
 
 	var currentProgress: SDcodableProgress? { get set }
 	var isSystemBusy: Bool { get set }
@@ -223,15 +221,13 @@ extension SDEngine {
 				let payloadData = obtainedPayload.encoded()
 				let (_, _) = await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
 
-				//TODO: save last ADetailer
+				//TODO: save last ADetailer, assign use_adetailer
 
 
 				DispatchQueue.main.async {
 					fxd_log()
 					self.generationPayload = obtainedPayload
 					self.extensionADetailer = extracted.1
-
-					self.use_adetailer = (self.isEnabledAdetailer && self.extensionADetailer != nil)
 
 					completionHandler?(error)
 				}

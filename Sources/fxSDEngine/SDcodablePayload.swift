@@ -15,7 +15,6 @@ public struct SDcodablePayload: Codable {
 	public var sampler_name: String
 	public var scheduler: String
 
-	public var model_hash: String?
 
 	public var width: Int
 	public var height: Int
@@ -47,6 +46,11 @@ public struct SDcodablePayload: Codable {
 		var sd_model_checkpoint: String?
 	}
 
+	// optionally or externally assigned
+	public var model_hash: String?
+	public var use_lastSeed: Bool?
+	public var use_adetailer: Bool?
+
 
 	public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -58,8 +62,6 @@ public struct SDcodablePayload: Codable {
 		self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 7.0
 		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "DPM++ 2M SDE"
 		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Karras"
-
-		self.model_hash = try container.decodeIfPresent(String.self, forKey: .model_hash)
 
 
 		var aspectRatio = UIScreen.main.nativeBounds.size.width/UIScreen.main.nativeBounds.size.height
@@ -90,13 +92,18 @@ public struct SDcodablePayload: Codable {
 
 		self.do_not_save_samples = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_samples) ?? false
 		self.do_not_save_grid = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_grid) ?? false
+
+
+		self.model_hash = try container.decodeIfPresent(String.self, forKey: .model_hash)
+		self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed)
+		self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer)
 	}
 }
 
 
 extension SDcodablePayload {
 	mutating func evaluatedPayload(sdEngine: SDEngine) -> Data? {
-		self.seed = sdEngine.use_lastSeed ? self.seed : -1
+		self.seed = (self.use_lastSeed ?? false) ? self.seed : -1
 
 		guard let payload: Data = encoded() else {
 			return nil
@@ -118,7 +125,7 @@ extension SDcodablePayload {
 
 		var alwayson_scripts: Dictionary<String, Any?> = [:]
 		if sdEngine.isEnabledAdetailer,
-		   sdEngine.use_adetailer {
+		   (self.use_adetailer ?? false) {
 			if sdEngine.extensionADetailer == nil {
 				do {
 					sdEngine.extensionADetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data())
