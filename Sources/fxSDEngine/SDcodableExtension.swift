@@ -153,3 +153,40 @@ extension SDextensionADetailer {
 		return args
 	}
 }
+
+extension SDextensionADetailer {
+	static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
+
+		var extractedDictionary: [String:Any?] = [:]
+		let extractingKeyPairs_adetailer = [
+			("ad_confidence", "adetailer confidence"),
+			("ad_denoising_strength", "adetailer denoising strength"),
+			("ad_dilate_erode", "adetailer dilate erode"),
+			("ad_inpaint_only_masked", "adetailer inpaint only masked"),
+			("ad_inpaint_only_masked_padding", "adetailer inpaint padding"),
+			("ad_mask_blur", "adetailer mask blur"),
+			("ad_mask_k_largest", "adetailer mask only top k largest"),
+			("ad_model", "adetailer model"),
+		]
+		for (key, extractedKey) in extractingKeyPairs_adetailer {
+			extractedDictionary[key] = jsonDictionary[extractedKey]
+			jsonDictionary[extractedKey] = nil
+		}
+
+		fxdPrint(name: "extractedDictionary", dictionary: extractedDictionary)
+
+		var decoded: Self? = nil
+		if extractedDictionary.count > 0 {
+			do {
+				let adetailerData = try JSONSerialization.data(withJSONObject: extractedDictionary)
+				decoded = try JSONDecoder().decode(Self.self, from: adetailerData)
+				fxdPrint(decoded!)
+			}
+			catch {
+				fxdPrint(error)
+			}
+		}
+
+		return decoded
+	}
+}

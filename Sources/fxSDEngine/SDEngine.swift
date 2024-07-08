@@ -283,74 +283,12 @@ extension SDEngine {
 		payloadDictionary["prompt"] = prompt
 		payloadDictionary["negative_prompt"] = negative_prompt
 
-		if let sizeComponents = (payloadDictionary["size"] as? String)?.components(separatedBy: "x"),
-		   sizeComponents.count == 2 {
-			payloadDictionary["width"] = Int(sizeComponents.first ?? "504")
-			payloadDictionary["height"] = Int(sizeComponents.last ?? "768")
-		}
-
-		let replacingKeyPairs = [
-			("sampler_name", "sampler"),
-			("scheduler", "schedule type"),
-			("cfg_scale", "cfg scale"),
-
-			("denoising_strength", "denoising strength"),
-			("hr_scale", "hires upscale"),
-			("hr_second_pass_steps", "hires steps"),
-			("hr_upscaler", "hires upscaler"),
-
-			("model_hash", "model hash"),
-		]
-
-		for (key, replacedKey) in replacingKeyPairs {
-			payloadDictionary[key] = payloadDictionary[replacedKey]
-			payloadDictionary[replacedKey] = nil
-		}
-
-
-		var adetailerDictionary: [String:Any?] = [:]
-		let extractingKeyPairs_adetailer = [
-			("ad_confidence", "adetailer confidence"),
-			("ad_denoising_strength", "adetailer denoising strength"),
-			("ad_dilate_erode", "adetailer dilate erode"),
-			("ad_inpaint_only_masked", "adetailer inpaint only masked"),
-			("ad_inpaint_only_masked_padding", "adetailer inpaint padding"),
-			("ad_mask_blur", "adetailer mask blur"),
-			("ad_mask_k_largest", "adetailer mask only top k largest"),
-			("ad_model", "adetailer model"),
-		]
-		for (key, extractedKey) in extractingKeyPairs_adetailer {
-			adetailerDictionary[key] = payloadDictionary[extractedKey]
-			payloadDictionary[extractedKey] = nil
-		}
-
 
 		fxd_log()
 		fxdPrint("[infotext]", infotext)
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
-		fxdPrint(name: "adetailerDictionary", dictionary: adetailerDictionary)
-
-		var decodedPayload: SDcodablePayload? = nil
-		do {
-			let payloadData = try JSONSerialization.data(withJSONObject: payloadDictionary)
-			decodedPayload = try JSONDecoder().decode(SDcodablePayload.self, from: payloadData)
-			fxdPrint(decodedPayload!)
-		}
-		catch {
-			fxdPrint(error)
-		}
-
-		var decodedADetailer: SDextensionADetailer? = nil
-		if adetailerDictionary.count > 0 {
-			do {
-				let adetailerData = try JSONSerialization.data(withJSONObject: adetailerDictionary)
-				decodedADetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: adetailerData)
-				fxdPrint(decodedADetailer!)
-			}
-			catch {
-				fxdPrint(error)
-			}
-		}
+		let decodedPayload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
+		let decodedADetailer: SDextensionADetailer? = SDextensionADetailer.decoded(using: &payloadDictionary)
 
 		return (decodedPayload, decodedADetailer)
 	}

@@ -155,3 +155,45 @@ extension SDcodablePayload {
 		return extendedPayload
 	}
 }
+
+extension SDcodablePayload {
+	static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
+
+		if let sizeComponents = (jsonDictionary["size"] as? String)?.components(separatedBy: "x"),
+		   sizeComponents.count == 2 {
+			jsonDictionary["width"] = Int(sizeComponents.first ?? "504")
+			jsonDictionary["height"] = Int(sizeComponents.last ?? "768")
+		}
+
+		let replacingKeyPairs = [
+			("sampler_name", "sampler"),
+			("scheduler", "schedule type"),
+			("cfg_scale", "cfg scale"),
+
+			("denoising_strength", "denoising strength"),
+			("hr_scale", "hires upscale"),
+			("hr_second_pass_steps", "hires steps"),
+			("hr_upscaler", "hires upscaler"),
+
+			("model_hash", "model hash"),
+		]
+
+		for (key, replacedKey) in replacingKeyPairs {
+			jsonDictionary[key] = jsonDictionary[replacedKey]
+			jsonDictionary[replacedKey] = nil
+		}
+
+
+		var decoded: Self? = nil
+		do {
+			let payloadData = try JSONSerialization.data(withJSONObject: jsonDictionary)
+			decoded = try JSONDecoder().decode(Self.self, from: payloadData)
+			fxdPrint(decoded!)
+		}
+		catch {
+			fxdPrint(error)
+		}
+
+		return decoded
+	}
+}
