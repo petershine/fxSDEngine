@@ -126,19 +126,20 @@ extension SDcodablePayload {
 			extendedDictionary?["seed"] = -1
 		}
 
-		if self.use_adetailer {
-			var alwayson_scripts: Dictionary<String, Any?> = [:]
-			if sdEngine.isEnabledAdetailer {
-				if sdEngine.extensionADetailer == nil {
-					do {
-						sdEngine.extensionADetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data())
-					}
-					catch {	fxd_log()
-						fxdPrint(error)
-					}
+		if self.use_adetailer,
+		   sdEngine.isEnabledAdetailer {
+
+			if sdEngine.extensionADetailer == nil {
+				do {
+					sdEngine.extensionADetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data())
 				}
-				alwayson_scripts[SDExtensionName.adetailer.rawValue] = sdEngine.extensionADetailer?.args
+				catch {	fxd_log()
+					fxdPrint(error)
+				}
 			}
+
+			var alwayson_scripts: Dictionary<String, Any?> = [:]
+			alwayson_scripts[SDExtensionName.adetailer.rawValue] = sdEngine.extensionADetailer?.args
 
 			if alwayson_scripts.count > 0 {
 				extendedDictionary?["alwayson_scripts"] = alwayson_scripts
