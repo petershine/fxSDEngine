@@ -94,7 +94,7 @@ public struct SDcodablePayload: Codable {
 		self.do_not_save_grid = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_grid) ?? false
 
 
-		// optionally or externally assigned
+		// externally editable
 		self.model_hash = try container.decodeIfPresent(String.self, forKey: .model_hash) ?? ""
 		self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed) ?? false
 		self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer) ?? false
@@ -145,6 +145,12 @@ extension SDcodablePayload {
 				extendedDictionary?["alwayson_scripts"] = alwayson_scripts
 			}
 		}
+
+
+		// clean unnecessary keys
+		extendedDictionary?["model_hash"] = nil
+		extendedDictionary?["use_lastSeed"] = nil
+		extendedDictionary?["use_adetailer"] = nil
 
 
 		var extendedPayload: Data = payload
