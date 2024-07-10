@@ -274,7 +274,7 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 				DispatchQueue.main.async {
 					fxd_log()
 					self.generationPayload = obtainedPayload
-					self.extensionADetailer = extracted.1
+//					self.extensionADetailer = extracted.1
 					completionHandler?(error)
 				}
 			}
@@ -405,7 +405,7 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 		let infotext = generated?.infotext() ?? ""
 		let extracted = self.extract_fromInfotext(infotext: infotext)
-		self.extensionADetailer = extracted.1
+//		self.extensionADetailer = extracted.1
 
 
 		let newImage = UIImage(data: pngDataArray.last!)
