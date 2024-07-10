@@ -25,8 +25,11 @@ public protocol SDEngine: NSObjectProtocol {
 	var displayedImage: UIImage? { get set }
 
 
+	func action_Synchronize()
 	func synchronize_withSystem(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 	func refresh_systemInfo(completionHandler: (@Sendable (_ error: Error?)->Void)?)
+
+	func action_ChangeCheckpoint(_ checkpoint: SDcodableModel)
 	func refresh_systemCheckpoints(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 	func change_systemCheckpoints(checkpoint: SDcodableModel, completionHandler: (@Sendable (_ error: Error?)->Void)?)
 

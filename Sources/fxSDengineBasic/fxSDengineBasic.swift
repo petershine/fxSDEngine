@@ -5,7 +5,7 @@ import UIKit
 import fXDKit
 
 
-open class fxSDBasicEngine: NSObject, ObservableObject, @preconcurrency SDEngine, @unchecked Sendable {
+open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine, @unchecked Sendable {
 
 	open var networkingModule: SDNetworking
 
@@ -36,6 +36,18 @@ open class fxSDBasicEngine: NSObject, ObservableObject, @preconcurrency SDEngine
 
 	@Published open var displayedImage: UIImage? = nil
 
+
+	open func action_Synchronize() {
+		self.synchronize_withSystem {
+			(error) in
+
+			self.refresh_systemCheckpoints(completionHandler: nil)
+
+			DispatchQueue.main.async {
+				UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
+			}
+		}
+	}
 
 	public func synchronize_withSystem(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
 		refresh_systemInfo {
@@ -97,6 +109,29 @@ open class fxSDBasicEngine: NSObject, ObservableObject, @preconcurrency SDEngine
 					completionHandler?(error)
 				}
 			}
+	}
+
+
+	open func action_ChangeCheckpoint(_ checkpoint: SDcodableModel) {
+		self.change_systemCheckpoints(checkpoint: checkpoint) {
+			error in
+
+			guard error == nil else {
+				DispatchQueue.main.async {
+					UIAlertController.errorAlert(error: error)
+				}
+				return
+			}
+
+
+			self.refresh_systemInfo {
+				(error) in
+
+				DispatchQueue.main.async {
+					UIAlertController.errorAlert(error: error)
+				}
+			}
+		}
 	}
 
 	public func refresh_systemCheckpoints(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
@@ -288,21 +323,12 @@ open class fxSDBasicEngine: NSObject, ObservableObject, @preconcurrency SDEngine
 	}
 
 
-	fileprivate var didStartGenerating: Bool = false
 	open func action_Generate(payload: SDcodablePayload) {
-		guard !self.didStartGenerating else {
-			return
-		}
-
-		self.didStartGenerating = true
-
 		self.execute_txt2img(payload: payload) {
 			error in
 
 			DispatchQueue.main.async {
 				UIAlertController.errorAlert(error: error)
-
-				self.didStartGenerating = false
 			}
 		}
 	}
@@ -423,72 +449,6 @@ open class fxSDBasicEngine: NSObject, ObservableObject, @preconcurrency SDEngine
 					completionHandler?(error)
 				}
 			}
-	}
-
-
-	@Published open var nonInteractiveObservable: FXDobservableOverlay? = nil
-
-	open var action_Interrupt: () -> Void {
-		return {
-			self.interrupt{
-				(error) in
-
-				DispatchQueue.main.async {
-					UIAlertController.errorAlert(error: error, title: "Interrupted")
-				}
-			}
-		}
-	}
-
-	open var action_DeleteMultiple: () -> Void {
-		return {
-			let storage = SDStorage()
-			storage.deleteFileURLs(fileURLs: storage.latestImageURLs) {
-				//self.imageURLs = storage.latestImageURLs
-			}
-		}
-	}
-
-	open var action_DeleteOne: (_ fileURL: URL?) -> Void {
-		return {
-			fileURL in
-
-			guard let fileURL else {
-				return
-			}
-
-			let storage = SDStorage()
-			storage.deleteFileURLs(fileURLs: [fileURL]) {
-				//self.imageURLs = storage.latestImageURLs
-			}
-		}
-	}
-
-	open var action_SharingALL: () -> Void {
-		return {
-			let imageURLs = SDStorage().latestImageURLs
-			if imageURLs.count > 0 {
-				DispatchQueue.main.async {
-					UIActivityViewController.show(items: imageURLs)
-				}
-			}
-		}
-	}
-
-	open var action_Reload: () -> Void {
-		return {
-			fxd_overridable()
-		}
-	}
-
-	open var action_Synchronize: () -> Void {
-		return {
-			fxd_overridable()
-		}
-	}
-
-	open func action_ChangeCheckpoint(_ checkpoint: SDcodableModel) {
-		fxd_overridable()
 	}
 }
 
