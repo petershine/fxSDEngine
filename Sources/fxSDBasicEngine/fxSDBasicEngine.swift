@@ -3,7 +3,6 @@ import Foundation
 import UIKit
 
 import fXDKit
-@preconcurrency import fxSDEngine
 
 
 open class fxSDBasicEngine: NSObject, ObservableObject, @preconcurrency SDEngine, @unchecked Sendable {

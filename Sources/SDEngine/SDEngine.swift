@@ -25,20 +25,20 @@ public protocol SDEngine: NSObjectProtocol {
 	var displayedImage: UIImage? { get set }
 
 
-	func synchronize_withSystem(completionHandler: ((_ error: Error?)->Void)?)
-	func refresh_systemInfo(completionHandler: ((_ error: Error?)->Void)?)
-	func refresh_systemCheckpoints(completionHandler: ((_ error: Error?)->Void)?)
-	func change_systemCheckpoints(checkpoint: SDcodableModel, completionHandler: ((_ error: Error?)->Void)?)
+	func synchronize_withSystem(completionHandler: (@Sendable (_ error: Error?)->Void)?)
+	func refresh_systemInfo(completionHandler: (@Sendable (_ error: Error?)->Void)?)
+	func refresh_systemCheckpoints(completionHandler: (@Sendable (_ error: Error?)->Void)?)
+	func change_systemCheckpoints(checkpoint: SDcodableModel, completionHandler: (@Sendable (_ error: Error?)->Void)?)
 
-	func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
-	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: ((_ error: Error?)->Void)?)
+	func obtain_latestPNGData(path: String, completionHandler: (@Sendable (_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
+	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: (@Sendable (_ error: Error?)->Void)?)
 	func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?)
 
 	func action_Generate(payload: SDcodablePayload)
-	func execute_txt2img(payload: SDcodablePayload, completionHandler: ((_ error: Error?)->Void)?)
+	func execute_txt2img(payload: SDcodablePayload, completionHandler: (@Sendable (_ error: Error?)->Void)?)
 	func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async -> (newImage: UIImage?, newPayload: SDcodablePayload?)?
 
-	func execute_progress(quiet: Bool, completionHandler: ((_ error: Error?)->Void)?)
+	func execute_progress(quiet: Bool, completionHandler: (@Sendable (_ error: Error?)->Void)?)
 	func continueRefreshing()
-	func interrupt(completionHandler: ((_ error: Error?)->Void)?)
+	func interrupt(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 }
