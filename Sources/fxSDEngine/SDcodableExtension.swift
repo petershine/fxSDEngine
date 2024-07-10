@@ -155,7 +155,7 @@ extension SDextensionADetailer {
 }
 
 extension SDextensionADetailer {
-	static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
+	public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
 
 		var extractedDictionary: [String:Any?] = [:]
 		let extractingKeyPairs_adetailer = [

@@ -17,7 +17,7 @@ public struct SDcodableSysInfo: Codable {
 
 
 extension SDcodableSysInfo {
-	var extensionNames: Set<SDExtensionName>? {
+	public var extensionNames: Set<SDExtensionName>? {
 		var extensionNames: Set<SDExtensionName> = []
 
 		for sdExtension in self.Extensions ?? [] {

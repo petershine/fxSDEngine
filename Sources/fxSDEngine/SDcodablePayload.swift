@@ -103,7 +103,7 @@ public struct SDcodablePayload: Codable {
 
 
 extension SDcodablePayload {
-	func extendedPayload(sdEngine: SDEngine) -> Data? {
+	public func extendedPayload(sdEngine: SDEngine) -> Data? {
 		guard let payload: Data = encoded() else {
 			return nil
 		}
@@ -128,15 +128,6 @@ extension SDcodablePayload {
 
 		if self.use_adetailer,
 		   sdEngine.isEnabledAdetailer {
-
-			if sdEngine.extensionADetailer == nil {
-				do {
-					sdEngine.extensionADetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data())
-				}
-				catch {	fxd_log()
-					fxdPrint(error)
-				}
-			}
 
 			var alwayson_scripts: Dictionary<String, Any?> = [:]
 			alwayson_scripts[SDExtensionName.adetailer.rawValue] = sdEngine.extensionADetailer?.args
@@ -166,7 +157,7 @@ extension SDcodablePayload {
 }
 
 extension SDcodablePayload {
-	static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
+	public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
 
 		if let sizeComponents = (jsonDictionary["size"] as? String)?.components(separatedBy: "x"),
 		   sizeComponents.count == 2 {
