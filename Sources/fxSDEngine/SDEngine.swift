@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public protocol SDEngine {
+public protocol SDEngine: NSObjectProtocol {
 	var networkingModule: SDNetworking { get set }
 	init(networkingModule: SDNetworking)
 	

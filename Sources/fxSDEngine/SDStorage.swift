@@ -6,8 +6,9 @@ import fXDKit
 import UniformTypeIdentifiers
 
 
-open class SDStorage: NSObject, ObservableObject {
-	open var latestImageURLs: [URL] = {
+@Observable
+open class SDStorage: NSObject {
+	public var latestImageURLs: [URL] = {
 		return FileManager.default.fileURLs(contentType: .png) ?? []
 	}()
 
