@@ -8,12 +8,15 @@ import fXDKit
 
 public protocol SDEngine {
 	var networkingModule: SDNetworking { get set }
+	init(networkingModule: SDNetworking)
+	
 
 	var systemInfo: SDcodableSysInfo? { get set }
 	var systemCheckpoints: [SDcodableModel] { get set }
-	var extensionADetailer: SDextensionADetailer? { get set }
+
 	var isEnabledAdetailer: Bool { get set }
-	
+	var extensionADetailer: SDextensionADetailer? { get set }
+
 	var generationPayload: SDcodablePayload? { get set }
 
 	var currentProgress: SDcodableProgress? { get set }
