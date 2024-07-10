@@ -96,7 +96,11 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 	public func refresh_systemInfo(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
 		networkingModule.requestToSDServer(
-			api_endpoint: .INTERNAL_SYSINFO) {
+			quiet: false,
+			api_endpoint: .INTERNAL_SYSINFO,
+			method: nil,
+			query: nil,
+			payload: nil) {
 				(data, response, error) in
 #if DEBUG
 				if let jsonDictionary = data?.jsonDictionary(quiet: true) {
@@ -136,7 +140,11 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 	public func refresh_systemCheckpoints(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
 		networkingModule.requestToSDServer(
-			api_endpoint: .SDAPI_V1_MODELS) {
+			quiet: false,
+			api_endpoint: .SDAPI_V1_MODELS,
+			method: nil,
+			query: nil,
+			payload: nil) {
 				(data, response, error) in
 #if DEBUG
 				if let jsonObject = data?.jsonObject(quiet: true) {
@@ -164,7 +172,10 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 		let overridePayload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
 		networkingModule.requestToSDServer(
+			quiet: false,
 			api_endpoint: .SDAPI_V1_OPTIONS,
+			method: nil,
+			query: nil,
 			payload: overridePayload) {
 				(data, response, error) in
 
@@ -177,8 +188,11 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 	public func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?) {
 		networkingModule.requestToSDServer(
+			quiet: false,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
-			query: "folder_path=\(path)") {
+			method: nil,
+			query: "folder_path=\(path)",
+			payload: nil) {
 				(data, response, error) in
 
 				guard let decodedResponse = data?.decode(SDcodableFiles.self),
@@ -222,8 +236,11 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 
 				self.networkingModule.requestToSDServer(
+					quiet: false,
 					api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
-					query: "path=\(fullpath)&t=file") {
+					method: nil,
+					query: "path=\(fullpath)&t=file",
+					payload: nil) {
 						(data, response, error) in
 
 						completionHandler?(data, fullpath, error)
@@ -265,9 +282,11 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 
 		networkingModule.requestToSDServer(
+			quiet: false,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
+			method: nil,
 			query: "path=\(imagePath)",
-			responseHandler: {
+			payload: nil) {
 				(data, response, error) in
 
 				guard let data,
@@ -278,7 +297,7 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 				}
 
 				_assignPayload(infotext, error)
-			})
+			}
 	}
 
 	public func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?) {
@@ -337,7 +356,10 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 		let payloadData: Data? = payload.extendedPayload(sdEngine: self)
 
 		networkingModule.requestToSDServer(
+			quiet: false,
 			api_endpoint: .SDAPI_V1_TXT2IMG,
+			method: nil,
+			query: nil,
 			payload: payloadData) {
 				(data, response, error) in
 
@@ -402,7 +424,10 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 	public func execute_progress(quiet: Bool = false, completionHandler: (@Sendable (_ error: Error?)->Void)?) {
 		networkingModule.requestToSDServer(
 			quiet: quiet,
-			api_endpoint: .SDAPI_V1_PROGRESS) {
+			api_endpoint: .SDAPI_V1_PROGRESS,
+			method: nil,
+			query: nil,
+			payload: nil) {
 				(data, response, error) in
 
 
@@ -441,8 +466,11 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 	public func interrupt(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
 		networkingModule.requestToSDServer(
+			quiet: false,
 			api_endpoint: .SDAPI_V1_INTERRUPT,
-			method: "POST") {
+			method: "POST",
+			query: nil,
+			payload: nil) {
 				(data, response, error) in
 
 				DispatchQueue.main.async {
