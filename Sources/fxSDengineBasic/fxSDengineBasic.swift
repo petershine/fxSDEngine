@@ -18,16 +18,6 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 	open var systemCheckpoints: [SDcodableModel] = []
 
 	open var isEnabledAdetailer: Bool = false
-	open var extensionADetailer: SDextensionADetailer? = {
-		var adetailerExtension: SDextensionADetailer? = nil
-		do {
-			adetailerExtension = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data())
-		}
-		catch {	fxd_log()
-			fxdPrint(error)
-		}
-		return adetailerExtension
-	}()
 
 	@Published open var generationPayload: SDcodablePayload? = nil
 

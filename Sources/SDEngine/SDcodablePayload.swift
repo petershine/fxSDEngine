@@ -130,7 +130,7 @@ extension SDcodablePayload {
 		   sdEngine.isEnabledAdetailer {
 
 			var alwayson_scripts: Dictionary<String, Any?> = [:]
-			alwayson_scripts[SDExtensionName.adetailer.rawValue] = sdEngine.extensionADetailer?.args
+			alwayson_scripts[SDExtensionName.adetailer.rawValue] = SDExtensionName.adetailer.arguments()
 
 			if alwayson_scripts.count > 0 {
 				extendedDictionary?["alwayson_scripts"] = alwayson_scripts

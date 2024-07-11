@@ -15,7 +15,6 @@ public protocol SDEngine: NSObjectProtocol {
 	var systemCheckpoints: [SDcodableModel] { get set }
 
 	var isEnabledAdetailer: Bool { get set }
-	var extensionADetailer: SDextensionADetailer? { get set }
 
 	var generationPayload: SDcodablePayload? { get set }
 

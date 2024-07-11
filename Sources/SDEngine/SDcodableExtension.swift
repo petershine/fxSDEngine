@@ -23,13 +23,8 @@ extension SDExtensionName {
 		do {
 			switch self {
 				case .adetailer:
-					args = [
-						"args" : [
-							true,
-							false,
-							try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data()),
-						]
-					]
+					let adetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data())
+					args = adetailer.args
 			}
 		}
 		catch {	fxd_log()
