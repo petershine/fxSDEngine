@@ -61,3 +61,9 @@ extension SDcodableSysInfo {
 		return alwayson_scripts
 	}
 }
+
+extension SDcodableSysInfo {
+	public func isEnabled(_ extensionCase: SDExtensionName) -> Bool {
+		return extensionNames?.contains(extensionCase) ?? false
+	}
+}

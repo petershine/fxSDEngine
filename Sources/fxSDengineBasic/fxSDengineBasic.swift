@@ -17,7 +17,6 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 	open var systemInfo: SDcodableSysInfo? = nil
 	open var systemCheckpoints: [SDcodableModel] = []
 
-	open var isEnabledAdetailer: Bool = false
 
 	@Published open var currentProgress: SDcodableProgress? = nil
 	@Published open var isSystemBusy: Bool = false
@@ -97,7 +96,6 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 #endif
 				DispatchQueue.main.async {
 					self.systemInfo = data?.decode(SDcodableSysInfo.self)
-					self.isEnabledAdetailer = self.systemInfo?.extensionNames?.contains(.adetailer) ?? false
 					completionHandler?(error)
 				}
 			}

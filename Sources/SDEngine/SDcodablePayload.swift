@@ -127,7 +127,7 @@ extension SDcodablePayload {
 		}
 
 		if self.use_adetailer,
-		   sdEngine.isEnabledAdetailer {
+		   sdEngine.systemInfo?.isEnabled(.adetailer) ?? false {
 
 			var alwayson_scripts: Dictionary<String, Any?> = [:]
 			alwayson_scripts[SDExtensionName.adetailer.rawValue] = SDExtensionName.adetailer.arguments()

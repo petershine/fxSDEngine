@@ -14,8 +14,6 @@ public protocol SDEngine: NSObjectProtocol {
 	var systemInfo: SDcodableSysInfo? { get set }
 	var systemCheckpoints: [SDcodableModel] { get set }
 
-	var isEnabledAdetailer: Bool { get set }
-
 	var currentProgress: SDcodableProgress? { get set }
 	var isSystemBusy: Bool { get set }
 
