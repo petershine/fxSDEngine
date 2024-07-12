@@ -19,6 +19,9 @@ public protocol SDEngine: NSObjectProtocol {
 
 	var displayedImage: UIImage? { get set }
 
+	var nextPayload: SDcodablePayload? { get set }
+	var selectedImageURL: URL? { get set }
+
 
 	func action_Synchronize()
 	func synchronize_withSystem(completionHandler: (@Sendable (_ error: Error?)->Void)?)

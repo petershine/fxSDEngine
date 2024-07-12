@@ -23,6 +23,23 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 	@Published open var displayedImage: UIImage? = nil
 
+	@Published open var nextPayload: SDcodablePayload? = nil
+	@Published open var selectedImageURL: URL? {
+		didSet {
+			guard let jsonURL = selectedImageURL?.jsonURL else {
+				return
+			}
+
+			do {
+				let payloadData = try Data(contentsOf: jsonURL)
+				nextPayload = payloadData.decode(SDcodablePayload.self)
+			}
+			catch {	fxd_log()
+				fxdPrint(error)
+			}
+		}
+	}
+
 
 	open func action_Synchronize() {
 		self.synchronize_withSystem {
