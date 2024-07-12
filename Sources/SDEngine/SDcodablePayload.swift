@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public struct SDcodablePayload: Codable {
+public class SDcodablePayload: Codable, ObservableObject {
 	public var prompt: String
 	public var negative_prompt: String
 
@@ -52,7 +52,7 @@ public struct SDcodablePayload: Codable {
 	}
 
 
-	public init(from decoder: any Decoder) throws {
+	required public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
 
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? ""
