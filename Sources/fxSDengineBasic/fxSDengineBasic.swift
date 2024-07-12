@@ -449,7 +449,6 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 	@MainActor public func continueRefreshing() {
 		if UIApplication.shared.applicationState == .background {
-			fxdPrint("UIApplication.shared.backgroundTimeRemaining: \(UIApplication.shared.backgroundTimeRemaining)")
 			DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
 				self.continueRefreshing()
 			}
