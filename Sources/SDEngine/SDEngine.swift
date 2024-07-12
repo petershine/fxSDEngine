@@ -16,8 +16,6 @@ public protocol SDEngine: NSObjectProtocol {
 
 	var isEnabledAdetailer: Bool { get set }
 
-	var generationPayload: SDcodablePayload? { get set }
-
 	var currentProgress: SDcodableProgress? { get set }
 	var isSystemBusy: Bool { get set }
 

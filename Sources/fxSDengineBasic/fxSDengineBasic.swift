@@ -19,8 +19,6 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 	open var isEnabledAdetailer: Bool = false
 
-	@Published open var generationPayload: SDcodablePayload? = nil
-
 	@Published open var currentProgress: SDcodableProgress? = nil
 	@Published open var isSystemBusy: Bool = false
 
@@ -261,9 +259,9 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 				//TODO: save last ADetailer, assign use_adetailer
 
 
-				DispatchQueue.main.async {
+				await MainActor.run {
 					fxd_log()
-					self.generationPayload = obtainedPayload
+//					self.generationPayload = obtainedPayload
 //					self.extensionADetailer = extracted.1
 					completionHandler?(error)
 				}
@@ -378,7 +376,7 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 
 					await MainActor.run {
 						self.displayedImage = newlyGenerated?.0
-						self.generationPayload = newlyGenerated?.1
+//						self.generationPayload = newlyGenerated?.1
 						completionHandler?(error)
 					}
 				}
