@@ -5,7 +5,7 @@ import UIKit
 import fXDKit
 
 
-open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine, @unchecked Sendable {
+@preconcurrency open class fxSDengineBasic: NSObject, ObservableObject, SDEngine, @unchecked Sendable {
 
 	open var networkingModule: SDNetworking
 
@@ -447,7 +447,7 @@ open class fxSDengineBasic: NSObject, ObservableObject, @preconcurrency SDEngine
 			}
 	}
 
-	@MainActor public func continueRefreshing() {
+	public func continueRefreshing() {
 		if UIApplication.shared.applicationState == .background {
 			DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
 				self.continueRefreshing()
