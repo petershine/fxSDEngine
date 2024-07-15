@@ -261,23 +261,19 @@ import fXDKit
 			}
 
 			let extracted = self.extract_fromInfotext(infotext: infotext)
-			guard let obtainedPayload = extracted.0 else {
+			guard let payload = extracted.0 else {
 				completionHandler?(error)
 				return
 			}
 
 
 			Task {
-				let payloadData = obtainedPayload.encoded()
+				let payloadData = payload.encoded()
 				let (_, _) = await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
-
-				//TODO: save last ADetailer, assign use_adetailer
 
 
 				await MainActor.run {
 					fxd_log()
-//					self.generationPayload = obtainedPayload
-//					self.extensionADetailer = extracted.1
 					completionHandler?(error)
 				}
 			}
