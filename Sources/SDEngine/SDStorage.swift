@@ -8,14 +8,9 @@ import UniformTypeIdentifiers
 
 @Observable
 open class SDStorage: NSObject {
-	public var latestImageURLs: [URL] = {
-		return FileManager.default.fileURLs(contentType: .png) ?? []
+	public var latestImageURLs: [URL]? = {
+		return FileManager.default.fileURLs(contentType: .png)
 	}()
-
-	public var latestJsonURLs: [URL]? {
-		return FileManager.default.fileURLs(contentType: .json)
-	}
-
 
 	public override init() {
 		super.init()
@@ -61,8 +56,8 @@ extension SDStorage {
 }
 
 extension SDStorage {
-	public func deleteFileURLs(fileURLs: [URL], completionHandler: (() -> Void)?) {
-		guard fileURLs.count > 0 else {
+	public func deleteFileURLs(fileURLs: [URL]?, completionHandler: (() -> Void)?) {
+		guard let fileURLs, fileURLs.count > 0 else {
 			completionHandler?()
 			return
 		}
