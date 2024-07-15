@@ -40,6 +40,8 @@ import fXDKit
 		}
 	}
 
+    @Published open var nonInteractiveObservable: FXDobservableOverlay? = nil
+
 
 	open func action_Synchronize() {
 		self.synchronize_withSystem {
