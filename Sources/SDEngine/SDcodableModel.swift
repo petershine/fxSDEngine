@@ -8,3 +8,25 @@ public struct SDcodableModel: Codable, Hashable {
 	var filename: String?
 	var config: String?
 }
+
+public struct SDcodableSampler: Codable {
+    var name: String?
+    var aliases: [String?]?
+    var options: [SDcodableSamplerOption?]?
+    struct SDcodableSamplerOption: Codable {
+        var scheduler: String?
+        var second_order: Bool?
+        var brownian_noise: Bool?
+        var solver_type: String?
+        var discard_next_to_last_sigma: Bool?
+        var uses_ensd: Bool?
+    }
+}
+
+public struct SDcodableScheduler: Codable {
+	var name: String?
+    var label: String?
+    var aliases: [String?]?
+    var default_rho: Int?
+    var need_inner_model: Bool?
+}
