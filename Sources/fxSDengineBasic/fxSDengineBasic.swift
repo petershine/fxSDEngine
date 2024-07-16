@@ -201,8 +201,12 @@ import fXDKit
             self.refresh_systemSamplers {
                 error in
 
-                DispatchQueue.main.async {
-                    completionHandler?(error)
+                self.refresh_systemSchedulers {
+                    error in
+
+                    DispatchQueue.main.async {
+                        completionHandler?(error)
+                    }
                 }
             }
         }
@@ -223,6 +227,26 @@ import fXDKit
 #endif
                 DispatchQueue.main.async {
                     self.systemSamplers = data?.decode(Array<SDcodableSampler>.self) ?? []
+                    completionHandler?(error)
+                }
+            }
+    }
+
+    public func refresh_systemSchedulers(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
+        networkingModule.requestToSDServer(
+            quiet: false,
+            api_endpoint: .SDAPI_V1_SCHEDULERS,
+            method: nil,
+            query: nil,
+            payload: nil) {
+                (data, response, error) in
+#if DEBUG
+                if let jsonObject = data?.jsonObject(quiet: true) {
+                    fxdPrint("SCHEDULERS", (jsonObject as? Array<Any>)?.count)
+                }
+#endif
+                DispatchQueue.main.async {
+                    self.systemSchedulers = data?.decode(Array<SDcodableScheduler>.self) ?? []
                     completionHandler?(error)
                 }
             }

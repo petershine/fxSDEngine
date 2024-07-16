@@ -35,6 +35,7 @@ public protocol SDEngine: NSObjectProtocol {
 
     func refresh_AllConfigurations(completionHandler: (@Sendable (_ error: Error?)->Void)?)
     func refresh_systemSamplers(completionHandler: (@Sendable (_ error: Error?)->Void)?)
+    func refresh_systemSchedulers(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 
 	func obtain_latestPNGData(path: String, completionHandler: (@Sendable (_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
 	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: (@Sendable (_ error: Error?)->Void)?)
