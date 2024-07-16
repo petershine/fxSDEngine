@@ -43,17 +43,17 @@ public class SDcodablePayload: Codable, Equatable, ObservableObject {
 	var do_not_save_samples: Bool
 	var do_not_save_grid: Bool
 
+    var override_settings_restore_afterwards: Bool
+    var override_settings: SDcodableOverride?
+    struct SDcodableOverride: Codable {
+        var sd_model_checkpoint: String?
+    }
 
-	// externally editable
-	public var model_hash: String
-	public var use_lastSeed: Bool
-	public var use_adetailer: Bool
 
-	var override_settings_restore_afterwards: Bool = true
-	var override_settings: SDcodableOverride?
-	struct SDcodableOverride: Codable {
-		var sd_model_checkpoint: String?
-	}
+    // externally editable
+    public var model_hash: String
+    public var use_lastSeed: Bool
+    public var use_adetailer: Bool
 
 
 	required public init(from decoder: any Decoder) throws {
@@ -98,6 +98,9 @@ public class SDcodablePayload: Codable, Equatable, ObservableObject {
 		self.do_not_save_grid = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_grid) ?? false
 
 
+        self.override_settings_restore_afterwards = try container.decodeIfPresent(Bool.self, forKey: .override_settings_restore_afterwards) ?? false
+        self.override_settings = try container.decodeIfPresent(SDcodableOverride.self, forKey: .override_settings)
+
 		// externally editable
 		self.model_hash = try container.decodeIfPresent(String.self, forKey: .model_hash) ?? ""
 		self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed) ?? false
@@ -124,7 +127,11 @@ extension SDcodablePayload {
 		guard extendedDictionary != nil else {
 			return nil
 		}
-		
+
+
+        if !self.model_hash.isEmpty {
+            extendedDictionary?["override_settings"] = ["sd_model_checkpoint" : self.model_hash]
+        }
 
 		if !self.use_lastSeed {
 			extendedDictionary?["seed"] = -1
