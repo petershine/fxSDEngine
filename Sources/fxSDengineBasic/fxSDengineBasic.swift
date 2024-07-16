@@ -16,6 +16,8 @@ import fXDKit
 
 	open var systemInfo: SDcodableSysInfo? = nil
 	open var systemCheckpoints: [SDcodableModel] = []
+    open var systemSamplers: [SDcodableSampler] = []
+    open var systemSchedulers: [SDcodableScheduler] = []
 
 
 	@Published open var currentProgress: SDcodableProgress? = nil
@@ -47,7 +49,7 @@ import fXDKit
 		self.synchronize_withSystem {
 			(error) in
 
-			self.refresh_systemCheckpoints(completionHandler: nil)
+            self.refresh_AllConfigurations(completionHandler: nil)
 
 			DispatchQueue.main.async {
 				UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
@@ -189,6 +191,42 @@ import fXDKit
 				}
 			}
 	}
+
+
+    public func refresh_AllConfigurations(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
+
+        self.refresh_systemCheckpoints {
+            error in
+
+            self.refresh_systemSamplers {
+                error in
+
+                DispatchQueue.main.async {
+                    completionHandler?(error)
+                }
+            }
+        }
+    }
+    
+    public func refresh_systemSamplers(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
+        networkingModule.requestToSDServer(
+            quiet: false,
+            api_endpoint: .SDAPI_V1_SAMPLERS,
+            method: nil,
+            query: nil,
+            payload: nil) {
+                (data, response, error) in
+#if DEBUG
+                if let jsonObject = data?.jsonObject(quiet: true) {
+                    fxdPrint("SAMPLERS", (jsonObject as? Array<Any>)?.count)
+                }
+#endif
+                DispatchQueue.main.async {
+                    self.systemSamplers = data?.decode(Array<SDcodableSampler>.self) ?? []
+                    completionHandler?(error)
+                }
+            }
+    }
 
 
 	public func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?) {

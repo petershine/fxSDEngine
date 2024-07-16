@@ -12,14 +12,14 @@ public struct SDcodableModel: Codable, Hashable {
 public struct SDcodableSampler: Codable {
     var name: String?
     var aliases: [String?]?
-    var options: [SDcodableSamplerOption?]?
+    var options: SDcodableSamplerOption?
     struct SDcodableSamplerOption: Codable {
         var scheduler: String?
-        var second_order: Bool?
-        var brownian_noise: Bool?
+        var second_order: String?
+        var brownian_noise: String?
         var solver_type: String?
-        var discard_next_to_last_sigma: Bool?
-        var uses_ensd: Bool?
+        var discard_next_to_last_sigma: String?
+        var uses_ensd: String?
     }
 }
 
@@ -28,5 +28,5 @@ public struct SDcodableScheduler: Codable {
     var label: String?
     var aliases: [String?]?
     var default_rho: Int?
-    var need_inner_model: Bool?
+    var need_inner_model: String?
 }

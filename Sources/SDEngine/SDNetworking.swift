@@ -13,6 +13,7 @@ public enum SDAPIendpoint: String, CaseIterable {
 	case SDAPI_V1_INTERRUPT = "sdapi/v1/interrupt"
 	case SDAPI_V1_OPTIONS = "sdapi/v1/options"
 	case SDAPI_V1_MODELS = "sdapi/v1/sd-models"
+    case SDAPI_V1_SAMPLERS = "sdapi/v1/samplers"
 
 
 	case INFINITE_IMAGE_BROWSING_FILES = "infinite_image_browsing/files"

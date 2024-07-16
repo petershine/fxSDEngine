@@ -13,6 +13,8 @@ public protocol SDEngine: NSObjectProtocol {
 
 	var systemInfo: SDcodableSysInfo? { get set }
 	var systemCheckpoints: [SDcodableModel] { get set }
+    var systemSamplers: [SDcodableSampler] { get set }
+    var systemSchedulers: [SDcodableScheduler] { get set }
 
 	var currentProgress: SDcodableProgress? { get set }
 	var isSystemBusy: Bool { get set }
@@ -30,6 +32,9 @@ public protocol SDEngine: NSObjectProtocol {
 	func action_ChangeCheckpoint(_ checkpoint: SDcodableModel)
 	func refresh_systemCheckpoints(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 	func change_systemCheckpoints(checkpoint: SDcodableModel, completionHandler: (@Sendable (_ error: Error?)->Void)?)
+
+    func refresh_AllConfigurations(completionHandler: (@Sendable (_ error: Error?)->Void)?)
+    func refresh_systemSamplers(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 
 	func obtain_latestPNGData(path: String, completionHandler: (@Sendable (_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
 	func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: (@Sendable (_ error: Error?)->Void)?)
