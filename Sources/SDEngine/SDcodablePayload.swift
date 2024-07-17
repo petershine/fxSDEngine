@@ -97,7 +97,7 @@ public class SDcodablePayload: Codable, Equatable, ObservableObject {
 		self.do_not_save_grid = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_grid) ?? false
 
 
-        self.override_settings_restore_afterwards = try container.decodeIfPresent(Bool.self, forKey: .override_settings_restore_afterwards) ?? false
+        self.override_settings_restore_afterwards = try container.decodeIfPresent(Bool.self, forKey: .override_settings_restore_afterwards) ?? true
         self.override_settings = try container.decodeIfPresent(SDcodableOverride.self, forKey: .override_settings)
 
 		// externally editable
