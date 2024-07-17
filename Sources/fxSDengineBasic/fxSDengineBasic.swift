@@ -27,8 +27,8 @@ import fXDKit
 
 	@Published open var nextPayload: SDcodablePayload? = nil
 	@Published open var selectedImageURL: URL? {
-		didSet {
-			guard let jsonURL = selectedImageURL?.jsonURL else {
+        willSet {
+            guard let jsonURL = newValue?.jsonURL else {
 				return
 			}
 
