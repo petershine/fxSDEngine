@@ -9,11 +9,11 @@ public struct SDcodableModel: Codable, Hashable {
 	var config: String?
 }
 
-public struct SDcodableSampler: Codable {
-    var name: String?
+public struct SDcodableSampler: Codable, Hashable {
+    public var name: String?
     var aliases: [String?]?
     var options: SDcodableSamplerOption?
-    struct SDcodableSamplerOption: Codable {
+    struct SDcodableSamplerOption: Codable, Hashable {
         var scheduler: String?
         var second_order: String?
         var brownian_noise: String?
@@ -23,7 +23,7 @@ public struct SDcodableSampler: Codable {
     }
 }
 
-public struct SDcodableScheduler: Codable {
+public struct SDcodableScheduler: Codable, Hashable {
 	var name: String?
     var label: String?
     var aliases: [String?]?
