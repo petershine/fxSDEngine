@@ -28,5 +28,5 @@ public struct SDcodableScheduler: Codable {
     var label: String?
     var aliases: [String?]?
     var default_rho: Int?
-    var need_inner_model: String?
+    var need_inner_model: Bool?
 }

@@ -5,6 +5,9 @@ import UIKit
 
 import fXDKit
 
+public struct SDcodableOverride: Codable {
+    public var sd_model_checkpoint: String?
+}
 
 public class SDcodablePayload: Codable, Equatable, ObservableObject {
 	public static func == (lhs: SDcodablePayload, rhs: SDcodablePayload) -> Bool {
@@ -44,14 +47,10 @@ public class SDcodablePayload: Codable, Equatable, ObservableObject {
 	var do_not_save_grid: Bool
 
     var override_settings_restore_afterwards: Bool
-    var override_settings: SDcodableOverride?
-    struct SDcodableOverride: Codable {
-        var sd_model_checkpoint: String?
-    }
+    public var override_settings: SDcodableOverride?
 
 
     // externally editable
-    public var model_hash: String
     public var use_lastSeed: Bool
     public var use_adetailer: Bool
 
@@ -102,7 +101,6 @@ public class SDcodablePayload: Codable, Equatable, ObservableObject {
         self.override_settings = try container.decodeIfPresent(SDcodableOverride.self, forKey: .override_settings)
 
 		// externally editable
-		self.model_hash = try container.decodeIfPresent(String.self, forKey: .model_hash) ?? ""
 		self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed) ?? false
 		self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer) ?? false
 	}
@@ -129,10 +127,6 @@ extension SDcodablePayload {
 		}
 
 
-        if !self.model_hash.isEmpty {
-            extendedDictionary?["override_settings"] = ["sd_model_checkpoint" : self.model_hash]
-        }
-
 		if !self.use_lastSeed {
 			extendedDictionary?["seed"] = -1
 		}
@@ -150,8 +144,7 @@ extension SDcodablePayload {
 
 
 		// clean unnecessary keys
-		extendedDictionary?["model_hash"] = nil
-		extendedDictionary?["use_lastSeed"] = nil
+        extendedDictionary?["use_lastSeed"] = nil
 		extendedDictionary?["use_adetailer"] = nil
 
 
@@ -185,14 +178,17 @@ extension SDcodablePayload {
 			("hr_scale", "hires upscale"),
 			("hr_second_pass_steps", "hires steps"),
 			("hr_upscaler", "hires upscaler"),
-
-			("model_hash", "model hash"),
 		]
 
 		for (key, replacedKey) in replacingKeyPairs {
 			jsonDictionary[key] = jsonDictionary[replacedKey]
 			jsonDictionary[replacedKey] = nil
 		}
+
+        let model_hash: String = (jsonDictionary["model hash"] ?? jsonDictionary["model_hash"]) as? String ?? ""
+        if !model_hash.isEmpty {
+            jsonDictionary["override_settings"] = ["sd_model_checkpoint" : model_hash]
+        }
 
 
 		var decoded: Self? = nil
