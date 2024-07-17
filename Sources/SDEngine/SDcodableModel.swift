@@ -9,7 +9,12 @@ public struct SDcodableModel: Codable, Hashable {
 	var config: String?
 }
 
-public struct SDcodableSampler: Codable, Hashable {
+
+public protocol SDprotocolModel: Hashable {
+    var name: String? { get set }
+}
+
+public struct SDcodableSampler: Codable, SDprotocolModel {
     public var name: String?
     var aliases: [String?]?
     var options: SDcodableSamplerOption?
@@ -23,8 +28,8 @@ public struct SDcodableSampler: Codable, Hashable {
     }
 }
 
-public struct SDcodableScheduler: Codable, Hashable {
-	var name: String?
+public struct SDcodableScheduler: Codable, SDprotocolModel {
+	public var name: String?
     var label: String?
     var aliases: [String?]?
     var default_rho: Int?
