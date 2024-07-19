@@ -10,7 +10,7 @@ public struct SDcodableSysInfo: Codable {
 	public struct SDcodableConfig: Codable {
 		public var outdir_samples: String? = nil
 
-		var sd_checkpoint_hash: String? = nil
+		public var sd_checkpoint_hash: String? = nil
 		public var sd_model_checkpoint: String? = nil
 	}
 }
