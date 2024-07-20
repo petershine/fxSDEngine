@@ -385,7 +385,10 @@ import fXDKit
 			prompt.removeFirst()
 		}
 
-		let negative_prompt = promptPair?.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+		var negative_prompt = promptPair?.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        if promptPair?.count ?? 0 < 2 || negative_prompt == prompt {
+            negative_prompt = ""
+        }
 
 		guard !(prompt.isEmpty) else {	fxd_log()
 			fxdPrint("[infotext]", infotext)
