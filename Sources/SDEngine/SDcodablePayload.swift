@@ -161,29 +161,29 @@ extension SDcodablePayload {
 }
 
 extension SDcodablePayload {
-	public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
+    public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
 
-		if let sizeComponents = (jsonDictionary["size"] as? String)?.components(separatedBy: "x"),
-		   sizeComponents.count == 2 {
-			jsonDictionary["width"] = Int(sizeComponents.first ?? "504")
-			jsonDictionary["height"] = Int(sizeComponents.last ?? "768")
-		}
+        if let sizeComponents = (jsonDictionary["size"] as? String)?.components(separatedBy: "x"),
+           sizeComponents.count == 2 {
+            jsonDictionary["width"] = Int(sizeComponents.first ?? "504")
+            jsonDictionary["height"] = Int(sizeComponents.last ?? "768")
+        }
 
-		let replacingKeyPairs = [
-			("sampler_name", "sampler"),
-			("scheduler", "schedule type"),
-			("cfg_scale", "cfg scale"),
+        let replacingKeyPairs = [
+            ("sampler_name", "sampler"),
+            ("scheduler", "schedule type"),
+            ("cfg_scale", "cfg scale"),
 
-			("denoising_strength", "denoising strength"),
-			("hr_scale", "hires upscale"),
-			("hr_second_pass_steps", "hires steps"),
-			("hr_upscaler", "hires upscaler"),
-		]
+            ("denoising_strength", "denoising strength"),
+            ("hr_scale", "hires upscale"),
+            ("hr_second_pass_steps", "hires steps"),
+            ("hr_upscaler", "hires upscaler"),
+        ]
 
-		for (key, replacedKey) in replacingKeyPairs {
-			jsonDictionary[key] = jsonDictionary[replacedKey]
-			jsonDictionary[replacedKey] = nil
-		}
+        for (key, replacedKey) in replacingKeyPairs {
+            jsonDictionary[key] = jsonDictionary[replacedKey]
+            jsonDictionary[replacedKey] = nil
+        }
 
         let model_hash: String = (jsonDictionary["model hash"] ?? jsonDictionary["model_hash"]) as? String ?? ""
         if !model_hash.isEmpty {
@@ -191,16 +191,16 @@ extension SDcodablePayload {
         }
 
 
-		var decoded: Self? = nil
-		do {
-			let payloadData = try JSONSerialization.data(withJSONObject: jsonDictionary)
-			decoded = try JSONDecoder().decode(Self.self, from: payloadData)
-			fxdPrint(decoded!)
-		}
-		catch {
-			fxdPrint(error)
-		}
+        var decoded: Self? = nil
+        do {
+            let payloadData = try JSONSerialization.data(withJSONObject: jsonDictionary)
+            decoded = try JSONDecoder().decode(Self.self, from: payloadData)
+            fxdPrint(decoded!)
+        }
+        catch {
+            fxdPrint(error)
+        }
 
-		return decoded
-	}
+        return decoded
+    }
 }

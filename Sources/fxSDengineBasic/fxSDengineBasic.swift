@@ -177,13 +177,13 @@ import fXDKit
 		}
 
 
-		let overridePayload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
+		let optionsPayload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
 		networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .SDAPI_V1_OPTIONS,
 			method: nil,
 			query: nil,
-			payload: overridePayload) {
+			payload: optionsPayload) {
 				(data, response, error) in
 
 				DispatchQueue.main.async {
