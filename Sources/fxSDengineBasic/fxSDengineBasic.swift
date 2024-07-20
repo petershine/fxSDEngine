@@ -323,7 +323,7 @@ import fXDKit
 
 
 
-            Task {	@MainActor in
+            Task {
 				let payloadData = payload.encoded()
 				let (_, _) = await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
 
@@ -440,7 +440,7 @@ import fXDKit
 				}
 
 
-				Task {	@MainActor in
+				Task {
 					let newlyGenerated = await self.finish_txt2img(
 						generated: generated,
 						encodedImages: encodedImages)
