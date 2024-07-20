@@ -56,9 +56,9 @@ extension SDStorage {
 }
 
 extension SDStorage {
-	public func deleteFileURLs(fileURLs: [URL?]?, completionHandler: (() -> Void)?) {
+    public func deleteFileURLs(fileURLs: [URL?]?, completionHandler: ((Bool) -> Void)?) {
 		guard let fileURLs, fileURLs.count > 0 else {
-			completionHandler?()
+			completionHandler?(false)
 			return
 		}
 
@@ -74,7 +74,7 @@ extension SDStorage {
 				action in
 
 				guard action.style != .cancel else {
-					completionHandler?()
+                    completionHandler?(false)
 					return
 				}
 
@@ -112,7 +112,7 @@ extension SDStorage {
 					UIAlertController.errorAlert(error: deletingError)
 				}
 
-				completionHandler?()
+                completionHandler?(deletedCount > 0)
 			})
 	}
 }
