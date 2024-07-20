@@ -395,6 +395,10 @@ import fXDKit
 		let decodedPayload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
 		let decodedADetailer: SDextensionADetailer? = SDextensionADetailer.decoded(using: &payloadDictionary)
 
+        if decodedADetailer != nil {
+            decodedPayload?.use_adetailer = true
+        }
+
 		return (decodedPayload, decodedADetailer)
 	}
 
@@ -410,7 +414,7 @@ import fXDKit
 	}
 
 	public func execute_txt2img(payload: SDcodablePayload, completionHandler: (@Sendable (_ error: Error?)->Void)?) {	fxd_log()
-		let payloadData: Data? = payload.extendedPayload(sdEngine: self)
+		let payloadData: Data? = payload.submissablePayload(sdEngine: self)
 
 		networkingModule.requestToSDServer(
 			quiet: false,
@@ -462,8 +466,6 @@ import fXDKit
 
 		let infotext = generated?.infotext() ?? ""
 		let extracted = self.extract_fromInfotext(infotext: infotext)
-//		self.extensionADetailer = extracted.1
-
 
 		let newImage = UIImage(data: pngDataArray.last!)
 		let newPayload: SDcodablePayload? = extracted.0

@@ -108,7 +108,7 @@ public class SDcodablePayload: Codable, Equatable, ObservableObject {
 
 
 extension SDcodablePayload {
-	public func extendedPayload(sdEngine: SDEngine) -> Data? {
+	public func submissablePayload(sdEngine: SDEngine) -> Data? {
 		guard let payload: Data = encoded() else {
 			return nil
 		}
@@ -252,7 +252,7 @@ extension SDcodablePayload {
             }
         }
 
-        let essentials: [[String]] = [
+        var essentials: [[String]] = [
             ["MODEL: ", model_name],
             ["SAMPLER: ", sampler_name],
             ["SCHEDULER: ", scheduler],
@@ -263,8 +263,10 @@ extension SDcodablePayload {
             ["HEIGHT: ", String(Int(height))],
             ["RESIZED: ", "x\(String(format: "%.2f", hr_scale)) (\(String(Int(Double(width)*hr_scale))) by \(String(Int(Double(height)*hr_scale))))"],
 
-            ["SEED:", String(seed)],
+            ["SEED: ", String(seed)],
         ]
+
+        essentials.append(["DID USE ADETAILER: ", (use_adetailer ? "YES" : "NO")])
 
         return essentials
     }
