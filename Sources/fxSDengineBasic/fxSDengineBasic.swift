@@ -322,15 +322,13 @@ import fXDKit
 			}
 
 
-			Task {
+
+            Task {	@MainActor in
 				let payloadData = payload.encoded()
 				let (_, _) = await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
 
-
-				await MainActor.run {
-					fxd_log()
-					completionHandler?(error)
-				}
+                fxd_log()
+                completionHandler?(error)
 			}
 		}
 
@@ -442,16 +440,14 @@ import fXDKit
 				}
 
 
-				Task {
+				Task {	@MainActor in
 					let newlyGenerated = await self.finish_txt2img(
 						generated: generated,
 						encodedImages: encodedImages)
 
-					await MainActor.run {
-						self.displayedImage = newlyGenerated?.0
-//						self.generationPayload = newlyGenerated?.1
-						completionHandler?(error)
-					}
+                    self.displayedImage = newlyGenerated?.0
+                    //self.generationPayload = newlyGenerated?.1
+                    completionHandler?(error)
 				}
 			}
 	}

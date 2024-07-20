@@ -56,14 +56,14 @@ extension SDStorage {
 }
 
 extension SDStorage {
-	public func deleteFileURLs(fileURLs: [URL]?, completionHandler: (() -> Void)?) {
+	public func deleteFileURLs(fileURLs: [URL?]?, completionHandler: (() -> Void)?) {
 		guard let fileURLs, fileURLs.count > 0 else {
 			completionHandler?()
 			return
 		}
 
 
-		let message: String = (fileURLs.count > 1) ? "\(fileURLs.count) images" : (fileURLs.first?.absoluteURL.lastPathComponent ?? "")
+		let message: String = (fileURLs.count > 1) ? "\(fileURLs.count) images" : ((fileURLs.first as? URL)?.absoluteURL.lastPathComponent ?? "")
 
 		UIAlertController.simpleAlert(
 			withTitle: "Do you want to delete?",
@@ -83,7 +83,11 @@ extension SDStorage {
 				var deletedCount: Int = 0
 				var deletingError: Error? = nil
 				do {
-					for imageURL in fileURLs {
+					for fileURL in fileURLs {
+                        guard let imageURL: URL = fileURL else {
+                            continue
+                        }
+
 						try FileManager.default.removeItem(at: imageURL)
 
 						do {
