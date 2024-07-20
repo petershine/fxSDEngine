@@ -26,21 +26,7 @@ import fXDKit
 	@Published open var displayedImage: UIImage? = nil
 
 	@Published open var nextPayload: SDcodablePayload? = nil
-	@Published open var selectedImageURL: URL? {
-        willSet {
-            guard let jsonURL = newValue?.jsonURL else {
-				return
-			}
-
-			do {
-				let payloadData = try Data(contentsOf: jsonURL)
-				nextPayload = payloadData.decode(SDcodablePayload.self)
-			}
-			catch {	fxd_log()
-				fxdPrint(error)
-			}
-		}
-	}
+	@Published open var selectedImageURL: URL? = nil
 
     @Published open var nonInteractiveObservable: FXDobservableOverlay? = nil
 

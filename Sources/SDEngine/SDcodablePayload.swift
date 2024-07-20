@@ -220,8 +220,28 @@ extension SDcodablePayload {
             fxdPrint(error)
         }
     }
+}
 
-    @MainActor public func essentials(with checkpoints: [SDcodableModel]) async -> [[String]] {
+
+extension SDcodablePayload {
+    @MainActor public static func loaded(from imageURL: URL?) async -> Self? {
+        guard let jsonURL = imageURL?.jsonURL else {
+            return nil
+        }
+
+        var loaded: Self? = nil
+        do {
+            let payloadData = try Data(contentsOf: jsonURL)
+            loaded = payloadData.decode(Self.self)
+        }
+        catch {    fxd_log()
+            fxdPrint(error)
+        }
+
+        return loaded
+    }
+
+    @MainActor public func configurations(with checkpoints: [SDcodableModel]) async -> [[String]] {
         var model_name: String = "(unknown)"
         let model_hash = override_settings?.sd_model_checkpoint ?? ""
         if !model_hash.isEmpty {
