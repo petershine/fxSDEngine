@@ -29,6 +29,7 @@ public protocol SDEngine: NSObjectProtocol {
 	func synchronize_withSystem(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 	func refresh_systemInfo(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 
+    func checkpoint(for model_hash: String?) -> SDcodableModel?
 	func action_ChangeCheckpoint(_ checkpoint: SDcodableModel)
 	func refresh_systemCheckpoints(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 	func change_systemCheckpoints(checkpoint: SDcodableModel, completionHandler: (@Sendable (_ error: Error?)->Void)?)

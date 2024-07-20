@@ -122,6 +122,11 @@ import fXDKit
 			}
 	}
 
+    open func checkpoint(for model_hash: String?) -> SDcodableModel? {
+        return self.systemCheckpoints.filter({
+            return ($0.hash?.isEmpty ?? true) ? false : (model_hash ?? "").contains(($0.hash)!)
+        }).first
+    }
 
 	open func action_ChangeCheckpoint(_ checkpoint: SDcodableModel) {
 		self.change_systemCheckpoints(checkpoint: checkpoint) {
