@@ -220,4 +220,32 @@ extension SDcodablePayload {
             fxdPrint(error)
         }
     }
+
+    @MainActor public func essentials(with checkpoints: [SDcodableModel]) async -> [[String]] {
+        var model_name: String = "(unknown)"
+        let model_hash = override_settings?.sd_model_checkpoint ?? ""
+        if !model_hash.isEmpty {
+            let filtered = checkpoints.filter { $0.hash == model_hash }
+
+            if filtered.first != nil {
+                model_name = filtered.first?.model_name ?? "(unknown)"
+            }
+        }
+
+        let essentials: [[String]] = [
+            ["MODEL: ", model_name],
+            ["SAMPLER: ", sampler_name],
+            ["SCHEDULER: ", scheduler],
+            ["STEPS: ", String(Int(steps))],
+            ["CFG: ", String(format: "%.1f", cfg_scale)],
+
+            ["WIDTH: ", String(Int(width))],
+            ["HEIGHT: ", String(Int(height))],
+            ["RESIZED: ", "x\(String(format: "%.2f", hr_scale)) (\(String(Int(Double(width)*hr_scale))) by \(String(Int(Double(height)*hr_scale))))"],
+
+            ["SEED:", String(seed)],
+        ]
+
+        return essentials
+    }
 }
