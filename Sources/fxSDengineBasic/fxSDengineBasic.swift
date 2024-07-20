@@ -26,7 +26,15 @@ import fXDKit
 	@Published open var displayedImage: UIImage? = nil
 
 	@Published open var nextPayload: SDcodablePayload? = nil
-	@Published open var selectedImageURL: URL? = nil
+    @Published open var selectedImageURL: URL? {
+        willSet {
+            if let imageURL = newValue,
+               let loadedImage = UIImage(contentsOfFile: imageURL.path()) {
+
+                displayedImage = loadedImage
+            }
+        }
+    }
 
     @Published open var nonInteractiveObservable: FXDobservableOverlay? = nil
 
@@ -74,13 +82,11 @@ import fXDKit
 					self.prepare_generationPayload(
 						pngData: pngData!,
 						imagePath: imagePath!) {
-							error in
+							(imageURL, error) in
 
 							DispatchQueue.main.async {
-								if pngData != nil,
-								   let latestImage = UIImage(data: pngData!) {
-									self.displayedImage = latestImage
-								}
+                                self.selectedImageURL = imageURL
+
 								completionHandler?(error)
 							}
 						}
@@ -306,18 +312,18 @@ import fXDKit
 			}
 	}
 
-	public func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: (@Sendable (_ error: Error?)->Void)?) {
+    public func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: (@Sendable (_ imageURL: URL?, _ error: Error?)->Void)?) {
 		let _assignPayload: (String, Error?) -> Void = {
 			(infotext: String, error: Error?) in
 
 			guard !infotext.isEmpty, error == nil else {
-				completionHandler?(error)
+				completionHandler?(nil, error)
 				return
 			}
 
 			let extracted = self.extract_fromInfotext(infotext: infotext)
 			guard let payload = extracted.0 else {
-				completionHandler?(error)
+				completionHandler?(nil, error)
 				return
 			}
 
@@ -325,10 +331,10 @@ import fXDKit
 
             Task {
 				let payloadData = payload.encoded()
-				let (_, _) = await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
+				let imageURL = await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
 
                 fxd_log()
-                completionHandler?(error)
+                completionHandler?(imageURL, error)
 			}
 		}
 
@@ -433,8 +439,6 @@ import fXDKit
 				let generated = data?.decode(SDcodableGenerated.self)
 				let encodedImages = generated?.images ?? []
 				guard encodedImages.count > 0 else {
-					DispatchQueue.main.async {
-					}
 					completionHandler?(error)
 					return
 				}
@@ -445,14 +449,16 @@ import fXDKit
 						generated: generated,
 						encodedImages: encodedImages)
 
-                    self.displayedImage = newlyGenerated?.0
-                    //self.generationPayload = newlyGenerated?.1
-                    completionHandler?(error)
+                    await MainActor.run {
+                        self.selectedImageURL = newlyGenerated?.0
+                        self.nextPayload = newlyGenerated?.1
+                        completionHandler?(error)
+                    }
 				}
 			}
 	}
 
-	open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async -> (newImage: UIImage?, newPayload: SDcodablePayload?)? {
+	open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async -> (newImageURL: URL?, newPayload: SDcodablePayload?)? {
 		let pngDataArray: [Data] = encodedImages.map { Data(base64Encoded: $0 ?? "") ?? Data() }
 		guard pngDataArray.count > 0 else {
 			return nil
@@ -463,16 +469,16 @@ import fXDKit
 		let infotext = generated?.infotext() ?? ""
 		let extracted = self.extract_fromInfotext(infotext: infotext)
 
-		let newImage = UIImage(data: pngDataArray.last!)
 		let newPayload: SDcodablePayload? = extracted.0
-
 		let payloadData = newPayload.encoded()
-		let storage = SDStorage()
+
+        var newImageURL: URL? = nil
+        let storage = SDStorage()
 		for (index, pngData) in pngDataArray.enumerated() {
-			let (_, _) = await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)
+            newImageURL = await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)
 		}
 
-		return (newImage, newPayload)
+		return (newImageURL, newPayload)
 	}
 
 

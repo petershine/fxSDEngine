@@ -29,9 +29,9 @@ extension SDStorage {
 		return fileURL
 	}
 
-	public func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async -> (imageURL: URL?, payloadURL: URL?) {
+	public func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async -> URL? {
 		guard let imageURL = newFileURL(index: index, contentType: UTType.png) else {
-			return (nil, nil)
+			return nil
 		}
 
 
@@ -46,11 +46,11 @@ extension SDStorage {
 			try payloadData?.write(to: imageURL.jsonURL)
 			fxdPrint("[PAYLOAD JSON SAVED]: ", imageURL.jsonURL)
 
-			return (imageURL, imageURL.jsonURL)
+			return imageURL
 
 		} catch {
 			fxdPrint(error)
-			return (nil, nil)
+			return nil
 		}
 	}
 }
