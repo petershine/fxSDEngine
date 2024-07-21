@@ -46,6 +46,20 @@ extension SDStorage {
 			try payloadData?.write(to: imageURL.jsonURL)
 			fxdPrint("[PAYLOAD JSON SAVED]: ", imageURL.jsonURL)
 
+
+            if let originalImage = UIImage(data: pngData) {
+                let containerSize = CGSize(width: DIMENSION_MINIMUM_IMAGE, height: DIMENSION_MINIMUM_IMAGE)
+                let thumbnailSize = originalImage.aspectSize(for: .fill, containerSize: containerSize)
+
+                if let thumbnailImage = await UIImage(data: pngData)?.byPreparingThumbnail(ofSize: thumbnailSize) {
+                    let thumbnailData = thumbnailImage.pngData()
+
+                    fxdPrint("thumbnailData: ", thumbnailData)
+                    try thumbnailData?.write(to: imageURL.thumbnailURL)
+                    fxdPrint("[THUMBNAIL SAVED]: ", imageURL.thumbnailURL)
+                }
+            }
+
 			return imageURL
 
 		} catch {
@@ -92,6 +106,13 @@ extension SDStorage {
 
 						do {
 							try FileManager.default.removeItem(at: imageURL.jsonURL)
+
+                            do {
+                                try FileManager.default.removeItem(at: imageURL.thumbnailURL)
+                            }
+                            catch {
+                                // attempt with paired .thumbnailURL don't need to be caught
+                            }
 						}
 						catch {
 							// attempt with paired .jsonURL don't need to be caught
@@ -114,14 +135,5 @@ extension SDStorage {
 
                 completionHandler?(deletedCount > 0)
 			})
-	}
-}
-
-
-extension URL {
-	public var jsonURL: URL {
-		return self
-			.deletingPathExtension()
-			.appendingPathExtension(UTType.json.preferredFilenameExtension ?? UTType.json.identifier.components(separatedBy: ".").last ?? "json")
 	}
 }
