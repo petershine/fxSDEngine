@@ -12,7 +12,7 @@ open class SDStorage: NSObject {
 		return FileManager.default.fileURLs(contentType: .png)
 	}()
 
-	public override init() {
+	public override required init() {
 		super.init()
 	}
 }
@@ -46,19 +46,7 @@ extension SDStorage {
 			try payloadData?.write(to: imageURL.jsonURL)
 			fxdPrint("[PAYLOAD JSON SAVED]: ", imageURL.jsonURL)
 
-
-            if let originalImage = UIImage(data: pngData) {
-                let containerSize = CGSize(width: DIMENSION_MINIMUM_IMAGE, height: DIMENSION_MINIMUM_IMAGE)
-                let thumbnailSize = originalImage.aspectSize(for: .fill, containerSize: containerSize)
-
-                if let thumbnailImage = await UIImage(data: pngData)?.byPreparingThumbnail(ofSize: thumbnailSize) {
-                    let thumbnailData = thumbnailImage.pngData()
-
-                    fxdPrint("thumbnailData: ", thumbnailData)
-                    try thumbnailData?.write(to: imageURL.thumbnailURL)
-                    fxdPrint("[THUMBNAIL SAVED]: ", imageURL.thumbnailURL)
-                }
-            }
+            let _ = await saveThumbnail(imageURL: imageURL, pngData: pngData)
 
 			return imageURL
 
@@ -136,4 +124,45 @@ extension SDStorage {
                 completionHandler?(deletedCount > 0)
 			})
 	}
+}
+
+extension SDStorage {
+    public func saveThumbnail(imageURL: URL, pngData: Data? = nil) async -> Bool {
+        var imageData: Data? = pngData
+        if imageData == nil {
+            do {
+                imageData = try Data(contentsOf: imageURL)
+            }
+            catch {
+            }
+        }
+
+        guard imageData != nil,
+              let pngImage = UIImage(data: imageData!) else {
+            return false
+        }
+
+
+        let thumbnailSize = pngImage.aspectSize(for: .fill, containerSize: CGSize(width: DIMENSION_MINIMUM_IMAGE, height: DIMENSION_MINIMUM_IMAGE))
+        guard let thumbnailImage = await UIImage(data: imageData!)?.byPreparingThumbnail(ofSize: thumbnailSize) else {
+            return false
+        }
+
+
+        let thumbnailData = thumbnailImage.pngData()
+        let thumbnailURL = imageURL.thumbnailURL
+
+        let thumbnailDirectory = thumbnailURL.deletingPathExtension().deletingLastPathComponent()
+        do {
+            try FileManager.default.createDirectory(at: thumbnailDirectory, withIntermediateDirectories: true)
+
+            fxdPrint("thumbnailData: ", thumbnailData)
+            try thumbnailData?.write(to: thumbnailURL)
+            fxdPrint("[THUMBNAIL SAVED]: ", thumbnailURL)
+        }
+        catch {
+        }
+
+        return true
+    }
 }
