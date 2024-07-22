@@ -28,10 +28,12 @@ import fXDKit
 	@Published open var nextPayload: SDcodablePayload? = nil
     @Published open var selectedImageURL: URL? {
         willSet {
-            if let imageURL = newValue,
-               let loadedImage = UIImage(contentsOfFile: imageURL.path()) {
+            if let imageURL = newValue {
+                Task {	@MainActor in
+                    let loadedImage = UIImage(contentsOfFile: imageURL.path())
 
-                displayedImage = loadedImage
+                    displayedImage = loadedImage
+                }
             }
         }
     }
