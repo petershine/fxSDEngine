@@ -88,6 +88,9 @@ import fXDKit
 
 							DispatchQueue.main.async {
                                 self.selectedImageURL = imageURL
+                                Task {    @MainActor in
+                                    self.nextPayload = try await SDcodablePayload.loaded(from: imageURL)
+                                }
 
 								completionHandler?(error)
 							}
