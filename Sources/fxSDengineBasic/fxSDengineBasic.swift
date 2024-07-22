@@ -333,7 +333,7 @@ import fXDKit
 
             Task {
 				let payloadData = payload.encoded()
-				let imageURL = await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
+				let imageURL = try await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
 
                 fxd_log()
                 completionHandler?(imageURL, error)
@@ -447,7 +447,7 @@ import fXDKit
 
 
 				Task {
-					let newlyGenerated = await self.finish_txt2img(
+					let newlyGenerated = try await self.finish_txt2img(
 						generated: generated,
 						encodedImages: encodedImages)
 
@@ -460,12 +460,11 @@ import fXDKit
 			}
 	}
 
-	open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async -> (newImageURL: URL?, newPayload: SDcodablePayload?)? {
+	open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (newImageURL: URL?, newPayload: SDcodablePayload?)? {
 		let pngDataArray: [Data] = encodedImages.map { Data(base64Encoded: $0 ?? "") ?? Data() }
 		guard pngDataArray.count > 0 else {
 			return nil
 		}
-
 
 
 		let infotext = generated?.infotext() ?? ""
@@ -477,7 +476,7 @@ import fXDKit
         var newImageURL: URL? = nil
         let storage = SDStorage()
 		for (index, pngData) in pngDataArray.enumerated() {
-            newImageURL = await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)
+            newImageURL = try await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)
 		}
 
 		return (newImageURL, newPayload)

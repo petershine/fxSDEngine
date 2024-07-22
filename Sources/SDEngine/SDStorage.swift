@@ -29,31 +29,25 @@ extension SDStorage {
 		return fileURL
 	}
 
-	public func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async -> URL? {
+	public func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async throws -> URL? {
 		guard let imageURL = newFileURL(index: index, contentType: UTType.png) else {
 			return nil
 		}
 
 
 		fxd_log()
-		do {
-			fxdPrint("pngData: ", pngData)
-			try pngData.write(to: imageURL)
-			fxdPrint("[IMAGE FILE SAVED]: ", imageURL)
+        fxdPrint("pngData: ", pngData)
+        try pngData.write(to: imageURL)
+        fxdPrint("[IMAGE FILE SAVED]: ", imageURL)
 
 
-			fxdPrint("payloadData: ", payloadData)
-			try payloadData?.write(to: imageURL.jsonURL)
-			fxdPrint("[PAYLOAD JSON SAVED]: ", imageURL.jsonURL)
+        fxdPrint("payloadData: ", payloadData)
+        try payloadData?.write(to: imageURL.jsonURL)
+        fxdPrint("[PAYLOAD JSON SAVED]: ", imageURL.jsonURL)
 
-            let _ = try await saveThumbnail(imageURL: imageURL, pngData: pngData)
+        let _ = try await saveThumbnail(imageURL: imageURL, pngData: pngData)
 
-			return imageURL
-
-		} catch {
-			fxdPrint(error)
-			return nil
-		}
+        return imageURL
 	}
 }
 

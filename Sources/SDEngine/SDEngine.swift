@@ -44,7 +44,7 @@ public protocol SDEngine: NSObjectProtocol {
 
 	func action_Generate(payload: SDcodablePayload)
 	func execute_txt2img(payload: SDcodablePayload, completionHandler: (@Sendable (_ error: Error?)->Void)?)
-	func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async -> (newImageURL: URL?, newPayload: SDcodablePayload?)?
+	func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (newImageURL: URL?, newPayload: SDcodablePayload?)?
 
 	func execute_progress(quiet: Bool, completionHandler: (@Sendable (_ error: Error?)->Void)?)
 	func continueRefreshing()
