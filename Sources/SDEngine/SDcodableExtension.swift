@@ -17,23 +17,6 @@ public enum SDExtensionName: String {
 	case adetailer
 }
 
-extension SDExtensionName {
-	func arguments() -> Dictionary<String, Any?>? {
-		var args: Dictionary<String, Any?>? = nil
-		do {
-			switch self {
-				case .adetailer:
-					let adetailer = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data())
-					args = adetailer.args
-			}
-		}
-		catch {	fxd_log()
-			fxdPrint(error)
-		}
-		return args
-	}
-}
-
 
 public struct SDextensionADetailer: Codable {
 	var ad_confidence: Double
