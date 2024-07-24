@@ -52,72 +52,64 @@ extension SDStorage {
 }
 
 extension SDStorage {
-    public func deleteFileURLs(fileURLs: [URL?]?, completionHandler: ((Bool) -> Void)?) {
-		guard let fileURLs, fileURLs.count > 0 else {
-			completionHandler?(false)
-			return
-		}
+    @MainActor public func deleteFileURLs(fileURLs: [URL?]?) async throws -> Bool {
+        guard let fileURLs, fileURLs.count > 0 else {
+            return false
+        }
 
 
-		let message: String = (fileURLs.count > 1) ? "\(fileURLs.count) images" : ((fileURLs.first as? URL)?.absoluteURL.lastPathComponent ?? "")
+        let message: String = (fileURLs.count > 1) ? "\(fileURLs.count) images" : ((fileURLs.first as? URL)?.absoluteURL.lastPathComponent ?? "")
 
-		UIAlertController.simpleAlert(
-			withTitle: "Do you want to delete?",
-			message: message,
-			destructiveText: "DELETE",
-			cancelText: "NO",
-			destructiveHandler: {
-				action in
+        let deletingResult = try await withCheckedThrowingContinuation({
+            (continuation: CheckedContinuation<Bool, Error>) in
 
-				guard action.style != .cancel else {
-                    completionHandler?(false)
-					return
-				}
+            UIAlertController.simpleAlert(
+                withTitle: "Do you want to delete?",
+                message: message,
+                destructiveText: "DELETE",
+                cancelText: "NO",
+                destructiveHandler: {
+                    action in
+
+                    guard action.style != .cancel else {
+                        continuation.resume(returning: false)
+                        return
+                    }
 
 
-				let originalCount = fileURLs.count
-				var deletedCount: Int = 0
-				var deletingError: Error? = nil
-				do {
-					for fileURL in fileURLs {
-                        guard let imageURL: URL = fileURL else {
-                            continue
+                    let originalCount = fileURLs.count
+                    var deletedCount: Int = 0
+                    do {
+                        for fileURL in fileURLs {
+                            guard let imageURL: URL = fileURL else {
+                                continue
+                            }
+
+                            try FileManager.default.removeItem(at: imageURL)
+                            try FileManager.default.removeItem(at: imageURL.jsonURL)
+                            try FileManager.default.removeItem(at: imageURL.thumbnailURL)
+
+                            deletedCount = deletedCount + 1
                         }
+                    }
+                    catch {    fxd_log()
+                        fxdPrint(error)
+                        UIAlertController.errorAlert(error: error)
+                        continuation.resume(throwing: error)
+                        return
+                    }
 
-						try FileManager.default.removeItem(at: imageURL)
 
-						do {
-							try FileManager.default.removeItem(at: imageURL.jsonURL)
+                    if deletedCount == originalCount {
+                        UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images", message: nil)
+                    }
 
-                            do {
-                                try FileManager.default.removeItem(at: imageURL.thumbnailURL)
-                            }
-                            catch {
-                                // attempt with paired .thumbnailURL don't need to be caught
-                            }
-						}
-						catch {
-							// attempt with paired .jsonURL don't need to be caught
-						}
+                    continuation.resume(returning: deletedCount > 0)
+                })
+        })
 
-						deletedCount = deletedCount + 1
-					}
-				}
-				catch {	fxd_log()
-					fxdPrint(error)
-					deletingError = error
-				}
-
-				if deletedCount == originalCount {
-					UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images", message: nil)
-				}
-				else {
-					UIAlertController.errorAlert(error: deletingError)
-				}
-
-                completionHandler?(deletedCount > 0)
-			})
-	}
+        return deletingResult
+    }
 }
 
 extension SDStorage {
