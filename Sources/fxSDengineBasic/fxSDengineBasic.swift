@@ -195,6 +195,31 @@ import fXDKit
 			}
 	}
 
+    public func change_systemVAE(vae: SDcodableVAE, completionHandler: (@Sendable (_ error: Error?)->Void)?) {
+        let vaeName = vae.model_name ?? ""
+        guard !(vaeName.isEmpty) else {
+            DispatchQueue.main.async {
+                completionHandler?(nil)
+            }
+            return
+        }
+
+
+        let optionsPayload = "{\"sd_vae\" : \"\(vaeName)\"}".processedJSONData()
+        networkingModule.requestToSDServer(
+            quiet: false,
+            api_endpoint: .SDAPI_V1_OPTIONS,
+            method: nil,
+            query: nil,
+            payload: optionsPayload) {
+                (data, response, error) in
+
+                DispatchQueue.main.async {
+                    completionHandler?(error)
+                }
+            }
+    }
+
 
     public func refresh_AllConfigurations(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
 

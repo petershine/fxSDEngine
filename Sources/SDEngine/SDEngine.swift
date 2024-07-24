@@ -34,6 +34,7 @@ public protocol SDEngine: NSObjectProtocol {
 	func action_ChangeCheckpoint(_ checkpoint: SDcodableModel)
 	func refresh_systemCheckpoints(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 	func change_systemCheckpoints(checkpoint: SDcodableModel, completionHandler: (@Sendable (_ error: Error?)->Void)?)
+    func change_systemVAE(vae: SDcodableVAE, completionHandler: (@Sendable (_ error: Error?)->Void)?)
 
     func refresh_AllConfigurations(completionHandler: (@Sendable (_ error: Error?)->Void)?)
     func refresh_systemSamplers(completionHandler: (@Sendable (_ error: Error?)->Void)?)

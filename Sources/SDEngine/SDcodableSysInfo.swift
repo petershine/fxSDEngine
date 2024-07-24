@@ -12,6 +12,8 @@ public struct SDcodableSysInfo: Codable {
 
 		public var sd_checkpoint_hash: String? = nil
 		var sd_model_checkpoint: String? = nil
+
+        public var sd_vae: String? = nil
 	}
 }
 

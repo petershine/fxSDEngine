@@ -7,6 +7,7 @@ import fXDKit
 
 public struct SDcodableOverride: Codable {
     public var sd_model_checkpoint: String?
+    public var sd_vae: String?
 }
 
 public class SDcodablePayload: Codable, Equatable, ObservableObject {
