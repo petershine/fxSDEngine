@@ -1,6 +1,6 @@
 
 
-public struct SDcodableModel: Codable, Hashable {
+public struct SDcodableModel: Codable, Hashable, Sendable {
 	public var model_name: String?
 	public var title: String?
 	public var hash: String?

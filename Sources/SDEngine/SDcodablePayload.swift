@@ -210,7 +210,7 @@ extension SDcodablePayload {
         return decoded
     }
 
-    public func update(with checkpoint: SDcodableModel) {
+    public func update(with checkpoint: SDcodableModel) throws {
         guard let model_hash = checkpoint.hash,
               let overrideSettings = "{\"sd_model_checkpoint\" : \"\(model_hash)\"}".processedJSONData()
         else {	fxd_log()
@@ -219,12 +219,7 @@ extension SDcodablePayload {
         }
 
 
-        do {
-            self.override_settings = try JSONDecoder().decode(SDcodableOverride.self, from: overrideSettings)
-        }
-        catch {    fxd_log()
-            fxdPrint(error)
-        }
+        self.override_settings = try JSONDecoder().decode(SDcodableOverride.self, from: overrideSettings)
     }
 }
 
