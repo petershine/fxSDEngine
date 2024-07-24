@@ -16,6 +16,7 @@ public protocol SDprotocolModel: Hashable {
 
 public struct SDcodableSampler: Codable, SDprotocolModel {
     public var name: String?
+
     var aliases: [String?]?
     var options: SDcodableSamplerOption?
     struct SDcodableSamplerOption: Codable, Hashable {
@@ -30,8 +31,23 @@ public struct SDcodableSampler: Codable, SDprotocolModel {
 
 public struct SDcodableScheduler: Codable, SDprotocolModel {
 	public var name: String?
+
     var label: String?
     var aliases: [String?]?
     var default_rho: Int?
     var need_inner_model: Bool?
+}
+
+public struct SDcodableVAE: Codable, SDprotocolModel {
+    public var name: String? {
+        get {
+            return model_name
+        }
+        set {
+            model_name = newValue
+        }
+    }
+
+    var model_name: String?
+    var filename: String?
 }
