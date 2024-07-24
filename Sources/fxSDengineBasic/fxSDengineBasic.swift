@@ -18,6 +18,7 @@ import fXDKit
 	open var systemCheckpoints: [SDcodableModel] = []
     open var systemSamplers: [SDcodableSampler] = []
     open var systemSchedulers: [SDcodableScheduler] = []
+    open var systemVAEs: [SDcodableVAE] = []
 
 
 	@Published open var currentProgress: SDcodableProgress? = nil
@@ -206,8 +207,12 @@ import fXDKit
                 self.refresh_systemSchedulers {
                     error in
 
-                    DispatchQueue.main.async {
-                        completionHandler?(error)
+                    self.refresh_systemVAEs {
+                        error in
+
+                        DispatchQueue.main.async {
+                            completionHandler?(error)
+                        }
                     }
                 }
             }
@@ -249,6 +254,26 @@ import fXDKit
 #endif
                 DispatchQueue.main.async {
                     self.systemSchedulers = data?.decode(Array<SDcodableScheduler>.self) ?? []
+                    completionHandler?(error)
+                }
+            }
+    }
+
+    public func refresh_systemVAEs(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
+        networkingModule.requestToSDServer(
+            quiet: false,
+            api_endpoint: .SDAPI_V1_VAE,
+            method: nil,
+            query: nil,
+            payload: nil) {
+                (data, response, error) in
+#if DEBUG
+                if let jsonObject = data?.jsonObject(quiet: true) {
+                    fxdPrint("VAEs", (jsonObject as? Array<Any>)?.count)
+                }
+#endif
+                DispatchQueue.main.async {
+                    self.systemVAEs = data?.decode(Array<SDcodableVAE>.self) ?? []
                     completionHandler?(error)
                 }
             }

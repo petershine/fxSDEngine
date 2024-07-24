@@ -15,6 +15,7 @@ public protocol SDEngine: NSObjectProtocol {
 	var systemCheckpoints: [SDcodableModel] { get set }
     var systemSamplers: [SDcodableSampler] { get set }
     var systemSchedulers: [SDcodableScheduler] { get set }
+    var systemVAEs: [SDcodableVAE] { get set }
 
 	var currentProgress: SDcodableProgress? { get set }
 	var isSystemBusy: Bool { get set }
@@ -37,6 +38,7 @@ public protocol SDEngine: NSObjectProtocol {
     func refresh_AllConfigurations(completionHandler: (@Sendable (_ error: Error?)->Void)?)
     func refresh_systemSamplers(completionHandler: (@Sendable (_ error: Error?)->Void)?)
     func refresh_systemSchedulers(completionHandler: (@Sendable (_ error: Error?)->Void)?)
+    func refresh_systemVAEs(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 
 	func obtain_latestPNGData(path: String, completionHandler: (@Sendable (_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
     func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: (@Sendable (_ imageURL: URL?, _ error: Error?)->Void)?)
