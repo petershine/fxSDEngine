@@ -10,7 +10,7 @@ public struct SDcodableModel: Codable, Hashable, Sendable {
 }
 
 
-public protocol SDprotocolModel: Hashable {
+public protocol SDprotocolModel: Hashable, Sendable {
     var name: String? { get set }
 }
 
