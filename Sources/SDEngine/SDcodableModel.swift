@@ -51,3 +51,9 @@ public struct SDcodableVAE: Codable, SDprotocolModel {
     var model_name: String?
     var filename: String?
 }
+
+extension SDcodableVAE {
+    static func defaultArray() -> [SDcodableVAE] {
+        return [SDcodableVAE(model_name: "Automatic"), SDcodableVAE(model_name: "None")]
+    }
+}

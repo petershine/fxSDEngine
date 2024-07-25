@@ -298,7 +298,9 @@ import fXDKit
                 }
 #endif
                 DispatchQueue.main.async {
-                    self.systemVAEs = data?.decode(Array<SDcodableVAE>.self) ?? []
+                    var defaultVAEs = SDcodableVAE.defaultArray()
+                    defaultVAEs += data?.decode(Array<SDcodableVAE>.self) ?? []
+                    self.systemVAEs = defaultVAEs
                     completionHandler?(error)
                 }
             }
