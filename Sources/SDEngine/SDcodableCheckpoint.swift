@@ -1,17 +1,26 @@
 
 
-public struct SDcodableModel: Codable, Hashable, Sendable {
-	public var model_name: String?
-	public var title: String?
-	public var hash: String?
-	var sha256: String?
-	var filename: String?
-	var config: String?
+public protocol SDprotocolModel: Hashable, Sendable {
+    var name: String? { get set }
 }
 
 
-public protocol SDprotocolModel: Hashable, Sendable {
-    var name: String? { get set }
+public struct SDcodableCheckpoint: Codable, SDprotocolModel {
+    public var name: String? {
+        get {
+            return model_name
+        }
+        set {
+            model_name = newValue
+        }
+    }
+
+    public var model_name: String?
+    public var title: String?
+    public var hash: String?
+    var sha256: String?
+    var filename: String?
+    var config: String?
 }
 
 public struct SDcodableSampler: Codable, SDprotocolModel {

@@ -15,7 +15,7 @@ import fXDKit
 
 
 	open var systemInfo: SDcodableSysInfo? = nil
-	open var systemCheckpoints: [SDcodableModel] = []
+	open var systemCheckpoints: [SDcodableCheckpoint] = []
     open var systemSamplers: [SDcodableSampler] = []
     open var systemSchedulers: [SDcodableScheduler] = []
     open var systemVAEs: [SDcodableVAE] = []
@@ -120,13 +120,13 @@ import fXDKit
 			}
 	}
 
-    open func checkpoint(for model_hash: String?) -> SDcodableModel? {
+    open func checkpoint(for model_hash: String?) -> SDcodableCheckpoint? {
         return self.systemCheckpoints.filter({
             return ($0.hash?.isEmpty ?? true) ? false : (model_hash ?? "").contains(($0.hash)!)
         }).first
     }
 
-	open func action_ChangeCheckpoint(_ checkpoint: SDcodableModel) {
+	open func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint) {
 		self.change_systemCheckpoints(checkpoint: checkpoint) {
 			error in
 
@@ -162,13 +162,13 @@ import fXDKit
 				}
 #endif
 				DispatchQueue.main.async {
-					self.systemCheckpoints = data?.decode(Array<SDcodableModel>.self) ?? []
+					self.systemCheckpoints = data?.decode(Array<SDcodableCheckpoint>.self) ?? []
 					completionHandler?(error)
 				}
 			}
 	}
 
-	public func change_systemCheckpoints(checkpoint: SDcodableModel, completionHandler: (@Sendable (_ error: Error?)->Void)?) {
+	public func change_systemCheckpoints(checkpoint: SDcodableCheckpoint, completionHandler: (@Sendable (_ error: Error?)->Void)?) {
 		//https://github.com/AUTOMATIC1111/stable-diffusion-webui/discussions/7839
 
 		let checkpointTitle = checkpoint.title ?? ""

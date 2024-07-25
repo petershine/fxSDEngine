@@ -12,7 +12,7 @@ public protocol SDEngine: NSObjectProtocol {
 	
 
 	var systemInfo: SDcodableSysInfo? { get set }
-	var systemCheckpoints: [SDcodableModel] { get set }
+	var systemCheckpoints: [SDcodableCheckpoint] { get set }
     var systemSamplers: [SDcodableSampler] { get set }
     var systemSchedulers: [SDcodableScheduler] { get set }
     var systemVAEs: [SDcodableVAE] { get set }
@@ -30,10 +30,10 @@ public protocol SDEngine: NSObjectProtocol {
 	func synchronize_withSystem(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 	func refresh_systemInfo(completionHandler: (@Sendable (_ error: Error?)->Void)?)
 
-    func checkpoint(for model_hash: String?) -> SDcodableModel?
-	func action_ChangeCheckpoint(_ checkpoint: SDcodableModel)
+    func checkpoint(for model_hash: String?) -> SDcodableCheckpoint?
+	func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint)
 	func refresh_systemCheckpoints(completionHandler: (@Sendable (_ error: Error?)->Void)?)
-	func change_systemCheckpoints(checkpoint: SDcodableModel, completionHandler: (@Sendable (_ error: Error?)->Void)?)
+	func change_systemCheckpoints(checkpoint: SDcodableCheckpoint, completionHandler: (@Sendable (_ error: Error?)->Void)?)
     func change_systemVAE(vae: SDcodableVAE, completionHandler: (@Sendable (_ error: Error?)->Void)?)
 
     func refresh_AllConfigurations(completionHandler: (@Sendable (_ error: Error?)->Void)?)
