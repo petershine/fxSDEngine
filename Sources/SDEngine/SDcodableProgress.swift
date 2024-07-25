@@ -23,10 +23,8 @@ public struct SDcodableState: Codable {
 	var sampling_steps: Int? = nil
 	var skipped: Bool? = nil
 	var stopping_generation: Bool? = nil
-}
 
-extension SDcodableState {
-	public var isJobRunning: Bool {
-		return !((job ?? "").isEmpty || interrupted ?? true)
-	}
+    var isJobRunning: Bool? {
+        return !((job ?? "").isEmpty || interrupted ?? true)
+    }
 }

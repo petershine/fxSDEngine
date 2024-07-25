@@ -522,7 +522,7 @@ import fXDKit
 		}
 
 
-		let infotext = generated?.infotext() ?? ""
+		let infotext = generated?.infotext ?? ""
 		let extracted = self.extract_fromInfotext(infotext: infotext)
 
 		let newPayload: SDcodablePayload? = extracted.0
