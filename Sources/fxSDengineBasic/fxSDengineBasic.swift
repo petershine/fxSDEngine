@@ -43,13 +43,11 @@ import fXDKit
 
 
 	open func action_Synchronize() {
-        Task {
+        Task {	@MainActor in
             let error = try await self.synchronize_withSystem()
             let _ = await self.refresh_AllConfigurations()
 
-            await MainActor.run {
-                UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
-            }
+            UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
         }
 	}
 
@@ -80,8 +78,10 @@ import fXDKit
         let imageURL = prepared?.0
         let error_2 = prepared?.1
 
-        self.nextPayload = try await SDcodablePayload.loaded(from: imageURL)
+        let loadedPayload = try await SDcodablePayload.loaded(from: imageURL)
+
         await MainActor.run {
+            self.nextPayload = loadedPayload
             self.selectedImageURL = imageURL
         }
 
@@ -104,9 +104,7 @@ import fXDKit
             fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonDictionary)
         }
 #endif
-        await MainActor.run {
-            self.systemInfo = data?.decode(SDcodableSysInfo.self)
-        }
+        self.systemInfo = data?.decode(SDcodableSysInfo.self)
 
         return error
     }
@@ -220,9 +218,7 @@ import fXDKit
             fxdPrint("MODELS", (jsonObject as? Array<Any>)?.count)
         }
 #endif
-        await MainActor.run {
-            self.systemCheckpoints = data?.decode(Array<SDcodableCheckpoint>.self) ?? []
-        }
+        self.systemCheckpoints = data?.decode(Array<SDcodableCheckpoint>.self) ?? []
 
         return error
     }
@@ -243,10 +239,8 @@ import fXDKit
             fxdPrint("SAMPLERS", (jsonObject as? Array<Any>)?.count)
         }
 #endif
-        await MainActor.run {
-            self.systemSamplers = data?.decode(Array<SDcodableSampler>.self) ?? []
-        }
-        
+        self.systemSamplers = data?.decode(Array<SDcodableSampler>.self) ?? []
+
         return error
     }
 
@@ -266,9 +260,7 @@ import fXDKit
             fxdPrint("SCHEDULERS", (jsonObject as? Array<Any>)?.count)
         }
 #endif
-        await MainActor.run {
-            self.systemSchedulers = data?.decode(Array<SDcodableScheduler>.self) ?? []
-        }
+        self.systemSchedulers = data?.decode(Array<SDcodableScheduler>.self) ?? []
 
         return error
     }
@@ -289,11 +281,10 @@ import fXDKit
             fxdPrint("VAEs", (jsonObject as? Array<Any>)?.count)
         }
 #endif
-        await MainActor.run {
-            var defaultVAEs = SDcodableVAE.defaultArray()
-            defaultVAEs += data?.decode(Array<SDcodableVAE>.self) ?? []
-            self.systemVAEs = defaultVAEs
-        }
+
+        var defaultVAEs = SDcodableVAE.defaultArray()
+        defaultVAEs += data?.decode(Array<SDcodableVAE>.self) ?? []
+        self.systemVAEs = defaultVAEs
 
         return error
     }
@@ -483,10 +474,8 @@ import fXDKit
             encodedImages: encodedImages)
 
 
-        await MainActor.run {
-            self.selectedImageURL = newlyGenerated?.0
-            self.nextPayload = newlyGenerated?.1
-        }
+        self.selectedImageURL = newlyGenerated?.0
+        self.nextPayload = newlyGenerated?.1
 
         return error
     }
@@ -514,16 +503,22 @@ import fXDKit
 	}
 
 
-//    public func continueRefreshing() async {
-//        if await UIApplication.shared.applicationState == .background {
-//            await self.continueRefreshing()
-//            return
-//        }
-//
-//
-//        let _ = await execute_progress()
-//        await self.continueRefreshing()
-//    }
+    public func continueRefreshing() async {
+        if await UIApplication.shared.applicationState == .background {
+            await self.continueRefreshing()
+            return
+        }
+
+
+        let _ = await execute_progress()
+        do {
+            try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
+        }
+        catch {
+        }
+        
+        await self.continueRefreshing()
+    }
 
     public func execute_progress(quiet: Bool = false) async -> Error? {
         let completion = await networkingModule.requestToSDServer(
@@ -536,13 +531,11 @@ import fXDKit
         let data = completion?.0
         let error = completion?.2
 
-        await MainActor.run {
-            self.currentProgress = data?.decode(SDcodableProgress.self)
+        self.currentProgress = data?.decode(SDcodableProgress.self)
 
-            let isJobRunning = self.currentProgress?.state?.isJobRunning ?? false
-            if self.isSystemBusy != isJobRunning {
-                self.isSystemBusy = isJobRunning
-            }
+        let isJobRunning = self.currentProgress?.state?.isJobRunning ?? false
+        if self.isSystemBusy != isJobRunning {
+            self.isSystemBusy = isJobRunning
         }
 
         return error

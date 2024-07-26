@@ -49,7 +49,7 @@ public protocol SDEngine: NSObjectProtocol {
     func execute_txt2img(payload: SDcodablePayload) async throws -> Error?
 	func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (newImageURL: URL?, newPayload: SDcodablePayload?)?
 
-//    func continueRefreshing() async
+    func continueRefreshing() async
     func execute_progress(quiet: Bool) async -> Error?
     func interrupt() async -> Error?
 }
