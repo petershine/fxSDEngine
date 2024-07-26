@@ -27,29 +27,29 @@ public protocol SDEngine: NSObjectProtocol {
 
 
 	func action_Synchronize()
-	func synchronize_withSystem(completionHandler: (@Sendable (_ error: Error?)->Void)?)
-	func refresh_systemInfo(completionHandler: (@Sendable (_ error: Error?)->Void)?)
+    func synchronize_withSystem() async throws -> Error?
+    func refresh_systemInfo() async -> Error?
 
     func checkpoint(for model_hash: String?) -> SDcodableCheckpoint?
 	func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint)
-	func refresh_systemCheckpoints(completionHandler: (@Sendable (_ error: Error?)->Void)?)
-	func change_systemCheckpoints(checkpoint: SDcodableCheckpoint, completionHandler: (@Sendable (_ error: Error?)->Void)?)
-    func change_systemVAE(vae: SDcodableVAE, completionHandler: (@Sendable (_ error: Error?)->Void)?)
+    func change_systemCheckpoints(checkpoint: SDcodableCheckpoint) async -> Error?
+    func change_systemVAE(vae: SDcodableVAE) async -> Error?
 
-    func refresh_AllConfigurations(completionHandler: (@Sendable (_ error: Error?)->Void)?)
-    func refresh_systemSamplers(completionHandler: (@Sendable (_ error: Error?)->Void)?)
-    func refresh_systemSchedulers(completionHandler: (@Sendable (_ error: Error?)->Void)?)
-    func refresh_systemVAEs(completionHandler: (@Sendable (_ error: Error?)->Void)?)
+    func refresh_AllConfigurations() async -> Error?
+    func refresh_systemCheckpoints() async -> Error?
+    func refresh_systemSamplers() async -> Error?
+    func refresh_systemSchedulers() async -> Error?
+    func refresh_systemVAEs() async -> Error?
 
-	func obtain_latestPNGData(path: String, completionHandler: (@Sendable (_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?)
-    func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: (@Sendable (_ imageURL: URL?, _ error: Error?)->Void)?)
+    func obtain_latestPNGData(path: String) async -> (Data?, String?, Error?)?
+    func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?)?
 	func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?)
 
 	func action_Generate(payload: SDcodablePayload)
-	func execute_txt2img(payload: SDcodablePayload, completionHandler: (@Sendable (_ error: Error?)->Void)?)
+    func execute_txt2img(payload: SDcodablePayload) async throws -> Error?
 	func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (newImageURL: URL?, newPayload: SDcodablePayload?)?
 
-	func execute_progress(quiet: Bool, completionHandler: (@Sendable (_ error: Error?)->Void)?)
-	func continueRefreshing()
-	func interrupt(completionHandler: (@Sendable (_ error: Error?)->Void)?)
+//    func continueRefreshing() async
+    func execute_progress(quiet: Bool) async -> Error?
+    func interrupt() async -> Error?
 }

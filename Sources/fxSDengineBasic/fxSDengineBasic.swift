@@ -43,82 +43,73 @@ import fXDKit
 
 
 	open func action_Synchronize() {
-		self.synchronize_withSystem {
-			(error) in
+        Task {
+            let error = try await self.synchronize_withSystem()
+            let _ = await self.refresh_AllConfigurations()
 
-            self.refresh_AllConfigurations(completionHandler: nil)
-
-			DispatchQueue.main.async {
-				UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
-			}
-		}
+            await MainActor.run {
+                UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
+            }
+        }
 	}
 
-	public func synchronize_withSystem(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
-		refresh_systemInfo {
-			(error) in
+    public func synchronize_withSystem() async throws -> Error? {
+        let error_0 = await refresh_systemInfo()
 
-			// TODO: find better evaluation for NEWly started server
-			guard let folderPath = self.systemInfo?.Config?.outdir_samples else {
-				DispatchQueue.main.async {
-					completionHandler?(error)
-				}
-				return
-			}
+        // TODO: find better evaluation for newly started server
+        guard let folderPath = self.systemInfo?.Config?.outdir_samples else {
+            return error_0
+        }
 
 
-			self.obtain_latestPNGData(
-				path: folderPath,
-				completionHandler: {
-					(pngData, imagePath, error) in
+        let obtained = await obtain_latestPNGData(path: folderPath)
 
-					guard pngData != nil
-							&& imagePath != nil
-					else {
-						DispatchQueue.main.async {
-							completionHandler?(error)
-						}
-						return
-					}
+        let pngData = obtained?.0
+        let imagePath = obtained?.1
+        let error_1 = obtained?.2
+
+        guard pngData != nil
+                && imagePath != nil
+        else {
+            return error_1
+        }
 
 
-					self.prepare_generationPayload(
-						pngData: pngData!,
-						imagePath: imagePath!) {
-							(imageURL, error) in
+        let prepared = try await prepare_generationPayload(pngData: pngData!, imagePath: imagePath!)
 
-							DispatchQueue.main.async {
-                                self.selectedImageURL = imageURL
-                                Task {    @MainActor in
-                                    self.nextPayload = try await SDcodablePayload.loaded(from: imageURL)
-                                }
+        let imageURL = prepared?.0
+        let error_2 = prepared?.1
 
-								completionHandler?(error)
-							}
-						}
-				})
-		}
-	}
+        self.nextPayload = try await SDcodablePayload.loaded(from: imageURL)
+        await MainActor.run {
+            self.selectedImageURL = imageURL
+        }
 
-	public func refresh_systemInfo(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
-		networkingModule.requestToSDServer(
+        return error_2
+    }
+
+    public func refresh_systemInfo() async -> Error? {
+        let completion = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .INTERNAL_SYSINFO,
 			method: nil,
 			query: nil,
-			payload: nil) {
-				(data, response, error) in
+			payload: nil)
+
+        let data = completion?.0
+        let _  = completion?.1
+        let error = completion?.2
 #if DEBUG
-				if let jsonDictionary = data?.jsonDictionary(quiet: true) {
-					fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonDictionary)
-				}
+        if let jsonDictionary = data?.jsonDictionary(quiet: true) {
+            fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonDictionary)
+        }
 #endif
-				DispatchQueue.main.async {
-					self.systemInfo = data?.decode(SDcodableSysInfo.self)
-					completionHandler?(error)
-				}
-			}
-	}
+        await MainActor.run {
+            self.systemInfo = data?.decode(SDcodableSysInfo.self)
+        }
+
+        return error
+    }
 
     open func checkpoint(for model_hash: String?) -> SDcodableCheckpoint? {
         return self.systemCheckpoints.filter({
@@ -127,292 +118,279 @@ import fXDKit
     }
 
 	open func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint) {
-		self.change_systemCheckpoints(checkpoint: checkpoint) {
-			error in
+        Task {
+            let error_0 = await self.change_systemCheckpoints(checkpoint: checkpoint)
 
-			guard error == nil else {
+			guard error_0 == nil else {
 				DispatchQueue.main.async {
-					UIAlertController.errorAlert(error: error)
+					UIAlertController.errorAlert(error: error_0)
 				}
 				return
 			}
 
 
-			self.refresh_systemInfo {
-				(error) in
+            let error_1 = await self.refresh_systemInfo()
 
-				DispatchQueue.main.async {
-					UIAlertController.errorAlert(error: error)
-				}
-			}
-		}
+            DispatchQueue.main.async {
+                UIAlertController.errorAlert(error: error_1)
+            }
+        }
 	}
 
-	public func refresh_systemCheckpoints(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
-		networkingModule.requestToSDServer(
-			quiet: false,
-			api_endpoint: .SDAPI_V1_MODELS,
-			method: nil,
-			query: nil,
-			payload: nil) {
-				(data, response, error) in
-#if DEBUG
-				if let jsonObject = data?.jsonObject(quiet: true) {
-					fxdPrint("MODELS", (jsonObject as? Array<Any>)?.count)
-				}
-#endif
-				DispatchQueue.main.async {
-					self.systemCheckpoints = data?.decode(Array<SDcodableCheckpoint>.self) ?? []
-					completionHandler?(error)
-				}
-			}
-	}
-
-	public func change_systemCheckpoints(checkpoint: SDcodableCheckpoint, completionHandler: (@Sendable (_ error: Error?)->Void)?) {
+    public func change_systemCheckpoints(checkpoint: SDcodableCheckpoint) async -> Error? {
 		//https://github.com/AUTOMATIC1111/stable-diffusion-webui/discussions/7839
 
 		let checkpointTitle = checkpoint.title ?? ""
 		guard !(checkpointTitle.isEmpty) else {
-			DispatchQueue.main.async {
-				completionHandler?(nil)
-			}
-			return
+			return nil
 		}
 
 
 		let optionsPayload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
-		networkingModule.requestToSDServer(
+        let completion = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .SDAPI_V1_OPTIONS,
 			method: nil,
 			query: nil,
-			payload: optionsPayload) {
-				(data, response, error) in
+			payload: optionsPayload)
 
-				DispatchQueue.main.async {
-					completionHandler?(error)
-				}
-			}
+        let _ = completion?.0
+        let _  = completion?.1
+        let error = completion?.2
+
+        return error
 	}
 
-    public func change_systemVAE(vae: SDcodableVAE, completionHandler: (@Sendable (_ error: Error?)->Void)?) {
+    public func change_systemVAE(vae: SDcodableVAE) async -> Error? {
         let vaeName = vae.model_name ?? ""
         guard !(vaeName.isEmpty) else {
-            DispatchQueue.main.async {
-                completionHandler?(nil)
-            }
-            return
+            return nil
         }
 
 
         let optionsPayload = "{\"sd_vae\" : \"\(vaeName)\"}".processedJSONData()
-        networkingModule.requestToSDServer(
+        let completion = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_OPTIONS,
             method: nil,
             query: nil,
-            payload: optionsPayload) {
-                (data, response, error) in
+            payload: optionsPayload)
+        
+        let _ = completion?.0
+        let _  = completion?.1
+        let error = completion?.2
 
-                DispatchQueue.main.async {
-                    completionHandler?(error)
-                }
-            }
+        return error
     }
 
 
-    public func refresh_AllConfigurations(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
-
-        self.refresh_systemCheckpoints {
-            error in
-
-            self.refresh_systemSamplers {
-                error in
-
-                self.refresh_systemSchedulers {
-                    error in
-
-                    self.refresh_systemVAEs {
-                        error in
-
-                        DispatchQueue.main.async {
-                            completionHandler?(error)
-                        }
-                    }
-                }
-            }
+    public func refresh_AllConfigurations() async -> Error? {
+        let error_0 = await self.refresh_systemCheckpoints()
+        guard error_0 == nil else {
+            return error_0
         }
+
+        let error_1 = await self.refresh_systemSamplers()
+        guard error_1 == nil else {
+            return error_1
+        }
+
+        let error_2 = await self.refresh_systemSchedulers()
+        guard error_2 == nil else {
+            return error_2
+        }
+
+        let error_3 = await self.refresh_systemVAEs()
+        return error_3
     }
-    
-    public func refresh_systemSamplers(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
-        networkingModule.requestToSDServer(
+
+    public func refresh_systemCheckpoints() async -> Error? {
+        let completion = await networkingModule.requestToSDServer(
+            quiet: false,
+            api_endpoint: .SDAPI_V1_MODELS,
+            method: nil,
+            query: nil,
+            payload: nil)
+
+        let data = completion?.0
+        let _  = completion?.1
+        let error = completion?.2
+#if DEBUG
+        if let jsonObject = data?.jsonObject(quiet: true) {
+            fxdPrint("MODELS", (jsonObject as? Array<Any>)?.count)
+        }
+#endif
+        await MainActor.run {
+            self.systemCheckpoints = data?.decode(Array<SDcodableCheckpoint>.self) ?? []
+        }
+
+        return error
+    }
+
+    public func refresh_systemSamplers() async -> Error? {
+        let completion = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_SAMPLERS,
             method: nil,
             query: nil,
-            payload: nil) {
-                (data, response, error) in
+            payload: nil)
+
+        let data = completion?.0
+        let _  = completion?.1
+        let error = completion?.2
 #if DEBUG
-                if let jsonObject = data?.jsonObject(quiet: true) {
-                    fxdPrint("SAMPLERS", (jsonObject as? Array<Any>)?.count)
-                }
+        if let jsonObject = data?.jsonObject(quiet: true) {
+            fxdPrint("SAMPLERS", (jsonObject as? Array<Any>)?.count)
+        }
 #endif
-                DispatchQueue.main.async {
-                    self.systemSamplers = data?.decode(Array<SDcodableSampler>.self) ?? []
-                    completionHandler?(error)
-                }
-            }
+        await MainActor.run {
+            self.systemSamplers = data?.decode(Array<SDcodableSampler>.self) ?? []
+        }
+        
+        return error
     }
 
-    public func refresh_systemSchedulers(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
-        networkingModule.requestToSDServer(
+    public func refresh_systemSchedulers() async -> Error? {
+        let completion = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_SCHEDULERS,
             method: nil,
             query: nil,
-            payload: nil) {
-                (data, response, error) in
+            payload: nil)
+
+        let data = completion?.0
+        let _  = completion?.1
+        let error = completion?.2
 #if DEBUG
-                if let jsonObject = data?.jsonObject(quiet: true) {
-                    fxdPrint("SCHEDULERS", (jsonObject as? Array<Any>)?.count)
-                }
+        if let jsonObject = data?.jsonObject(quiet: true) {
+            fxdPrint("SCHEDULERS", (jsonObject as? Array<Any>)?.count)
+        }
 #endif
-                DispatchQueue.main.async {
-                    self.systemSchedulers = data?.decode(Array<SDcodableScheduler>.self) ?? []
-                    completionHandler?(error)
-                }
-            }
+        await MainActor.run {
+            self.systemSchedulers = data?.decode(Array<SDcodableScheduler>.self) ?? []
+        }
+
+        return error
     }
 
-    public func refresh_systemVAEs(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
-        networkingModule.requestToSDServer(
+    public func refresh_systemVAEs() async -> Error? {
+        let completion = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_VAE,
             method: nil,
             query: nil,
-            payload: nil) {
-                (data, response, error) in
+            payload: nil)
+
+        let data = completion?.0
+        let _  = completion?.1
+        let error = completion?.2
 #if DEBUG
-                if let jsonObject = data?.jsonObject(quiet: true) {
-                    fxdPrint("VAEs", (jsonObject as? Array<Any>)?.count)
-                }
+        if let jsonObject = data?.jsonObject(quiet: true) {
+            fxdPrint("VAEs", (jsonObject as? Array<Any>)?.count)
+        }
 #endif
-                DispatchQueue.main.async {
-                    var defaultVAEs = SDcodableVAE.defaultArray()
-                    defaultVAEs += data?.decode(Array<SDcodableVAE>.self) ?? []
-                    self.systemVAEs = defaultVAEs
-                    completionHandler?(error)
-                }
-            }
+        await MainActor.run {
+            var defaultVAEs = SDcodableVAE.defaultArray()
+            defaultVAEs += data?.decode(Array<SDcodableVAE>.self) ?? []
+            self.systemVAEs = defaultVAEs
+        }
+
+        return error
     }
 
-
-	public func obtain_latestPNGData(path: String, completionHandler: ((_ pngData: Data?, _ path: String?, _ error: Error?)->Void)?) {
-		networkingModule.requestToSDServer(
+    public func obtain_latestPNGData(path: String) async -> (Data?, String?, Error?)? {
+        let completion = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
 			method: nil,
 			query: "folder_path=\(path)",
-			payload: nil) {
-				(data, response, error) in
+			payload: nil)
 
-				guard let decodedResponse = data?.decode(SDcodableFiles.self),
-					  let filesORfolders = decodedResponse.files
-				else {
-					completionHandler?(nil, nil, error)
-					return
-				}
-
-				fxdPrint("filesORfolders.count: ", filesORfolders.count)
-
-				let latestFileORfolder = filesORfolders
-					.sorted {
-						($0?.updated_time)! > ($1?.updated_time)!
-					}
-					.filter {
-						!($0?.fullpath?.contains("DS_Store") ?? false)
-					}
-					.first as? SDcodableFile
-
-				fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time)
-				fxdPrint("latestFileORfolder?.fullpath: ", latestFileORfolder?.fullpath)
-				guard latestFileORfolder != nil,
-					  let fullpath = latestFileORfolder?.fullpath
-				else {
-					completionHandler?(nil, nil, error)
-					return
-				}
+        let data = completion?.0
+        let _  = completion?.1
+        let error = completion?.2
 
 
-				fxdPrint("latestFileORfolder?.type: ", latestFileORfolder?.type)
-				guard let type = latestFileORfolder?.type,
-					  type != "dir"
-				else {
-					//recursive
-					self.obtain_latestPNGData(
-						path: fullpath,
-						completionHandler: completionHandler)
-					return
-				}
+        guard let decodedResponse = data?.decode(SDcodableFiles.self),
+              let filesORfolders = decodedResponse.files
+        else {
+            return (nil, nil, error)
+        }
+
+        fxdPrint("filesORfolders.count: ", filesORfolders.count)
+
+        let latestFileORfolder = filesORfolders
+            .sorted {
+                ($0?.updated_time)! > ($1?.updated_time)!
+            }
+            .filter {
+                !($0?.fullpath?.contains("DS_Store") ?? false)
+            }
+            .first as? SDcodableFile
+
+        fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time)
+        fxdPrint("latestFileORfolder?.fullpath: ", latestFileORfolder?.fullpath)
+        guard latestFileORfolder != nil,
+              let fullpath = latestFileORfolder?.fullpath
+        else {
+            //TODO: error can be nil here. Prepare an error for alerting
+            return (nil, nil, error)
+        }
 
 
-				self.networkingModule.requestToSDServer(
-					quiet: false,
-					api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
-					method: nil,
-					query: "path=\(fullpath)&t=file",
-					payload: nil) {
-						(data, response, error) in
-
-						completionHandler?(data, fullpath, error)
-					}
-			}
-	}
-
-    public func prepare_generationPayload(pngData: Data, imagePath: String, completionHandler: (@Sendable (_ imageURL: URL?, _ error: Error?)->Void)?) {
-		let _assignPayload: (String, Error?) -> Void = {
-			(infotext: String, error: Error?) in
-
-			guard !infotext.isEmpty, error == nil else {
-				completionHandler?(nil, error)
-				return
-			}
-
-			let extracted = self.extract_fromInfotext(infotext: infotext)
-			guard let payload = extracted.0 else {
-				completionHandler?(nil, error)
-				return
-			}
+        fxdPrint("latestFileORfolder?.type: ", latestFileORfolder?.type)
+        guard let type = latestFileORfolder?.type,
+              type != "dir"
+        else {
+            //recursive
+            return await self.obtain_latestPNGData(path: fullpath)
+        }
 
 
+        let obtained = await networkingModule.requestToSDServer(
+            quiet: false,
+            api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
+            method: nil,
+            query: "path=\(fullpath)&t=file",
+            payload: nil)
 
-            Task {
-				let payloadData = payload.encoded()
-				let imageURL = try await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
+        return (obtained?.0, fullpath, obtained?.2)
+    }
 
-                fxd_log()
-                completionHandler?(imageURL, error)
-			}
-		}
-
-
-		networkingModule.requestToSDServer(
+    public func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?)? {
+        let completion = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
 			method: nil,
 			query: "path=\(imagePath)",
-			payload: nil) {
-				(data, response, error) in
+			payload: nil)
 
-				guard let data,
-					  let infotext = String(data: data, encoding: .utf8)
-				else {
-					_assignPayload("", error)
-					return
-				}
+        let data = completion?.0
+        let _ = completion?.1
+        let error = completion?.2
 
-				_assignPayload(infotext, error)
-			}
+        guard let data,
+              let infotext = String(data: data, encoding: .utf8)
+        else {
+            return (nil, error)
+        }
+
+
+        guard !infotext.isEmpty, error == nil else {
+            return (nil, error)
+        }
+
+        let extracted = self.extract_fromInfotext(infotext: infotext)
+        guard let payload = extracted.0 else {
+            return (nil, error)
+        }
+
+
+        let payloadData = payload.encoded()
+        let imageURL = try await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
+
+        fxd_log()
+        return (imageURL, error)
 	}
 
 	public func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?) {
@@ -465,55 +443,53 @@ import fXDKit
 
 
 	open func action_Generate(payload: SDcodablePayload) {
-		self.execute_txt2img(payload: payload) {
-			error in
+        Task {	@MainActor in
+            let error = try await self.execute_txt2img(payload: payload)
+            UIAlertController.errorAlert(error: error)
+        }
+    }
 
-			DispatchQueue.main.async {
-				UIAlertController.errorAlert(error: error)
-			}
-		}
-	}
-
-	public func execute_txt2img(payload: SDcodablePayload, completionHandler: (@Sendable (_ error: Error?)->Void)?) {	fxd_log()
+	public func execute_txt2img(payload: SDcodablePayload) async throws -> Error? {	fxd_log()
 		let payloadData: Data? = payload.submissablePayload(sdEngine: self)
 
-		networkingModule.requestToSDServer(
+        let completion = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			method: nil,
 			query: nil,
-			payload: payloadData) {
-				(data, response, error) in
+			payload: payloadData)
+
+        let data = completion?.0
+        let _ = completion?.1
+        let error = completion?.2
 
 #if DEBUG
-				if var jsonDictionary = data?.jsonDictionary() {	fxd_log()
-					jsonDictionary["images"] = ["<IMAGES ENCODED>"]
-					fxdPrint(name: "TXT2IMG", dictionary: jsonDictionary)
-				}
+        if var jsonDictionary = data?.jsonDictionary() {	fxd_log()
+            jsonDictionary["images"] = ["<IMAGES ENCODED>"]
+            fxdPrint(name: "TXT2IMG", dictionary: jsonDictionary)
+        }
 #endif
 
 
-				let generated = data?.decode(SDcodableGenerated.self)
-				let encodedImages = generated?.images ?? []
-				guard encodedImages.count > 0 else {
-					completionHandler?(error)
-					return
-				}
+        let generated = data?.decode(SDcodableGenerated.self)
+        let encodedImages = generated?.images ?? []
+        guard encodedImages.count > 0 else {
+            return error
+        }
 
 
-				Task {
-					let newlyGenerated = try await self.finish_txt2img(
-						generated: generated,
-						encodedImages: encodedImages)
+        let newlyGenerated = try await self.finish_txt2img(
+            generated: generated,
+            encodedImages: encodedImages)
 
-                    await MainActor.run {
-                        self.selectedImageURL = newlyGenerated?.0
-                        self.nextPayload = newlyGenerated?.1
-                        completionHandler?(error)
-                    }
-				}
-			}
-	}
+
+        await MainActor.run {
+            self.selectedImageURL = newlyGenerated?.0
+            self.nextPayload = newlyGenerated?.1
+        }
+
+        return error
+    }
 
 	open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (newImageURL: URL?, newPayload: SDcodablePayload?)? {
 		let pngDataArray: [Data] = encodedImages.map { Data(base64Encoded: $0 ?? "") ?? Data() }
@@ -538,62 +514,53 @@ import fXDKit
 	}
 
 
-	public func execute_progress(quiet: Bool = false, completionHandler: (@Sendable (_ error: Error?)->Void)?) {
-		networkingModule.requestToSDServer(
-			quiet: quiet,
-			api_endpoint: .SDAPI_V1_PROGRESS,
-			method: nil,
-			query: nil,
-			payload: nil) {
-				(data, response, error) in
+//    public func continueRefreshing() async {
+//        if await UIApplication.shared.applicationState == .background {
+//            await self.continueRefreshing()
+//            return
+//        }
+//
+//
+//        let _ = await execute_progress()
+//        await self.continueRefreshing()
+//    }
+
+    public func execute_progress(quiet: Bool = false) async -> Error? {
+        let completion = await networkingModule.requestToSDServer(
+            quiet: quiet,
+            api_endpoint: .SDAPI_V1_PROGRESS,
+            method: nil,
+            query: nil,
+            payload: nil)
+
+        let data = completion?.0
+        let error = completion?.2
+
+        await MainActor.run {
+            self.currentProgress = data?.decode(SDcodableProgress.self)
+
+            let isJobRunning = self.currentProgress?.state?.isJobRunning ?? false
+            if self.isSystemBusy != isJobRunning {
+                self.isSystemBusy = isJobRunning
+            }
+        }
+
+        return error
+    }
 
 
-				DispatchQueue.main.async {
-					self.currentProgress = data?.decode(SDcodableProgress.self)
+	public func interrupt() async -> Error? {
+        let completion = await networkingModule.requestToSDServer(
+            quiet: false,
+            api_endpoint: .SDAPI_V1_INTERRUPT,
+            method: "POST",
+            query: nil,
+            payload: nil)
 
-					let isJobRunning = self.currentProgress?.state?.isJobRunning ?? false
-					if self.isSystemBusy != isJobRunning {
-						self.isSystemBusy = isJobRunning
-					}
+        let error = completion?.2
 
-					completionHandler?(error)
-				}
-			}
-	}
-
-	public func continueRefreshing() {
-		if UIApplication.shared.applicationState == .background {
-			DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-				self.continueRefreshing()
-			}
-			return
-		}
-
-		self.execute_progress(
-			quiet: true,
-			completionHandler: {
-				(error) in
-
-				DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-					self.continueRefreshing()
-				}
-			})
-	}
-
-	public func interrupt(completionHandler: (@Sendable (_ error: Error?)->Void)?) {
-		networkingModule.requestToSDServer(
-			quiet: false,
-			api_endpoint: .SDAPI_V1_INTERRUPT,
-			method: "POST",
-			query: nil,
-			payload: nil) {
-				(data, response, error) in
-
-				DispatchQueue.main.async {
-					completionHandler?(error)
-				}
-			}
-	}
+        return error
+    }
 }
 
 

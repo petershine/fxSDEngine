@@ -11,13 +11,12 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
 		return "http://127.0.0.1:7860"
 	}
 
-	public func requestToSDServer(
-		quiet: Bool = false,
-		api_endpoint: SDAPIendpoint,
-		method: String? = nil,
-		query: String? = nil,
-		payload: Data? = nil,
-		responseHandler: ((_ data: Data?, _ response: URLResponse?, _ error: Error?) -> Void)?) {
+    public func requestToSDServer(
+        quiet: Bool = false,
+        api_endpoint: SDAPIendpoint,
+        method: String? = nil,
+        query: String? = nil,
+        payload: Data? = nil) async -> (Data?, URLResponse?, Error?)? {
 			if !quiet {
 				fxd_log()
 			}
@@ -31,8 +30,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
 			fxdPrint("requestPath: ", requestPath, quiet:quiet)
 
 			guard let requestURL = URL(string: requestPath) else {
-				responseHandler?(nil, nil, nil)
-				return
+				return (nil, nil, nil)
 			}
 
 
@@ -48,30 +46,36 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
 			}
 
 
-			let completionHandler = {
-				(data: Data?, response: URLResponse?, error: Error?) in
+            var data: Data? = nil
+            var response: URLResponse? = nil
+            var error: Error? = nil
 
-				let statusCode = (response as? HTTPURLResponse)?.statusCode
-				fxdPrint("response.statusCode: ", statusCode, quiet:quiet)
-				fxdPrint("data: ", data, quiet:quiet)
-				fxdPrint("error: ", error, quiet:quiet)
+            do {
+                let dataAndResponse = try await URLSession.shared.data(for: httpRequest)
+                data = dataAndResponse.0
+                response = dataAndResponse.1
+            }
+            catch let httpError {
+                error = httpError
+            }
+            
 
-				if data == nil || statusCode != 200 {
-					fxdPrint("httpURLResponse: ", (response as? HTTPURLResponse), quiet:quiet)
+            let statusCode = (response as? HTTPURLResponse)?.statusCode
+            fxdPrint("response.statusCode: ", statusCode, quiet:quiet)
+            fxdPrint("data: ", data, quiet:quiet)
+            fxdPrint("error: ", error, quiet:quiet)
 
-					fxdPrint("httpRequest.url: ", httpRequest.url)
-					fxdPrint("httpRequest.allHTTPHeaderFields: ", httpRequest.allHTTPHeaderFields)
-					fxdPrint("httpRequest.httpMethod: ", httpRequest.httpMethod)
-					fxdPrint("httpRequest.httpBody: ", httpRequest.httpBody)
-				}
+            if data == nil || statusCode != 200 {
+                fxdPrint("httpURLResponse: ", (response as? HTTPURLResponse), quiet:quiet)
 
-				let processedError = SDError.processsed(data, response, error)
-				responseHandler?(data, response, processedError)
-			}
+                fxdPrint("httpRequest.url: ", httpRequest.url)
+                fxdPrint("httpRequest.allHTTPHeaderFields: ", httpRequest.allHTTPHeaderFields)
+                fxdPrint("httpRequest.httpMethod: ", httpRequest.httpMethod)
+                fxdPrint("httpRequest.httpBody: ", httpRequest.httpBody)
+            }
 
-
-			let httpTask = URLSession.shared.dataTask(with: httpRequest, completionHandler: completionHandler)
-			httpTask.resume()
+            let processedError = SDError.processsed(data, response, error)
+            return (data, response, processedError)
 		}
 	
 
