@@ -240,7 +240,6 @@ extension SDcodablePayload {
         let model_hash = override_settings?.sd_model_checkpoint ?? ""
         if !model_hash.isEmpty {
             let filtered = checkpoints.filter { $0.hash == model_hash }
-
             if filtered.first != nil {
                 model_name = filtered.first?.model_name ?? "(unknown)"
             }
@@ -260,7 +259,7 @@ extension SDcodablePayload {
             ["SEED: ", String(seed)],
         ]
 
-        essentials.append(["DID USE ADETAILER: ", (use_adetailer ? "YES" : "NO")])
+        essentials.append(["FACE IMPROVEMENT: ", (use_adetailer ? "YES" : "NO")])
 
         return essentials
     }
