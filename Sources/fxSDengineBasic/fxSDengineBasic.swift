@@ -503,21 +503,17 @@ import fXDKit
 	}
 
 
-    public func continueRefreshing() async {
-        if await UIApplication.shared.applicationState == .background {
-            await self.continueRefreshing()
-            return
-        }
+    public func continueRefreshing() {
+        Task {
+            let _ = await execute_progress(quiet: true)
+            do {
+                try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
+            }
+            catch {
+            }
 
-
-        let _ = await execute_progress()
-        do {
-            try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
+            self.continueRefreshing()
         }
-        catch {
-        }
-        
-        await self.continueRefreshing()
     }
 
     public func execute_progress(quiet: Bool = false) async -> Error? {
@@ -531,11 +527,16 @@ import fXDKit
         let data = completion?.0
         let error = completion?.2
 
-        self.currentProgress = data?.decode(SDcodableProgress.self)
+        let newProgress = data?.decode(SDcodableProgress.self)
+        let isJobRunning = newProgress?.state?.isJobRunning ?? false
 
-        let isJobRunning = self.currentProgress?.state?.isJobRunning ?? false
-        if self.isSystemBusy != isJobRunning {
-            self.isSystemBusy = isJobRunning
+        
+        await MainActor.run {
+            self.currentProgress = newProgress
+
+            if self.isSystemBusy != isJobRunning {
+                self.isSystemBusy = isJobRunning
+            }
         }
 
         return error
