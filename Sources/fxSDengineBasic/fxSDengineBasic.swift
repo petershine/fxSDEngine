@@ -78,7 +78,7 @@ import fXDKit
         let imageURL = prepared?.0
         let error_2 = prepared?.1
 
-        let loadedPayload = try await SDcodablePayload.loaded(from: imageURL)
+        let loadedPayload = try SDcodablePayload.loaded(from: imageURL)
 
         await MainActor.run {
             self.nextPayload = loadedPayload

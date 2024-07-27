@@ -226,7 +226,7 @@ extension SDcodablePayload {
 
 
 extension SDcodablePayload {
-    @MainActor public static func loaded(from imageURL: URL?) async throws -> Self? {
+    public static func loaded(from imageURL: URL?) throws -> Self? {
         guard let jsonURL = imageURL?.jsonURL else {
             return nil
         }
@@ -235,7 +235,7 @@ extension SDcodablePayload {
         return payloadData.decode(Self.self)
     }
 
-    @MainActor public func configurations(with checkpoints: [SDcodableCheckpoint]) async -> [[String]] {
+    public func configurations(with checkpoints: [SDcodableCheckpoint]) -> [[String]] {
         var model_name: String = "(unknown)"
         let model_hash = override_settings?.sd_model_checkpoint ?? ""
         if !model_hash.isEmpty {
