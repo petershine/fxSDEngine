@@ -16,7 +16,7 @@ open class fxSDnetworkingBasic: NSObject, @unchecked Sendable, SDNetworking {
         api_endpoint: SDAPIendpoint,
         method: String? = nil,
         query: String? = nil,
-        payload: Data? = nil) async -> (Data?, URLResponse?, Error?)? {
+        payload: Data? = nil) async -> (data: Data?, response: URLResponse?, error: Error?) {
 			if !quiet {
 				fxd_log()
 			}

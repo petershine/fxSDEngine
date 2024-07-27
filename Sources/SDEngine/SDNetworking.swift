@@ -32,7 +32,7 @@ public protocol SDNetworking: NSObjectProtocol {
 		api_endpoint: SDAPIendpoint,
 		method: String?,
 		query: String?,
-		payload: Data?) async -> (Data?, URLResponse?, Error?)?
+        payload: Data?) async -> (data: Data?, response: URLResponse?, error: Error?)
 }
 
 

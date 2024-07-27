@@ -100,16 +100,12 @@ import fXDKit
     }
 
     public func refresh_systemInfo() async -> Error? {
-        let completion = await networkingModule.requestToSDServer(
+        let (data, _, error) = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .INTERNAL_SYSINFO,
 			method: nil,
 			query: nil,
 			payload: nil)
-
-        let data = completion?.0
-        let _  = completion?.1
-        let error = completion?.2
 #if DEBUG
         if let jsonDictionary = data?.jsonDictionary(quiet: true) {
             fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonDictionary)
@@ -158,16 +154,12 @@ import fXDKit
 
 
 		let optionsPayload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
-        let completion = await networkingModule.requestToSDServer(
+        let (_, _, error) = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .SDAPI_V1_OPTIONS,
 			method: nil,
 			query: nil,
 			payload: optionsPayload)
-
-        let _ = completion?.0
-        let _  = completion?.1
-        let error = completion?.2
 
         return error
 	}
@@ -180,16 +172,12 @@ import fXDKit
 
 
         let optionsPayload = "{\"sd_vae\" : \"\(vaeName)\"}".processedJSONData()
-        let completion = await networkingModule.requestToSDServer(
+        let (_, _, error) = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_OPTIONS,
             method: nil,
             query: nil,
             payload: optionsPayload)
-        
-        let _ = completion?.0
-        let _  = completion?.1
-        let error = completion?.2
 
         return error
     }
@@ -216,16 +204,12 @@ import fXDKit
     }
 
     public func refresh_systemCheckpoints() async -> Error? {
-        let completion = await networkingModule.requestToSDServer(
+        let (data, _, error) = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_MODELS,
             method: nil,
             query: nil,
             payload: nil)
-
-        let data = completion?.0
-        let _  = completion?.1
-        let error = completion?.2
 #if DEBUG
         if let jsonObject = data?.jsonObject(quiet: true) {
             fxdPrint("MODELS", (jsonObject as? Array<Any>)?.count)
@@ -239,16 +223,12 @@ import fXDKit
     }
 
     public func refresh_systemSamplers() async -> Error? {
-        let completion = await networkingModule.requestToSDServer(
+        let (data, _, error) = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_SAMPLERS,
             method: nil,
             query: nil,
             payload: nil)
-
-        let data = completion?.0
-        let _  = completion?.1
-        let error = completion?.2
 #if DEBUG
         if let jsonObject = data?.jsonObject(quiet: true) {
             fxdPrint("SAMPLERS", (jsonObject as? Array<Any>)?.count)
@@ -262,16 +242,12 @@ import fXDKit
     }
 
     public func refresh_systemSchedulers() async -> Error? {
-        let completion = await networkingModule.requestToSDServer(
+        let (data, _, error) = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_SCHEDULERS,
             method: nil,
             query: nil,
             payload: nil)
-
-        let data = completion?.0
-        let _  = completion?.1
-        let error = completion?.2
 #if DEBUG
         if let jsonObject = data?.jsonObject(quiet: true) {
             fxdPrint("SCHEDULERS", (jsonObject as? Array<Any>)?.count)
@@ -285,16 +261,12 @@ import fXDKit
     }
 
     public func refresh_systemVAEs() async -> Error? {
-        let completion = await networkingModule.requestToSDServer(
+        let (data, _, error) = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_VAE,
             method: nil,
             query: nil,
             payload: nil)
-
-        let data = completion?.0
-        let _  = completion?.1
-        let error = completion?.2
 #if DEBUG
         if let jsonObject = data?.jsonObject(quiet: true) {
             fxdPrint("VAEs", (jsonObject as? Array<Any>)?.count)
@@ -310,17 +282,12 @@ import fXDKit
     }
 
     public func obtain_latestPNGData(path: String) async -> (Data?, String?, Error?)? {
-        let completion = await networkingModule.requestToSDServer(
+        let (data, _, error) = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
 			method: nil,
 			query: "folder_path=\(path)",
 			payload: nil)
-
-        let data = completion?.0
-        let _  = completion?.1
-        let error = completion?.2
-
 
         guard let decodedResponse = data?.decode(SDcodableFiles.self),
               let filesORfolders = decodedResponse.files
@@ -365,20 +332,16 @@ import fXDKit
             query: "path=\(fullpath)&t=file",
             payload: nil)
 
-        return (obtained?.0, fullpath, obtained?.2)
+        return (obtained.data, fullpath, obtained.error)
     }
 
     public func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?)? {
-        let completion = await networkingModule.requestToSDServer(
+        let (data, _, error) = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
 			method: nil,
 			query: "path=\(imagePath)",
-			payload: nil)
-
-        let data = completion?.0
-        let _ = completion?.1
-        let error = completion?.2
+            payload: nil)
 
         guard let data,
               let infotext = String(data: data, encoding: .utf8)
@@ -471,17 +434,12 @@ import fXDKit
 	public func execute_txt2img(payload: SDcodablePayload) async throws -> Error? {	fxd_log()
 		let payloadData: Data? = payload.submissablePayload(sdEngine: self)
 
-        let completion = await networkingModule.requestToSDServer(
+        let (data, _, error) = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			method: nil,
 			query: nil,
 			payload: payloadData)
-
-        let data = completion?.0
-        let _ = completion?.1
-        let error = completion?.2
-
 #if DEBUG
         if var jsonDictionary = data?.jsonDictionary() {	fxd_log()
             jsonDictionary["images"] = ["<IMAGES ENCODED>"]
@@ -561,15 +519,12 @@ import fXDKit
     }
 
     public func execute_progress(quiet: Bool = false) async -> Error? {
-        let completion = await networkingModule.requestToSDServer(
+        let (data, _, error) = await networkingModule.requestToSDServer(
             quiet: quiet,
             api_endpoint: .SDAPI_V1_PROGRESS,
             method: nil,
             query: nil,
             payload: nil)
-
-        let data = completion?.0
-        let error = completion?.2
 
         let newProgress = data?.decode(SDcodableProgress.self)
         let isJobRunning = newProgress?.state?.isJobRunning ?? false
@@ -588,14 +543,12 @@ import fXDKit
 
 
     @MainActor public func interrupt() async -> Error? {
-        let completion = await networkingModule.requestToSDServer(
+        let (_, _, error) = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_INTERRUPT,
             method: "POST",
             query: nil,
             payload: nil)
-
-        let error = completion?.2
 
         didInterrupt = true
 
