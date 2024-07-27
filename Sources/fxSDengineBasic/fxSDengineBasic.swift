@@ -104,7 +104,9 @@ import fXDKit
             fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonDictionary)
         }
 #endif
-        self.systemInfo = data?.decode(SDcodableSysInfo.self)
+        await MainActor.run {
+            self.systemInfo = data?.decode(SDcodableSysInfo.self)
+        }
 
         return error
     }
@@ -218,7 +220,9 @@ import fXDKit
             fxdPrint("MODELS", (jsonObject as? Array<Any>)?.count)
         }
 #endif
-        self.systemCheckpoints = data?.decode(Array<SDcodableCheckpoint>.self) ?? []
+        await MainActor.run {
+            self.systemCheckpoints = data?.decode(Array<SDcodableCheckpoint>.self) ?? []
+        }
 
         return error
     }
@@ -239,7 +243,9 @@ import fXDKit
             fxdPrint("SAMPLERS", (jsonObject as? Array<Any>)?.count)
         }
 #endif
-        self.systemSamplers = data?.decode(Array<SDcodableSampler>.self) ?? []
+        await MainActor.run {
+            self.systemSamplers = data?.decode(Array<SDcodableSampler>.self) ?? []
+        }
 
         return error
     }
@@ -260,7 +266,9 @@ import fXDKit
             fxdPrint("SCHEDULERS", (jsonObject as? Array<Any>)?.count)
         }
 #endif
-        self.systemSchedulers = data?.decode(Array<SDcodableScheduler>.self) ?? []
+        await MainActor.run {
+            self.systemSchedulers = data?.decode(Array<SDcodableScheduler>.self) ?? []
+        }
 
         return error
     }
@@ -281,10 +289,11 @@ import fXDKit
             fxdPrint("VAEs", (jsonObject as? Array<Any>)?.count)
         }
 #endif
-
-        var defaultVAEs = SDcodableVAE.defaultArray()
-        defaultVAEs += data?.decode(Array<SDcodableVAE>.self) ?? []
-        self.systemVAEs = defaultVAEs
+        await MainActor.run {
+            var defaultVAEs = SDcodableVAE.defaultArray()
+            defaultVAEs += data?.decode(Array<SDcodableVAE>.self) ?? []
+            self.systemVAEs = defaultVAEs
+        }
 
         return error
     }
