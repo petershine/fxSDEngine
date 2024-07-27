@@ -10,7 +10,7 @@ import fXDKit
 	open var networkingModule: SDNetworking
 
 	required public init(networkingModule: SDNetworking) {
-		self.networkingModule = networkingModule
+        self.networkingModule = networkingModule
 	}
 
 
@@ -44,8 +44,8 @@ import fXDKit
 
 	open func action_Synchronize() {
         Task {	@MainActor in
-            let error = try await self.synchronize_withSystem()
-            let _ = await self.refresh_AllConfigurations()
+            let error = try await synchronize_withSystem()
+            let _ = await refresh_AllConfigurations()
 
             UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
         }
@@ -55,7 +55,7 @@ import fXDKit
         let error_0 = await refresh_systemInfo()
 
         // TODO: find better evaluation for newly started server
-        guard let folderPath = self.systemInfo?.Config?.outdir_samples else {
+        guard let folderPath = systemInfo?.Config?.outdir_samples else {
             return error_0
         }
 
@@ -81,8 +81,8 @@ import fXDKit
         let loadedPayload = try SDcodablePayload.loaded(from: imageURL)
 
         await MainActor.run {
-            self.nextPayload = loadedPayload
-            self.selectedImageURL = imageURL
+            nextPayload = loadedPayload
+            selectedImageURL = imageURL
         }
 
         return error_2
@@ -105,21 +105,21 @@ import fXDKit
         }
 #endif
         await MainActor.run {
-            self.systemInfo = data?.decode(SDcodableSysInfo.self)
+            systemInfo = data?.decode(SDcodableSysInfo.self)
         }
 
         return error
     }
 
     open func checkpoint(for model_hash: String?) -> SDcodableCheckpoint? {
-        return self.systemCheckpoints.filter({
+        return systemCheckpoints.filter({
             return ($0.hash?.isEmpty ?? true) ? false : (model_hash ?? "").contains(($0.hash)!)
         }).first
     }
 
 	open func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint) {
         Task {
-            let error_0 = await self.change_systemCheckpoints(checkpoint: checkpoint)
+            let error_0 = await change_systemCheckpoints(checkpoint: checkpoint)
 
 			guard error_0 == nil else {
 				DispatchQueue.main.async {
@@ -129,7 +129,7 @@ import fXDKit
 			}
 
 
-            let error_1 = await self.refresh_systemInfo()
+            let error_1 = await refresh_systemInfo()
 
             DispatchQueue.main.async {
                 UIAlertController.errorAlert(error: error_1)
@@ -185,22 +185,22 @@ import fXDKit
 
 
     public func refresh_AllConfigurations() async -> Error? {
-        let error_0 = await self.refresh_systemCheckpoints()
+        let error_0 = await refresh_systemCheckpoints()
         guard error_0 == nil else {
             return error_0
         }
 
-        let error_1 = await self.refresh_systemSamplers()
+        let error_1 = await refresh_systemSamplers()
         guard error_1 == nil else {
             return error_1
         }
 
-        let error_2 = await self.refresh_systemSchedulers()
+        let error_2 = await refresh_systemSchedulers()
         guard error_2 == nil else {
             return error_2
         }
 
-        let error_3 = await self.refresh_systemVAEs()
+        let error_3 = await refresh_systemVAEs()
         return error_3
     }
 
@@ -221,7 +221,7 @@ import fXDKit
         }
 #endif
         await MainActor.run {
-            self.systemCheckpoints = data?.decode(Array<SDcodableCheckpoint>.self) ?? []
+            systemCheckpoints = data?.decode(Array<SDcodableCheckpoint>.self) ?? []
         }
 
         return error
@@ -244,7 +244,7 @@ import fXDKit
         }
 #endif
         await MainActor.run {
-            self.systemSamplers = data?.decode(Array<SDcodableSampler>.self) ?? []
+            systemSamplers = data?.decode(Array<SDcodableSampler>.self) ?? []
         }
 
         return error
@@ -267,7 +267,7 @@ import fXDKit
         }
 #endif
         await MainActor.run {
-            self.systemSchedulers = data?.decode(Array<SDcodableScheduler>.self) ?? []
+            systemSchedulers = data?.decode(Array<SDcodableScheduler>.self) ?? []
         }
 
         return error
@@ -292,7 +292,7 @@ import fXDKit
         await MainActor.run {
             var defaultVAEs = SDcodableVAE.defaultArray()
             defaultVAEs += data?.decode(Array<SDcodableVAE>.self) ?? []
-            self.systemVAEs = defaultVAEs
+            systemVAEs = defaultVAEs
         }
 
         return error
@@ -343,7 +343,7 @@ import fXDKit
               type != "dir"
         else {
             //recursive
-            return await self.obtain_latestPNGData(path: fullpath)
+            return await obtain_latestPNGData(path: fullpath)
         }
 
 
@@ -380,7 +380,7 @@ import fXDKit
             return (nil, error)
         }
 
-        let extracted = self.extract_fromInfotext(infotext: infotext)
+        let extracted = extract_fromInfotext(infotext: infotext)
         guard let payload = extracted.0 else {
             return (nil, error)
         }
@@ -441,11 +441,21 @@ import fXDKit
 		return (decodedPayload, decodedADetailer)
 	}
 
-
+    open var didStartGenerating: Bool = false
 	open func action_Generate(payload: SDcodablePayload) {
-        Task {	@MainActor in
-            let error = try await self.execute_txt2img(payload: payload)
+        guard !didStartGenerating else {
+            return
+        }
+
+        didStartGenerating = true
+
+        continueRefreshing()
+
+        Task {    @MainActor in
+            let error = try await execute_txt2img(payload: payload)
             UIAlertController.errorAlert(error: error)
+
+            didStartGenerating = false
         }
     }
 
@@ -478,14 +488,14 @@ import fXDKit
         }
 
 
-        let newlyGenerated = try await self.finish_txt2img(
+        let newlyGenerated = try await finish_txt2img(
             generated: generated,
             encodedImages: encodedImages)
 
 
         await MainActor.run {
-            self.nextPayload = newlyGenerated?.newPayload
-            self.selectedImageURL = newlyGenerated?.newImageURL
+            nextPayload = newlyGenerated?.newPayload
+            selectedImageURL = newlyGenerated?.newImageURL
         }
 
         return error
@@ -499,7 +509,7 @@ import fXDKit
 
 
 		let infotext = generated?.infotext ?? ""
-		let extracted = self.extract_fromInfotext(infotext: infotext)
+		let extracted = extract_fromInfotext(infotext: infotext)
 
 		let newPayload: SDcodablePayload? = extracted.0
 		let payloadData = newPayload.encoded()
@@ -514,16 +524,16 @@ import fXDKit
 	}
 
 
-    public func continueRefreshing() {
+    open func continueRefreshing() {
+        if !didStartGenerating {
+            return
+        }
+
         Task {
             let _ = await execute_progress(quiet: true)
-            do {
-                try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
-            }
-            catch {
-            }
+            try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
 
-            self.continueRefreshing()
+            continueRefreshing()
         }
     }
 
@@ -543,10 +553,10 @@ import fXDKit
 
         
         await MainActor.run {
-            self.currentProgress = newProgress
+            currentProgress = newProgress
 
-            if self.isSystemBusy != isJobRunning {
-                self.isSystemBusy = isJobRunning
+            if isSystemBusy != isJobRunning {
+                isSystemBusy = isJobRunning
             }
         }
 
