@@ -441,15 +441,25 @@ import fXDKit
 		return (decodedPayload, decodedADetailer)
 	}
 
-    open var didStartGenerating: Bool = false
+    open var didStartGenerating: Bool = false {
+        didSet {
+            if didStartGenerating {
+                continueRefreshing()
+            }
+            else {
+                currentProgress = nil
+                isSystemBusy = false
+            }
+        }
+    }
+
 	open func action_Generate(payload: SDcodablePayload) {
         guard !didStartGenerating else {
             return
         }
 
-        didStartGenerating = true
 
-        continueRefreshing()
+        didStartGenerating = true
 
         Task {    @MainActor in
             let error = try await execute_txt2img(payload: payload)
