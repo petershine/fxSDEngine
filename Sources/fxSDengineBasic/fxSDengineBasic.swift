@@ -71,23 +71,16 @@ import fXDKit
         }
 
 
-        let obtained = await obtain_latestPNGData(path: folderPath)
-
-        let pngData = obtained?.0
-        let imagePath = obtained?.1
-        let error_1 = obtained?.2
-
-        guard pngData != nil
-                && imagePath != nil
-        else {
+        let (pngData, imagePath, error_1) = await obtain_latestPNGData(path: folderPath)
+        guard let pngData, let imagePath else {
             return error_1
         }
 
 
-        let prepared = try await prepare_generationPayload(pngData: pngData!, imagePath: imagePath!)
-
-        let imageURL = prepared?.0
-        let error_2 = prepared?.1
+        let (imageURL, error_2) = try await prepare_generationPayload(pngData: pngData, imagePath: imagePath)
+        guard let imageURL else {
+            return error_2
+        }
 
         let loadedPayload = try SDcodablePayload.loaded(from: imageURL)
 
@@ -281,7 +274,7 @@ import fXDKit
         return error
     }
 
-    public func obtain_latestPNGData(path: String) async -> (Data?, String?, Error?)? {
+    public func obtain_latestPNGData(path: String) async -> (Data?, String?, Error?) {
         let (data, _, error) = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
@@ -325,17 +318,17 @@ import fXDKit
         }
 
 
-        let obtained = await networkingModule.requestToSDServer(
+        let (obtained_data, _, obtained_error) = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
             method: nil,
             query: "path=\(fullpath)&t=file",
             payload: nil)
 
-        return (obtained.data, fullpath, obtained.error)
+        return (obtained_data, fullpath, obtained_error)
     }
 
-    public func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?)? {
+    public func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?) {
         let (data, _, error) = await networkingModule.requestToSDServer(
 			quiet: false,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
@@ -354,8 +347,8 @@ import fXDKit
             return (nil, error)
         }
 
-        let extracted = extract_fromInfotext(infotext: infotext)
-        guard let payload = extracted.0 else {
+        let (payload, _) = extract_fromInfotext(infotext: infotext)
+        guard let payload else {
             return (nil, error)
         }
 
@@ -405,14 +398,14 @@ import fXDKit
 		fxd_log()
 		fxdPrint("[infotext]", infotext)
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
-		let decodedPayload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
-		let decodedADetailer: SDextensionADetailer? = SDextensionADetailer.decoded(using: &payloadDictionary)
+		let payload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
+		let adetailer: SDextensionADetailer? = SDextensionADetailer.decoded(using: &payloadDictionary)
 
-        if decodedADetailer != nil {
-            decodedPayload?.use_adetailer = true
+        if adetailer != nil {
+            payload?.use_adetailer = true
         }
 
-		return (decodedPayload, decodedADetailer)
+		return (payload, adetailer)
 	}
 
 	open func action_Generate(payload: SDcodablePayload) {
@@ -469,31 +462,30 @@ import fXDKit
         }
 
 
-        let newlyGenerated = try await finish_txt2img(
+        let (newImageURL, newPayload) = try await finish_txt2img(
             generated: generated,
             encodedImages: encodedImages)
 
 
         await MainActor.run {
-            nextPayload = newlyGenerated?.newPayload
-            selectedImageURL = newlyGenerated?.newImageURL
+            nextPayload = newPayload
+            selectedImageURL = newImageURL
         }
 
         return error
     }
 
-	open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (newImageURL: URL?, newPayload: SDcodablePayload?)? {
+	open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (URL?, SDcodablePayload?) {
 		let pngDataArray: [Data] = encodedImages.map { Data(base64Encoded: $0 ?? "") ?? Data() }
 		guard pngDataArray.count > 0 else {
-			return nil
+			return (nil, nil)
 		}
 
 
 		let infotext = generated?.infotext ?? ""
-		let extracted = extract_fromInfotext(infotext: infotext)
+		let (payload, _) = extract_fromInfotext(infotext: infotext)
 
-		let newPayload: SDcodablePayload? = extracted.0
-		let payloadData = newPayload.encoded()
+		let payloadData = payload.encoded()
 
         var newImageURL: URL? = nil
         let storage = SDStorage()
@@ -501,7 +493,7 @@ import fXDKit
             newImageURL = try await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)
 		}
 
-		return (newImageURL, newPayload)
+		return (newImageURL, payload)
 	}
 
 

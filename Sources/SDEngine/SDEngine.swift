@@ -43,13 +43,13 @@ public protocol SDEngine: NSObjectProtocol {
     func refresh_systemSchedulers() async -> Error?
     func refresh_systemVAEs() async -> Error?
 
-    func obtain_latestPNGData(path: String) async -> (Data?, String?, Error?)?
-    func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?)?
+    func obtain_latestPNGData(path: String) async -> (Data?, String?, Error?)
+    func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?)
 	func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?)
 
 	func action_Generate(payload: SDcodablePayload)
     func execute_txt2img(payload: SDcodablePayload) async throws -> Error?
-	func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (newImageURL: URL?, newPayload: SDcodablePayload?)?
+	func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (URL?, SDcodablePayload?)
 
     func continueRefreshing()
     func execute_progress(quiet: Bool) async -> Error?
