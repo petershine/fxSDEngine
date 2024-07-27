@@ -10,7 +10,7 @@ public struct SDcodableOverride: Codable {
     public var sd_vae: String?
 }
 
-public class SDcodablePayload: Codable, Equatable, ObservableObject {
+public class SDcodablePayload: Codable, Equatable, ObservableObject, @unchecked Sendable {
 	public static func == (lhs: SDcodablePayload, rhs: SDcodablePayload) -> Bool {
 		return lhs.seed == rhs.seed
 	}
@@ -226,7 +226,7 @@ extension SDcodablePayload {
 
 
 extension SDcodablePayload {
-    public static func loaded(from imageURL: URL?) async throws -> Self? {
+    @MainActor public static func loaded(from imageURL: URL?) async throws -> Self? {
         guard let jsonURL = imageURL?.jsonURL else {
             return nil
         }
@@ -235,7 +235,7 @@ extension SDcodablePayload {
         return payloadData.decode(Self.self)
     }
 
-    public func configurations(with checkpoints: [SDcodableCheckpoint]) async -> [[String]] {
+    @MainActor public func configurations(with checkpoints: [SDcodableCheckpoint]) async -> [[String]] {
         var model_name: String = "(unknown)"
         let model_hash = override_settings?.sd_model_checkpoint ?? ""
         if !model_hash.isEmpty {

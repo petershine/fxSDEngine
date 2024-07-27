@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
+open class fxSDnetworkingBasic: NSObject, @unchecked Sendable, SDNetworking {
 	open var SD_SERVER_HOSTNAME: String {
 		return "http://127.0.0.1:7860"
 	}

@@ -5,7 +5,7 @@ import UIKit
 import fXDKit
 
 
-@preconcurrency open class fxSDengineBasic: NSObject, ObservableObject, SDEngine, @unchecked Sendable {
+@preconcurrency open class fxSDengineBasic: NSObject, ObservableObject, @unchecked Sendable, SDEngine {
 
 	open var networkingModule: SDNetworking
 
@@ -554,7 +554,7 @@ import fXDKit
     }
 
 
-	public func interrupt() async -> Error? {
+    @MainActor public func interrupt() async -> Error? {
         let completion = await networkingModule.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_INTERRUPT,
