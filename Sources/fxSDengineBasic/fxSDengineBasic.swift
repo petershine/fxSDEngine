@@ -21,13 +21,24 @@ import fXDKit
     open var systemVAEs: [SDcodableVAE] = []
 
 
-	@Published open var currentProgress: SDcodableProgress? = nil
-	@Published open var isSystemBusy: Bool = false
+    @Published open var currentProgress: SDcodableProgress? = nil
+    @Published open var isSystemBusy: Bool = false
+    @Published open var didStartGenerating: Bool = false {
+        didSet {
+            if didStartGenerating {
+                continueRefreshing()
+            }
+            else {
+                currentProgress = nil
+                isSystemBusy = false
+            }
+        }
+    }
 
 	@Published open var displayedImage: UIImage? = nil
 
-	@Published open var nextPayload: SDcodablePayload? = nil
-    @Published open var selectedImageURL: URL? {
+    @Published open var nextPayload: SDcodablePayload? = nil
+    @Published open var selectedImageURL: URL? = nil {
         willSet {
             if let imageURL = newValue {
                 Task {	@MainActor in
@@ -38,8 +49,6 @@ import fXDKit
             }
         }
     }
-
-    @Published open var nonInteractiveObservable: FXDobservableOverlay? = nil
 
 
 	open func action_Synchronize() {
@@ -440,18 +449,6 @@ import fXDKit
 
 		return (decodedPayload, decodedADetailer)
 	}
-
-    open var didStartGenerating: Bool = false {
-        didSet {
-            if didStartGenerating {
-                continueRefreshing()
-            }
-            else {
-                currentProgress = nil
-                isSystemBusy = false
-            }
-        }
-    }
 
 	open func action_Generate(payload: SDcodablePayload) {
         guard !didStartGenerating else {
