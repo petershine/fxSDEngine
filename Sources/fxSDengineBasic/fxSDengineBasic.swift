@@ -34,6 +34,8 @@ import fXDKit
             }
         }
     }
+    @Published open var didInterrupt: Bool = false
+
 
 	@Published open var displayedImage: UIImage? = nil
 
@@ -486,6 +488,20 @@ import fXDKit
             fxdPrint(name: "TXT2IMG", dictionary: jsonDictionary)
         }
 #endif
+        guard !didInterrupt else {
+            await MainActor.run {
+                didInterrupt = false
+            }
+
+            let interruptedError = SDError(
+                domain: "SDEngine",
+                code: -1,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "Interrupted",
+                    NSLocalizedFailureReasonErrorKey: "Image generating is canceled",
+                ])
+            return interruptedError
+        }
 
 
         let generated = data?.decode(SDcodableGenerated.self)
@@ -580,6 +596,8 @@ import fXDKit
             payload: nil)
 
         let error = completion?.2
+
+        didInterrupt = true
 
         return error
     }
