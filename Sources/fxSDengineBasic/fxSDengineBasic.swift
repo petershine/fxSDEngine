@@ -474,8 +474,10 @@ import fXDKit
             encodedImages: encodedImages)
 
 
-        self.selectedImageURL = newlyGenerated?.0
-        self.nextPayload = newlyGenerated?.1
+        await MainActor.run {
+            self.nextPayload = newlyGenerated?.newPayload
+            self.selectedImageURL = newlyGenerated?.newImageURL
+        }
 
         return error
     }
