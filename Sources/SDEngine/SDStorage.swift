@@ -119,7 +119,7 @@ extension SDStorage {
 
 
                 if deletedCount == originalCount {
-                    UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images", message: nil)
+                    UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images")
                 }
 
                 return ((deletedCount > 0), nil)
