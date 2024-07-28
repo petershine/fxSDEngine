@@ -133,6 +133,22 @@ import fXDKit
         }
 	}
 
+    open func action_ChangeVAE(_ vae: SDcodableVAE) {
+        Task {    @MainActor in
+            let error_0 = await change_systemVAE(vae: vae)
+
+            guard error_0 == nil else {
+                UIAlertController.errorAlert(error: error_0)
+                return
+            }
+
+
+            let error_1 = await refresh_systemInfo()
+
+            UIAlertController.errorAlert(error: error_1)
+        }
+    }
+
     public func change_systemCheckpoints(checkpoint: SDcodableCheckpoint) async -> Error? {
 		//https://github.com/AUTOMATIC1111/stable-diffusion-webui/discussions/7839
 

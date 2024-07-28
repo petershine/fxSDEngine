@@ -34,6 +34,7 @@ public protocol SDEngine: NSObjectProtocol {
 
     func checkpoint(for model_hash: String?) -> SDcodableCheckpoint?
 	func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint)
+    func action_ChangeVAE(_ vae: SDcodableVAE)
     func change_systemCheckpoints(checkpoint: SDcodableCheckpoint) async -> Error?
     func change_systemVAE(vae: SDcodableVAE) async -> Error?
 
