@@ -88,18 +88,13 @@ extension SDStorage {
 
         let message: String = (fileURLs.count > 1) ? "\(fileURLs.count) images" : ((fileURLs.first as? URL)?.absoluteURL.lastPathComponent ?? "")
 
-        let deletedResult = try await UIAlertController.asyncAlert(
+        let didDelete = try await UIAlertController.asyncAlert(
             withTitle: "Do you want to delete?",
             message: message,
             cancelText: "NO",
             destructiveText: "DELETE",
             destructiveHandler: {
                 action in
-
-                guard action.style != .cancel else {
-                    return (false, nil)
-                }
-
 
                 let originalCount = fileURLs.count
                 var deletedCount: Int = 0
@@ -130,6 +125,6 @@ extension SDStorage {
                 return ((deletedCount > 0), nil)
             })
 
-        return deletedResult ?? false
+        return didDelete ?? false
     }
 }
