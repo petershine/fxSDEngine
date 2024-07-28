@@ -29,21 +29,18 @@ extension SDStorage {
 		return fileURL
 	}
 
-	public func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async throws -> URL? {
+	func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async throws -> URL? {
 		guard let imageURL = newFileURL(index: index, contentType: UTType.png) else {
 			return nil
 		}
 
 
 		fxd_log()
-        fxdPrint("pngData: ", pngData)
         try pngData.write(to: imageURL)
-        fxdPrint("[IMAGE FILE SAVED]: ", imageURL)
+        fxdPrint("[IMAGE FILE SAVED]: ", pngData, imageURL)
 
-
-        fxdPrint("payloadData: ", payloadData)
         try payloadData?.write(to: imageURL.jsonURL)
-        fxdPrint("[PAYLOAD JSON SAVED]: ", imageURL.jsonURL)
+        fxdPrint("[PAYLOAD JSON SAVED]: ", payloadData, imageURL.jsonURL)
 
         let _ = try await saveThumbnail(imageURL: imageURL, pngData: pngData)
 
@@ -112,8 +109,7 @@ extension SDStorage {
     }
 }
 
-extension SDStorage {
-    public func saveThumbnail(imageURL: URL, pngData: Data? = nil) async throws -> Bool {
+    func saveThumbnail(imageURL: URL, pngData: Data? = nil) async throws -> Bool {
         var imageData: Data? = pngData
         if imageData == nil {
             imageData = try Data(contentsOf: imageURL)
@@ -137,9 +133,8 @@ extension SDStorage {
         let thumbnailDirectory = thumbnailURL.deletingPathExtension().deletingLastPathComponent()
         try FileManager.default.createDirectory(at: thumbnailDirectory, withIntermediateDirectories: true)
 
-        fxdPrint("thumbnailData: ", thumbnailData)
         try thumbnailData?.write(to: thumbnailURL)
-        fxdPrint("[THUMBNAIL SAVED]: ", thumbnailURL)
+        fxdPrint("[THUMBNAIL SAVED]: ", thumbnailData, thumbnailURL)
 
         return true
     }
