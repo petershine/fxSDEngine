@@ -46,68 +46,6 @@ extension SDStorage {
 
         return imageURL
 	}
-}
-
-extension SDStorage {
-    @MainActor public func deleteFileURLs(fileURLs: [URL?]?) async throws -> Bool {
-        guard let fileURLs, fileURLs.count > 0 else {
-            return false
-        }
-
-
-        let message: String = (fileURLs.count > 1) ? "\(fileURLs.count) images" : ((fileURLs.first as? URL)?.absoluteURL.lastPathComponent ?? "")
-
-        let deletingResult = try await withCheckedThrowingContinuation({
-            (continuation: CheckedContinuation<Bool, Error>) in
-
-            UIAlertController.simpleAlert(
-                withTitle: "Do you want to delete?",
-                message: message,
-                destructiveText: "DELETE",
-                cancelText: "NO",
-                destructiveHandler: {
-                    action in
-
-                    guard action.style != .cancel else {
-                        continuation.resume(returning: false)
-                        return
-                    }
-
-
-                    let originalCount = fileURLs.count
-                    var deletedCount: Int = 0
-                    do {
-                        for fileURL in fileURLs {
-                            guard let imageURL: URL = fileURL else {
-                                continue
-                            }
-
-                            try FileManager.default.removeItem(at: imageURL)
-                            try FileManager.default.removeItem(at: imageURL.jsonURL)
-                            try FileManager.default.removeItem(at: imageURL.thumbnailURL)
-
-                            deletedCount = deletedCount + 1
-                        }
-                    }
-                    catch {    fxd_log()
-                        fxdPrint(error)
-                        UIAlertController.errorAlert(error: error)
-                        continuation.resume(throwing: error)
-                        return
-                    }
-
-
-                    if deletedCount == originalCount {
-                        UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images", message: nil)
-                    }
-
-                    continuation.resume(returning: deletedCount > 0)
-                })
-        })
-
-        return deletingResult
-    }
-}
 
     func saveThumbnail(imageURL: URL, pngData: Data? = nil) async throws -> Bool {
         var imageData: Data? = pngData
@@ -137,5 +75,61 @@ extension SDStorage {
         fxdPrint("[THUMBNAIL SAVED]: ", thumbnailData, thumbnailURL)
 
         return true
+    }
+}
+
+
+extension SDStorage {
+    @MainActor public func deleteFileURLs(fileURLs: [URL?]?) async throws -> Bool {
+        guard let fileURLs, fileURLs.count > 0 else {
+            return false
+        }
+
+
+        let message: String = (fileURLs.count > 1) ? "\(fileURLs.count) images" : ((fileURLs.first as? URL)?.absoluteURL.lastPathComponent ?? "")
+
+        let deletedResult = try await UIAlertController.asyncAlert(
+            withTitle: "",
+            message: message,
+            destructiveText: "",
+            cancelText: "NO",
+            destructiveHandler: {
+                action in
+
+                guard action.style != .cancel else {
+                    return (false, nil)
+                }
+
+
+                let originalCount = fileURLs.count
+                var deletedCount: Int = 0
+                do {
+                    for fileURL in fileURLs {
+                        guard let imageURL: URL = fileURL else {
+                            continue
+                        }
+
+                        try FileManager.default.removeItem(at: imageURL)
+                        try FileManager.default.removeItem(at: imageURL.jsonURL)
+                        try FileManager.default.removeItem(at: imageURL.thumbnailURL)
+
+                        deletedCount = deletedCount + 1
+                    }
+                }
+                catch {    fxd_log()
+                    fxdPrint(error)
+                    UIAlertController.errorAlert(error: error)
+                    return (false, error)
+                }
+
+
+                if deletedCount == originalCount {
+                    UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images", message: nil)
+                }
+
+                return ((deletedCount > 0), nil)
+            })
+
+        return deletedResult
     }
 }
