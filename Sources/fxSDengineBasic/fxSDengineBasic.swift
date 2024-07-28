@@ -26,11 +26,12 @@ import fXDKit
     @Published open var didStartGenerating: Bool = false {
         didSet {
             if didStartGenerating {
+                isSystemBusy = true
                 continueRefreshing()
             }
             else {
-                currentProgress = nil
                 isSystemBusy = false
+                currentProgress = nil
             }
         }
     }
@@ -535,11 +536,8 @@ import fXDKit
 
         
         await MainActor.run {
+            isSystemBusy = didStartGenerating || isJobRunning
             currentProgress = newProgress
-
-            if isSystemBusy != isJobRunning {
-                isSystemBusy = isJobRunning
-            }
         }
 
         return error
