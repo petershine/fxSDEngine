@@ -86,9 +86,7 @@ open class fxSDnetworkingBasic: NSObject, @unchecked Sendable, SDNetworking {
 
 extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
 	public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: (any Error)?) {	fxd_log()
-		DispatchQueue.main.async {
-			UIAlertController.errorAlert(error: error)
-		}
+        UIAlertController.errorAlert(error: error)
 	}
 
 	public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
@@ -100,11 +98,9 @@ extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
 	}
 
 	public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: (any Error)?) {
-		DispatchQueue.main.async {
-			self.responseHandler?(self.receivedData, task.response, error)
+        self.responseHandler?(self.receivedData, task.response, error)
 
-			self.responseHandler = nil
-			self.receivedData = nil
-		}
+        self.responseHandler = nil
+        self.receivedData = nil
 	}
 }

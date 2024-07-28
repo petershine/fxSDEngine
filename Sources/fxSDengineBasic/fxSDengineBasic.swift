@@ -118,22 +118,18 @@ import fXDKit
     }
 
 	open func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint) {
-        Task {
+        Task {	@MainActor in
             let error_0 = await change_systemCheckpoints(checkpoint: checkpoint)
 
 			guard error_0 == nil else {
-				DispatchQueue.main.async {
-					UIAlertController.errorAlert(error: error_0)
-				}
+                UIAlertController.errorAlert(error: error_0)
 				return
 			}
 
 
             let error_1 = await refresh_systemInfo()
 
-            DispatchQueue.main.async {
-                UIAlertController.errorAlert(error: error_1)
-            }
+            UIAlertController.errorAlert(error: error_1)
         }
 	}
 
