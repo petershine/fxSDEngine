@@ -23,18 +23,6 @@ import fXDKit
 
     @Published open var currentProgress: SDcodableProgress? = nil
     @Published open var isSystemBusy: Bool = false
-    @Published open var didStartGenerating: Bool = false {
-        didSet {
-            if didStartGenerating {
-                isSystemBusy = true
-//                continueMonitoring()
-            }
-            else {
-                isSystemBusy = false
-//                currentProgress = nil
-            }
-        }
-    }
     @Published open var didInterrupt: Bool = false
 
 
@@ -422,18 +410,18 @@ import fXDKit
 	}
 
 	open func action_Generate(payload: SDcodablePayload) {
-        guard !didStartGenerating else {
+        guard !isSystemBusy else {
             return
         }
 
 
-        didStartGenerating = true
+        isSystemBusy = true
 
         Task {    @MainActor in
             let error = try await execute_txt2img(payload: payload)
             UIAlertController.errorAlert(error: error)
 
-            didStartGenerating = false
+            isSystemBusy = (false || isSystemBusy)
         }
     }
 
@@ -511,17 +499,11 @@ import fXDKit
 
 
     open func continueMonitoring() {
-//        if !didStartGenerating {
-//            return
-//        }
-
         Task {
-            let (newProgress, error) = try await monitor_progress(quiet: true)
-            let isSystemBusy = newProgress?.state?.isSystemBusy ?? false
-
+            let (newProgress, isSystemBusy, _) = try await monitor_progress(quiet: true)
             if newProgress != nil || self.isSystemBusy != isSystemBusy {
                 await MainActor.run {
-                    self.isSystemBusy = didStartGenerating || isSystemBusy
+                    self.isSystemBusy = isSystemBusy
                     currentProgress = newProgress
                 }
             }
@@ -531,7 +513,7 @@ import fXDKit
         }
     }
 
-    public func monitor_progress(quiet: Bool) async throws -> (SDcodableProgress?, Error?) {
+    public func monitor_progress(quiet: Bool) async throws -> (SDcodableProgress?, Bool, Error?) {
         let (data, _, error) = await networkingModule.requestToSDServer(
             quiet: quiet,
             api_endpoint: .SDAPI_V1_PROGRESS,
@@ -540,15 +522,14 @@ import fXDKit
             payload: nil)
 
         let newProgress = data?.decode(SDcodableProgress.self)
-        let isSystemBusy = newProgress?.state?.isSystemBusy ?? false
 
-        guard newProgress?.current_image != nil,
-              isSystemBusy else {
-
-            return (nil, error)
+        guard newProgress?.current_image != nil else {
+            return (nil, false, error)
         }
 
-        return (newProgress, error)
+
+        let isSystemBusy = newProgress?.state?.isSystemBusy ?? false
+        return (newProgress, isSystemBusy, error)
     }
 
 

@@ -19,7 +19,6 @@ public protocol SDEngine: NSObjectProtocol {
 
 	var currentProgress: SDcodableProgress? { get set }
 	var isSystemBusy: Bool { get set }
-    var didStartGenerating: Bool { get set }
     var didInterrupt: Bool { get set }
 
 	var displayedImage: UIImage? { get set }
@@ -53,6 +52,6 @@ public protocol SDEngine: NSObjectProtocol {
 	func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (URL?, SDcodablePayload?)
 
     func continueMonitoring()
-    func monitor_progress(quiet: Bool) async throws -> (SDcodableProgress?, Error?)
+    func monitor_progress(quiet: Bool) async throws -> (SDcodableProgress?, Bool, Error?)
     func interrupt() async -> Error?
 }
