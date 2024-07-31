@@ -23,6 +23,7 @@ import fXDKit
 
     @Published open var currentProgress: SDcodableProgress? = nil
     @Published open var isSystemBusy: Bool = false
+    @Published open var didStartGenerating: Bool = false
     @Published open var didInterrupt: Bool = false
 
 
@@ -410,18 +411,18 @@ import fXDKit
 	}
 
 	open func action_Generate(payload: SDcodablePayload) {
-        guard !isSystemBusy else {
+        guard !didStartGenerating else {
             return
         }
 
 
-        isSystemBusy = true
+        didStartGenerating = true
 
         Task {    @MainActor in
             let error = try await execute_txt2img(payload: payload)
             UIAlertController.errorAlert(error: error)
 
-            isSystemBusy = (false || isSystemBusy)
+            didStartGenerating = false
         }
     }
 
@@ -501,10 +502,10 @@ import fXDKit
     open func continueMonitoring() {
         Task {
             let (newProgress, isSystemBusy, _) = try await monitor_progress(quiet: true)
-            if newProgress != nil || self.isSystemBusy != isSystemBusy {
+            if newProgress != nil || (didStartGenerating || isSystemBusy) != self.isSystemBusy {
                 await MainActor.run {
-                    self.isSystemBusy = isSystemBusy
                     currentProgress = newProgress
+                    self.isSystemBusy = didStartGenerating || isSystemBusy
                 }
             }
 
