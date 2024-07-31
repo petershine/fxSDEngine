@@ -27,11 +27,11 @@ import fXDKit
         didSet {
             if didStartGenerating {
                 isSystemBusy = true
-                continueMonitoring()
+//                continueMonitoring()
             }
             else {
                 isSystemBusy = false
-                currentProgress = nil
+//                currentProgress = nil
             }
         }
     }
@@ -511,9 +511,9 @@ import fXDKit
 
 
     open func continueMonitoring() {
-        if !didStartGenerating {
-            return
-        }
+//        if !didStartGenerating {
+//            return
+//        }
 
         Task {
             let (newProgress, error) = try await monitor_progress(quiet: true)
