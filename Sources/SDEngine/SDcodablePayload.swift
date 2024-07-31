@@ -8,6 +8,7 @@ import fXDKit
 public struct SDcodableOverride: Codable {
     public var sd_model_checkpoint: String?
     public var sd_vae: String?
+    public var samples_save: Bool?
 }
 
 public class SDcodablePayload: Codable, Equatable, ObservableObject, @unchecked Sendable {
@@ -148,6 +149,11 @@ extension SDcodablePayload {
         if alwayson_scripts.count > 0 {
             extendedDictionary?["alwayson_scripts"] = alwayson_scripts
         }
+
+
+        var override_settings: [String:Any?]? = extendedDictionary?["override_settings"] as? [String:Any?]
+        override_settings?["samples_save"] = true
+        extendedDictionary?["override_settings"] = override_settings
 
 
 		// clean unnecessary keys
