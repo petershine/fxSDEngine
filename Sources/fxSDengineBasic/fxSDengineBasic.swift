@@ -27,7 +27,7 @@ import fXDKit
         didSet {
             if didStartGenerating {
                 isSystemBusy = true
-                continueRefreshing()
+                continueMonitoring()
             }
             else {
                 isSystemBusy = false
@@ -510,20 +510,28 @@ import fXDKit
 	}
 
 
-    open func continueRefreshing() {
+    open func continueMonitoring() {
         if !didStartGenerating {
             return
         }
 
         Task {
-            let _ = await execute_progress(quiet: true)
-            try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
+            let (newProgress, error) = try await monitor_progress(quiet: true)
+            let isSystemBusy = newProgress?.state?.isSystemBusy ?? false
 
-            continueRefreshing()
+            if newProgress != nil || self.isSystemBusy != isSystemBusy {
+                await MainActor.run {
+                    self.isSystemBusy = didStartGenerating || isSystemBusy
+                    currentProgress = newProgress
+                }
+            }
+
+            try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
+            continueMonitoring()
         }
     }
 
-    public func execute_progress(quiet: Bool = false) async -> Error? {
+    public func monitor_progress(quiet: Bool) async throws -> (SDcodableProgress?, Error?) {
         let (data, _, error) = await networkingModule.requestToSDServer(
             quiet: quiet,
             api_endpoint: .SDAPI_V1_PROGRESS,
@@ -532,15 +540,15 @@ import fXDKit
             payload: nil)
 
         let newProgress = data?.decode(SDcodableProgress.self)
-        let isJobRunning = newProgress?.state?.isJobRunning ?? false
+        let isSystemBusy = newProgress?.state?.isSystemBusy ?? false
 
-        
-        await MainActor.run {
-            isSystemBusy = didStartGenerating || isJobRunning
-            currentProgress = newProgress
+        guard newProgress?.current_image != nil,
+              isSystemBusy else {
+
+            return (nil, error)
         }
 
-        return error
+        return (newProgress, error)
     }
 
 
