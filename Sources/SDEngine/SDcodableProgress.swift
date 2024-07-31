@@ -29,4 +29,20 @@ public extension SDcodableState {
     var isSystemBusy: Bool? {
         return !((job ?? "").isEmpty || interrupted ?? true)
     }
+
+    var formattedTimestamp: String? {
+        guard let job_timestamp else {
+            return nil
+        }
+
+        let sourceFormatter = DateFormatter()
+        sourceFormatter.dateFormat = "yyyyMMddHHmmss"
+        guard let job_date = sourceFormatter.date(from:job_timestamp) else {
+            return nil
+        }
+
+        let targetFormatter = DateFormatter()
+        targetFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return targetFormatter.string(from: job_date)
+    }
 }

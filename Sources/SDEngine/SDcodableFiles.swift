@@ -21,8 +21,8 @@ public struct SDcodableFile: Codable {
             return nil
         }
 
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        return dateFormatter.date(from:date!)
+        let targetFormatter = DateFormatter()
+        targetFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        return targetFormatter.date(from:date!)
     }
 }
