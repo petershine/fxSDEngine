@@ -477,7 +477,7 @@ import fXDKit
         return error
     }
 
-	open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (URL?, SDcodablePayload?) {
+    open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (URL?, SDcodablePayload?) {
 		let pngDataArray: [Data] = encodedImages.map { Data(base64Encoded: $0 ?? "") ?? Data() }
 		guard pngDataArray.count > 0 else {
 			return (nil, nil)
@@ -501,7 +501,7 @@ import fXDKit
 
     open func continueMonitoring() {
         Task {
-            let (newProgress, isSystemBusy, _) = try await monitor_progress(quiet: true)
+            let (newProgress, isSystemBusy, _) = await monitor_progress(quiet: true)
             if newProgress != nil || (didStartGenerating || isSystemBusy) != self.isSystemBusy {
                 await MainActor.run {
                     currentProgress = newProgress
@@ -514,7 +514,7 @@ import fXDKit
         }
     }
 
-    public func monitor_progress(quiet: Bool) async throws -> (SDcodableProgress?, Bool, Error?) {
+    public func monitor_progress(quiet: Bool) async -> (SDcodableProgress?, Bool, Error?) {
         let (data, _, error) = await networkingModule.requestToSDServer(
             quiet: quiet,
             api_endpoint: .SDAPI_V1_PROGRESS,

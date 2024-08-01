@@ -51,9 +51,7 @@ open class fxSDnetworkingBasic: NSObject, @unchecked Sendable, SDNetworking {
             var error: Error? = nil
 
             do {
-                let dataAndResponse = try await URLSession.shared.data(for: httpRequest)
-                data = dataAndResponse.0
-                response = dataAndResponse.1
+                (data, response) = try await URLSession.shared.data(for: httpRequest)
             }
             catch let httpError {
                 error = httpError

@@ -53,6 +53,6 @@ public protocol SDEngine: NSObjectProtocol {
 	func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (URL?, SDcodablePayload?)
 
     func continueMonitoring()
-    func monitor_progress(quiet: Bool) async throws -> (SDcodableProgress?, Bool, Error?)
+    func monitor_progress(quiet: Bool) async -> (SDcodableProgress?, Bool, Error?)
     func interrupt() async -> Error?
 }
