@@ -17,7 +17,7 @@ public protocol SDEngine: NSObjectProtocol {
     var systemSchedulers: [SDcodableScheduler] { get set }
     var systemVAEs: [SDcodableVAE] { get set }
 
-	var currentProgress: SDcodableProgress? { get set }
+	var monitoredProgress: SDcodableProgress? { get set }
 	var isSystemBusy: Bool { get set }
     var didStartGenerating: Bool { get set }
     var didInterrupt: Bool { get set }

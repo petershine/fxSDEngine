@@ -21,10 +21,18 @@ import fXDKit
     open var systemVAEs: [SDcodableVAE] = []
 
 
-    @Published open var currentProgress: SDcodableProgress? = nil
+    @Published open var monitoredProgress: SDcodableProgress? = nil
     @Published open var isSystemBusy: Bool = false
-    @Published open var didStartGenerating: Bool = false
-    @Published open var didInterrupt: Bool = false
+    @Published open var didStartGenerating: Bool = false {
+        didSet {
+            isSystemBusy = (isSystemBusy || didStartGenerating)
+        }
+    }
+    @Published open var didInterrupt: Bool = false {
+        didSet {
+            isSystemBusy = (isSystemBusy || !didInterrupt)
+        }
+    }
 
 
 	@Published open var displayedImage: UIImage? = nil
@@ -504,7 +512,7 @@ import fXDKit
             let (newProgress, isSystemBusy, _) = await monitor_progress(quiet: true)
             if newProgress != nil || (didStartGenerating || isSystemBusy) != self.isSystemBusy {
                 await MainActor.run {
-                    currentProgress = newProgress
+                    monitoredProgress = newProgress
                     self.isSystemBusy = didStartGenerating || isSystemBusy
                 }
             }
