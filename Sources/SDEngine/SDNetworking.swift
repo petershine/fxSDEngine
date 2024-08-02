@@ -25,7 +25,7 @@ public enum SDAPIendpoint: String, CaseIterable {
 
 
 public protocol SDNetworking: NSObjectProtocol {
-	var SD_SERVER_HOSTNAME: String { get }
+	var serverHostname: String { get }
 
 	func requestToSDServer(
 		quiet: Bool,

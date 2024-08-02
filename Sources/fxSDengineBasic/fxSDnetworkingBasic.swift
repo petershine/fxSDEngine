@@ -7,7 +7,7 @@ import fXDKit
 
 
 open class fxSDnetworkingBasic: NSObject, @unchecked Sendable, SDNetworking {
-	open var SD_SERVER_HOSTNAME: String {
+	open var serverHostname: String {
 		return "http://127.0.0.1:7860"
 	}
 
@@ -21,7 +21,7 @@ open class fxSDnetworkingBasic: NSObject, @unchecked Sendable, SDNetworking {
 				fxd_log()
 			}
 
-			var requestPath = "\(SD_SERVER_HOSTNAME)/\(api_endpoint.rawValue)"
+			var requestPath = "\(serverHostname)/\(api_endpoint.rawValue)"
 			if !(query?.isEmpty ?? true),
 			   let escapedQuery = query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
 				requestPath += "?\(escapedQuery)"
