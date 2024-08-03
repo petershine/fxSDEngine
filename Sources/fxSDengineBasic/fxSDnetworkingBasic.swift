@@ -11,6 +11,36 @@ open class fxSDnetworkingBasic: NSObject, @unchecked Sendable, SDNetworking {
 		return "http://127.0.0.1:7860"
 	}
 
+    public func httpRequest(
+        api_endpoint: SDAPIendpoint,
+        method: String? = nil,
+        query: String? = nil,
+        payload: Data? = nil) -> URLRequest? {
+            var requestPath = "\(serverHostname)/\(api_endpoint.rawValue)"
+            if !(query?.isEmpty ?? true),
+               let escapedQuery = query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+                requestPath += "?\(escapedQuery)"
+            }
+
+            guard let requestURL = URL(string: requestPath) else {
+                return nil
+            }
+
+
+            var httpRequest = URLRequest(url: requestURL)
+            httpRequest.timeoutInterval = .infinity
+            httpRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            httpRequest.httpMethod = method ?? "GET"
+            if payload != nil {
+                fxdPrint(name: "PAYLOAD", dictionary: payload?.jsonDictionary())
+                httpRequest.httpMethod = "POST"
+                httpRequest.httpBody = payload
+            }
+
+            return httpRequest
+    }
+
     public func requestToSDServer(
         quiet: Bool = false,
         api_endpoint: SDAPIendpoint,
@@ -21,29 +51,9 @@ open class fxSDnetworkingBasic: NSObject, @unchecked Sendable, SDNetworking {
 				fxd_log()
 			}
 
-			var requestPath = "\(serverHostname)/\(api_endpoint.rawValue)"
-			if !(query?.isEmpty ?? true),
-			   let escapedQuery = query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
-				requestPath += "?\(escapedQuery)"
-			}
-
-			fxdPrint("requestPath: ", requestPath, quiet:quiet)
-
-			guard let requestURL = URL(string: requestPath) else {
-				return (nil, nil, nil)
-			}
-
-
-			var httpRequest = URLRequest(url: requestURL)
-			httpRequest.timeoutInterval = .infinity
-			httpRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-			httpRequest.httpMethod = method ?? "GET"
-			if payload != nil {
-				fxdPrint(name: "PAYLOAD", dictionary: payload?.jsonDictionary())
-				httpRequest.httpMethod = "POST"
-				httpRequest.httpBody = payload
-			}
+            guard let httpRequest = httpRequest(api_endpoint: api_endpoint, method: method, query: query, payload: payload) else {
+                return (nil, nil, nil)
+            }
 
 
             var data: Data? = nil
@@ -64,7 +74,7 @@ open class fxSDnetworkingBasic: NSObject, @unchecked Sendable, SDNetworking {
             fxdPrint("error: ", error, quiet:quiet)
 
             if data == nil || statusCode != 200 {
-                fxdPrint("httpURLResponse: ", (response as? HTTPURLResponse), quiet:quiet)
+                fxdPrint("httpURLResponse: ", (response as? HTTPURLResponse))
 
                 fxdPrint("httpRequest.url: ", httpRequest.url)
                 fxdPrint("httpRequest.allHTTPHeaderFields: ", httpRequest.allHTTPHeaderFields)
