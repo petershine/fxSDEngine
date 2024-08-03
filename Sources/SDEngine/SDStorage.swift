@@ -18,19 +18,8 @@ open class SDStorage: NSObject {
 }
 
 extension SDStorage {
-	fileprivate func newFileURL(index: Int, contentType: UTType) -> URL? {
-		let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-
-		let dateFormatter = DateFormatter()
-		dateFormatter.dateFormat = "yyyy-MM-dd_HH_mm_ss"
-
-		let fileName = dateFormatter.string(from: Date.now)
-		let fileURL = documentDirectory?.appendingPathComponent("GenerArt_\(fileName)_\(index).\(contentType.preferredFilenameExtension ?? contentType.identifier.components(separatedBy: ".").last ?? "png")")
-		return fileURL
-	}
-
 	func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async throws -> URL? {
-		guard let imageURL = newFileURL(index: index, contentType: UTType.png) else {
+        guard let imageURL = URL.newFileURL(prefix: "GenerArt", index: index, contentType: UTType.png) else {
 			return nil
 		}
 
