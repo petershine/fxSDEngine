@@ -87,12 +87,38 @@ open class fxSDnetworkingBasic: NSObject, @unchecked Sendable, SDNetworking {
 		}
 	
 
-	fileprivate var responseHandler: ((Data?, URLResponse?, (any Error)?) -> Void)?
+    public var responseHandler: ((Data?, URLResponse?, (any Error)?) -> Void)?
 	fileprivate var receivedData: Data? = nil
+
+
+    private lazy var urlSession: URLSession = {
+        let config = URLSessionConfiguration.background(withIdentifier: "GenerArt")
+//        config.isDiscretionary = true
+        config.sessionSendsLaunchEvents = true
+        return URLSession(configuration: config, delegate: self, delegateQueue: nil)
+    }()
 }
 
 
 extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
+    public func execute_backgroundURLtask(api_endpoint: SDAPIendpoint,
+                                          method: String? = nil,
+                                          query: String? = nil,
+                                          payload: Data? = nil) {
+
+        guard let httpRequest = httpRequest(api_endpoint: api_endpoint, method: method, query: query, payload: payload) else {
+            return
+        }
+
+
+        let backgroundTask = urlSession.dataTask(with: httpRequest)
+        backgroundTask.earliestBeginDate = Date.now
+//        backgroundTask.countOfBytesClientExpectsToSend = 200
+        backgroundTask.countOfBytesClientExpectsToReceive = 1024 * 1024 * 1024
+
+        backgroundTask.resume()
+    }
+
 	public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: (any Error)?) {	fxd_log()
         UIAlertController.errorAlert(error: error)
 	}
@@ -111,4 +137,16 @@ extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
         self.responseHandler = nil
         self.receivedData = nil
 	}
+
+    public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {	fxd_log()
+        fxdPrint(session)
+        fxdPrint(responseHandler)
+        fxdPrint(receivedData)
+
+        if let appDelegate = UIApplication.shared.delegate as? FXDAppDelegate,
+           let completionHandler = appDelegate.backgroundCompletionHandler {
+
+            fxdPrint(completionHandler)
+        }
+    }
 }
