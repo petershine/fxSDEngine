@@ -36,15 +36,14 @@ import fXDKit
 
 
 	@Published open var displayedImage: UIImage? = nil
+    @Published open var sourceImage: UIImage? = nil
 
     @Published open var nextPayload: SDcodablePayload? = nil
     @Published open var selectedImageURL: URL? = nil {
         willSet {
             if let imageURL = newValue {
                 Task {	@MainActor in
-                    let loadedImage = UIImage(contentsOfFile: imageURL.path())
-
-                    displayedImage = loadedImage
+                    displayedImage = UIImage(contentsOfFile: imageURL.path())
                 }
             }
         }
