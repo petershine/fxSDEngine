@@ -36,7 +36,7 @@ import fXDKit
 
 
 	@Published open var displayedImage: UIImage? = nil
-    @Published open var sourceImage: UIImage? = nil
+    @Published open var sourceImageURL: URL? = nil
 
     @Published open var nextPayload: SDcodablePayload? = nil
     @Published open var selectedImageURL: URL? = nil {

@@ -23,7 +23,7 @@ public protocol SDEngine: NSObjectProtocol {
     var didInterrupt: Bool { get set }
 
 	var displayedImage: UIImage? { get set }
-    var sourceImage: UIImage? { get set }
+    var sourceImageURL: URL? { get set }
 
 	var nextPayload: SDcodablePayload? { get set }
 	var selectedImageURL: URL? { get set }
