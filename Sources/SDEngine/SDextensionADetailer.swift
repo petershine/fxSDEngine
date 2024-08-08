@@ -100,6 +100,24 @@ public struct SDextensionADetailer: Codable {
 }
 
 extension SDextensionADetailer: SDprotocolExtension {
+    public var args: Dictionary<String, Any?>? {
+        var args: Dictionary<String, Any?>? = nil
+        do {
+            args = [
+                "args" : [
+                    true,
+                    false,
+                    try JSONEncoder().encode(self).jsonDictionary() ?? [:],
+                ]
+            ]
+        }
+        catch {    fxd_log()
+            fxdPrint(error)
+        }
+
+        return args
+    }
+    
     public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
 
         var extractedDictionary: [String:Any?] = [:]

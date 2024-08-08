@@ -20,8 +20,8 @@ public enum SDExtensionName: String {
 
 public protocol SDprotocolExtension: Hashable, Sendable, Codable {
     static func minimum() -> Self?
-    var args: Dictionary<String, Any?>? { get }
 
+    var args: Dictionary<String, Any?>? { get }
     static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self?
 }
 
@@ -36,23 +36,5 @@ extension SDprotocolExtension {
         }
 
         return minimumInstance
-    }
-
-    public var args: Dictionary<String, Any?>? {
-        var args: Dictionary<String, Any?>? = nil
-        do {
-            args = [
-                "args" : [
-                    true,
-                    false,
-                    try JSONEncoder().encode(self).jsonDictionary() ?? [:],
-                ]
-            ]
-        }
-        catch {    fxd_log()
-            fxdPrint(error)
-        }
-
-        return args
     }
 }
