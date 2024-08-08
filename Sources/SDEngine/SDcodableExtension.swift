@@ -15,6 +15,46 @@ struct SDcodableExtension: Codable {
 
 public enum SDExtensionName: String {
 	case adetailer
+    case controlnet
+}
+
+public protocol SDprotocolExtension: Hashable, Sendable, Codable {
+    static func minimum() -> Self?
+    var args: Dictionary<String, Any?>? { get }
+
+    static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self?
+}
+
+extension SDprotocolExtension {
+    public static func minimum() -> Self? {
+        var minimumInstance: Self? = nil
+        do {
+            minimumInstance = try JSONDecoder().decode(Self.self, from: "{}".data(using: .utf8) ?? Data())
+        }
+        catch {    fxd_log()
+            fxdPrint(error)
+        }
+
+        return minimumInstance
+    }
+
+    public var args: Dictionary<String, Any?>? {
+        var args: Dictionary<String, Any?>? = nil
+        do {
+            args = [
+                "args" : [
+                    true,
+                    false,
+                    try JSONEncoder().encode(self).jsonDictionary() ?? [:],
+                ]
+            ]
+        }
+        catch {    fxd_log()
+            fxdPrint(error)
+        }
+
+        return args
+    }
 }
 
 
@@ -112,28 +152,8 @@ public struct SDextensionADetailer: Codable {
 	}
 }
 
-extension SDextensionADetailer {
-	public var args: Dictionary<String, Any?>? {
-		var args: Dictionary<String, Any?>? = nil
-		do {
-			args = [
-				"args" : [
-					true,
-					false,
-					try JSONEncoder().encode(self).jsonDictionary() ?? [:],
-				]
-			]
-		}
-		catch {	fxd_log()
-			fxdPrint(error)
-		}
-
-		return args
-	}
-}
-
-extension SDextensionADetailer {
-	public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
+extension SDextensionADetailer: SDprotocolExtension {
+    public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
 
 		var extractedDictionary: [String:Any?] = [:]
 		let extractingKeyPairs_adetailer = [

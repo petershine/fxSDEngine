@@ -138,12 +138,7 @@ extension SDcodablePayload {
 
         if self.use_adetailer,
            sdEngine.systemInfo?.isEnabled(.adetailer) ?? false {
-            do {
-                alwayson_scripts[SDExtensionName.adetailer.rawValue] = try JSONDecoder().decode(SDextensionADetailer.self, from: "{}".data(using: .utf8) ?? Data()).args
-            }
-            catch {	fxd_log()
-                fxdPrint(error)
-            }
+            alwayson_scripts[SDExtensionName.adetailer.rawValue] = SDextensionADetailer.minimum()?.args
         }
         
         if alwayson_scripts.count > 0 {
