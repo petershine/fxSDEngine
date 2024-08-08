@@ -409,9 +409,14 @@ import fXDKit
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
 		let payload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
 		let adetailer: SDextensionADetailer? = SDextensionADetailer.decoded(using: &payloadDictionary)
+        let controlnet: SDextensionControlNet? = SDextensionControlNet.decoded(using: &payloadDictionary)
 
         if adetailer != nil {
             payload?.use_adetailer = true
+        }
+
+        if controlnet != nil {
+            payload?.use_controlnet = true
         }
 
 		return (payload, adetailer)

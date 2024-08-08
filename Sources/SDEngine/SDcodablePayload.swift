@@ -55,6 +55,7 @@ public class SDcodablePayload: Codable, Equatable, ObservableObject, @unchecked 
     // externally editable
     public var use_lastSeed: Bool
     public var use_adetailer: Bool
+    public var use_controlnet: Bool
 
 
 	required public init(from decoder: any Decoder) throws {
@@ -105,6 +106,7 @@ public class SDcodablePayload: Codable, Equatable, ObservableObject, @unchecked 
 		// externally editable
 		self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed) ?? false
 		self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer) ?? false
+        self.use_controlnet = try container.decodeIfPresent(Bool.self, forKey: .use_controlnet) ?? false
 	}
 }
 
@@ -141,6 +143,11 @@ extension SDcodablePayload {
             alwayson_scripts[SDExtensionName.adetailer.rawValue] = SDextensionADetailer.minimum()?.args
         }
         
+        if self.use_controlnet,
+           sdEngine.systemInfo?.isEnabled(.controlnet) ?? false {
+            alwayson_scripts[SDExtensionName.adetailer.rawValue] = SDextensionControlNet.minimum()?.args
+        }
+
         if alwayson_scripts.count > 0 {
             extendedDictionary?["alwayson_scripts"] = alwayson_scripts
         }
@@ -154,6 +161,7 @@ extension SDcodablePayload {
 		// clean unnecessary keys
         extendedDictionary?["use_lastSeed"] = nil
 		extendedDictionary?["use_adetailer"] = nil
+        extendedDictionary?["use_controlnet"] = nil
 
 
 		var extendedPayload: Data = payload
@@ -261,6 +269,7 @@ extension SDcodablePayload {
         ]
 
         essentials.append(["FACE IMPROVEMENT: ", (use_adetailer ? "YES" : "NO")])
+        essentials.append(["CONTROLNET: ", (use_controlnet ? "YES" : "NO")])
 
         return essentials
     }
