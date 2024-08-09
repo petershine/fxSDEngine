@@ -19,24 +19,10 @@ public struct SDcodableSysInfo: Codable {
 
 
 extension SDcodableSysInfo {
-	public var extensionNames: Set<SDExtensionName>? {
-		var extensionNames: Set<SDExtensionName> = []
-
-		for sdExtension in self.Extensions ?? [] {
-			guard sdExtension.name != nil,
-				  let availableName = SDExtensionName(rawValue: sdExtension.name!) else {
-				continue
-			}
-
-			extensionNames.insert(availableName)
-		}
-
-		return extensionNames.count > 0 ? extensionNames : nil
-	}
-}
-
-extension SDcodableSysInfo {
 	public func isEnabled(_ extensionCase: SDExtensionName) -> Bool {
-		return extensionNames?.contains(extensionCase) ?? false
+        let filtered = self.Extensions?.filter({
+            return $0.name?.lowercased().contains(extensionCase.rawValue.lowercased()) ?? false
+        })
+        return (filtered ?? []).count > 0
 	}
 }
