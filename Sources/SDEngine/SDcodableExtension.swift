@@ -18,7 +18,7 @@ public enum SDExtensionName: String {
     case controlnet
 }
 
-public protocol SDprotocolExtension: Hashable, Sendable, Codable {
+public protocol SDprotocolExtension: Codable {
     static func minimum() -> Self?
 
     var args: Dictionary<String, Any?>? { get }
