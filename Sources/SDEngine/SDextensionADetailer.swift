@@ -54,7 +54,7 @@ public struct SDextensionADetailer: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         self.ad_confidence = try container.decodeIfPresent(Double.self, forKey: .ad_confidence) ?? 0.3
-        self.ad_denoising_strength = try container.decodeIfPresent(Double.self, forKey: .ad_denoising_strength) ?? 0.3
+        self.ad_denoising_strength = try container.decodeIfPresent(Double.self, forKey: .ad_denoising_strength) ?? 0.4
         self.ad_dilate_erode = try container.decodeIfPresent(Int.self, forKey: .ad_dilate_erode) ?? 4
         self.ad_inpaint_only_masked = try container.decodeIfPresent(Bool.self, forKey: .ad_inpaint_only_masked) ?? true
         self.ad_inpaint_only_masked_padding = try container.decodeIfPresent(Int.self, forKey: .ad_inpaint_only_masked_padding) ?? 31

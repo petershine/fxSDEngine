@@ -141,16 +141,19 @@ extension SDcodablePayload {
 
         if self.use_adetailer,
            sdEngine.systemInfo?.isEnabled(.adetailer) ?? false {
-            alwayson_scripts[SDExtensionName.adetailer.rawValue] = SDextensionADetailer.minimum()?.args
+
+            var adetailer = SDextensionADetailer.minimum()
+            adetailer?.ad_cfg_scale = Int(self.cfg_scale)
+            alwayson_scripts[SDExtensionName.adetailer.rawValue] = adetailer?.args
         }
         
         if self.use_controlnet,
            !(self.sourceImageBase64?.isEmpty ?? true),
            sdEngine.systemInfo?.isEnabled(.controlnet) ?? false {
 
-            var minimumInstance = SDextensionControlNet.minimum()
-            minimumInstance?.image?.image = self.sourceImageBase64
-            alwayson_scripts[SDExtensionName.controlnet.rawValue] = minimumInstance?.args
+            var controlnet = SDextensionControlNet.minimum()
+            controlnet?.image?.image = self.sourceImageBase64
+            alwayson_scripts[SDExtensionName.controlnet.rawValue] = controlnet?.args
         }
 
         if alwayson_scripts.count > 0 {
