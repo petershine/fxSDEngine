@@ -490,8 +490,8 @@ import fXDKit
     }
 
     open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (URL?, SDcodablePayload?) {
-		let pngDataArray: [Data] = encodedImages.map { Data(base64Encoded: $0 ?? "") ?? Data() }
-		guard pngDataArray.count > 0 else {
+		let decodedDataArray: [Data] = encodedImages.map { Data(base64Encoded: $0 ?? "") ?? Data() }
+        guard decodedDataArray.count > 0 else {
 			return (nil, nil)
 		}
 
@@ -499,11 +499,17 @@ import fXDKit
 		let infotext = generated?.infotext ?? ""
 		let (payload, _) = extract_fromInfotext(infotext: infotext)
 
-		let payloadData = payload.encoded()
+        var pngDataArray = decodedDataArray
+        if (payload?.use_controlnet ?? false),
+           let firstPNGdata = decodedDataArray.first {
+            pngDataArray = [firstPNGdata]
+        }
 
         var newImageURL: URL? = nil
+
         let storage = SDStorage()
-		for (index, pngData) in pngDataArray.enumerated() {
+        let payloadData = payload.encoded()
+        for (index, pngData) in pngDataArray.enumerated() {
             newImageURL = try await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)
 		}
 
