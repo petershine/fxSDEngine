@@ -106,6 +106,37 @@ extension SDextensionControlNet: SDprotocolExtension {
     }
     
     public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
-        return nil
+        var extractedDictionary: [String:Any?] = [:]
+        let extractingKeyPairs_controlnet = [
+            ("control_mode", "control mode"),
+            ("module", "controlnet 0"),
+            ("guidance_end", "guidance end"),
+            ("guidance_start", "guidance start"),
+            ("pixel_perfect", "pixel perfect"),
+            ("processor_res", "processor res"),
+            ("resize_mode", "resize mode"),
+            ("threshold_a", "threshold a"),
+            ("threshold_b", "threshold b"),
+        ]
+        for (key, extractedKey) in extractingKeyPairs_controlnet {
+            extractedDictionary[key] = jsonDictionary[extractedKey]
+            jsonDictionary[extractedKey] = nil
+        }
+
+        fxdPrint(name: "extractedDictionary", dictionary: extractedDictionary)
+
+        var decoded: Self? = nil
+        if extractedDictionary.count > 0 {
+            do {
+                let controlnetData = try JSONSerialization.data(withJSONObject: extractedDictionary)
+                decoded = try JSONDecoder().decode(Self.self, from: controlnetData)
+                fxdPrint(decoded!)
+            }
+            catch {
+                fxdPrint(error)
+            }
+        }
+
+        return decoded
     }
 }
