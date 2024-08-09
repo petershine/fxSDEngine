@@ -18,7 +18,7 @@ open class SDStorage: NSObject {
 }
 
 extension SDStorage {
-	func saveGenerated(pngData: Data, payloadData: Data?, index: Int = 0) async throws -> URL? {
+    func saveGenerated(pngData: Data, payloadData: Data?, controlnetData: Data? = nil, index: Int = 0) async throws -> URL? {
         guard let imageURL = URL.newFileURL(prefix: "GenerArt", index: index, contentType: UTType.png) else {
 			return nil
 		}
@@ -31,12 +31,17 @@ extension SDStorage {
         try payloadData?.write(to: imageURL.jsonURL)
         fxdPrint("[PAYLOAD JSON SAVED]: ", payloadData, imageURL.jsonURL)
 
+        if let controlnetData {
+            try controlnetData.write(to: imageURL.controlnetURL)
+            fxdPrint("[CONTROLNET JSON SAVED]: ", controlnetData, imageURL.controlnetURL)
+        }
+
         let _ = try await saveThumbnail(imageURL: imageURL, pngData: pngData)
 
         return imageURL
 	}
 
-    func saveThumbnail(imageURL: URL, pngData: Data? = nil) async throws -> Bool {
+    func saveThumbnail(imageURL: URL, pngData: Data?) async throws -> Bool {
         var imageData: Data? = pngData
         if imageData == nil {
             imageData = try Data(contentsOf: imageURL)
@@ -96,6 +101,7 @@ extension SDStorage {
                         try FileManager.default.removeItem(at: imageURL)
                         try FileManager.default.removeItem(at: imageURL.jsonURL)
                         try FileManager.default.removeItem(at: imageURL.thumbnailURL)
+                        try FileManager.default.removeItem(at: imageURL.controlnetURL)
 
                         deletedCount = deletedCount + 1
                     }
@@ -115,5 +121,19 @@ extension SDStorage {
             })
 
         return didDelete ?? false
+    }
+}
+
+
+fileprivate extension URL {
+    var controlnetURL: URL {
+        var controlNet = self.deletingPathExtension()
+        let filenameComponent = controlNet.lastPathComponent
+        controlNet.deleteLastPathComponent()
+        controlNet.append(component: "_controlnet")
+        controlNet.append(components: filenameComponent)
+        controlNet.appendPathExtension(UTType.json.preferredFilenameExtension ?? UTType.json.identifier.components(separatedBy: ".").last ?? "json")
+
+        return controlNet
     }
 }
