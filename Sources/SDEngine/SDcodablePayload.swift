@@ -56,6 +56,7 @@ public class SDcodablePayload: Codable, Equatable, ObservableObject, @unchecked 
     public var use_lastSeed: Bool
     public var use_adetailer: Bool
     public var use_controlnet: Bool
+    public var sourceImageBase64: String? = nil
 
 
 	required public init(from decoder: any Decoder) throws {
@@ -144,8 +145,12 @@ extension SDcodablePayload {
         }
         
         if self.use_controlnet,
+           !(self.sourceImageBase64?.isEmpty ?? true),
            sdEngine.systemInfo?.isEnabled(.controlnet) ?? false {
-            alwayson_scripts[SDExtensionName.adetailer.rawValue] = SDextensionControlNet.minimum()?.args
+
+            var minimumInstance = SDextensionControlNet.minimum()
+            minimumInstance?.image?.image = self.sourceImageBase64
+            alwayson_scripts[SDExtensionName.controlnet.rawValue] = minimumInstance?.args
         }
 
         if alwayson_scripts.count > 0 {
@@ -162,6 +167,7 @@ extension SDcodablePayload {
         extendedDictionary?["use_lastSeed"] = nil
 		extendedDictionary?["use_adetailer"] = nil
         extendedDictionary?["use_controlnet"] = nil
+        extendedDictionary?["sourceImageBase64"] = nil
 
 
 		var extendedPayload: Data = payload
