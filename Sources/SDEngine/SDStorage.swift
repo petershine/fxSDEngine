@@ -140,15 +140,10 @@ extension SDStorage {
 }
 
 
-fileprivate extension URL {
-    var controlnetURL: URL {
-        var controlNet = self.deletingPathExtension()
-        let filenameComponent = controlNet.lastPathComponent
-        controlNet.deleteLastPathComponent()
-        controlNet.append(component: "_controlnet")
-        controlNet.append(components: filenameComponent)
-        controlNet.appendPathExtension(UTType.json.preferredFilenameExtension ?? UTType.json.identifier.components(separatedBy: ".").last ?? "json")
+extension URL {
+    public var controlnetURL: URL {
+        let controlnet = self.pairedFileURL(inSubPath: "_controlnet", contentType: .json)
 
-        return controlNet
+        return controlnet
     }
 }

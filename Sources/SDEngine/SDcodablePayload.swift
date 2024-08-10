@@ -244,8 +244,8 @@ extension SDcodablePayload {
 
 
 extension SDcodablePayload {
-    public static func loaded(from imageURL: URL?) throws -> Self? {
-        guard let jsonURL = imageURL?.jsonURL else {
+    public static func loaded(from fileURL: URL?) throws -> Self? {
+        guard let jsonURL = fileURL?.jsonURL else {
             return nil
         }
 

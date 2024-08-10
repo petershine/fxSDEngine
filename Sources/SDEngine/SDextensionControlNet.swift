@@ -140,3 +140,25 @@ extension SDextensionControlNet: SDprotocolExtension {
         return decoded
     }
 }
+
+extension SDextensionControlNet {
+    public static func loaded(from fileURL: URL?) throws -> Self? {
+        guard let jsonURL = fileURL?.controlnetURL else {
+            return nil
+        }
+
+        let controlnetData = try Data(contentsOf: jsonURL)
+        return controlnetData.decode(Self.self)
+    }
+
+    public func configurations() -> [[String]] {
+        let essentials: [[String]] = [
+            ["module: ", module],
+            ["model: ", model],
+            ["control mode", control_mode],
+            ["resize mode: ", resize_mode],
+        ]
+
+        return essentials
+    }
+}
