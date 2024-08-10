@@ -39,7 +39,6 @@ import fXDKit
 
     @Published open var nextPayload: SDcodablePayload? = nil
     @Published open var nextControlNet: SDextensionControlNet? = nil
-    @Published open var sourceImageBase64: String = ""
     @Published open var selectedImageURL: URL? = nil {
         willSet {
             if let imageURL = newValue {
@@ -82,8 +81,8 @@ import fXDKit
 
         let loadedPayload = try SDcodablePayload.loaded(from: fileURL.jsonURL)
 
-        if (loadedPayload?.use_controlnet ?? false),
-           let loadedControlNet = try SDextensionControlNet.loaded(from: fileURL.controlnetURL) {
+        if (loadedPayload?.use_controlnet ?? false) {
+            let loadedControlNet = try SDextensionControlNet.loaded(from: fileURL.controlnetURL) ?? SDextensionControlNet.minimum()
             await MainActor.run {
                 nextControlNet = loadedControlNet
             }

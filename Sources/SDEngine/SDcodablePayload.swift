@@ -148,12 +148,13 @@ extension SDcodablePayload {
 
         var controlnet: SDextensionControlNet? = nil
         if self.use_controlnet,
-           !(sdEngine.sourceImageBase64.isEmpty),
            sdEngine.systemInfo?.isEnabled(.controlnet) ?? false {
 
-            controlnet = SDextensionControlNet.minimum()
-            controlnet?.image?.image = sdEngine.sourceImageBase64
-            alwayson_scripts[SDExtensionName.controlnet.rawValue] = controlnet?.args
+            controlnet = sdEngine.nextControlNet
+            if let sourceImageBase64 = controlnet?.image?.image,
+               !(sourceImageBase64.isEmpty) {
+                alwayson_scripts[SDExtensionName.controlnet.rawValue] = controlnet?.args
+            }
         }
 
         if alwayson_scripts.count > 0 {

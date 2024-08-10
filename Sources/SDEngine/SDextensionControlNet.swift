@@ -5,7 +5,11 @@ import Foundation
 import fXDKit
 
 
-public struct SDextensionControlNet: Codable {
+public struct SDextensionControlNet: Codable, Equatable {
+    public static func == (lhs: SDextensionControlNet, rhs: SDextensionControlNet) -> Bool {
+        return (lhs.module == rhs.module) && (lhs.image?.image == rhs.image?.image)
+    }
+
     var advanced_weighting: String?
     var animatediff_batch: Bool
     var batch_image_files: [String?]?
@@ -40,7 +44,7 @@ public struct SDextensionControlNet: Codable {
 
     public var image: SDextensionControlNetImage?
     public struct SDextensionControlNetImage: Codable {
-        var image: String?
+        public var image: String?
         var mask: String?
     }
 
