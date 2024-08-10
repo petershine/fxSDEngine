@@ -88,6 +88,11 @@ public struct SDextensionControlNet: Codable, Equatable {
         if self.image == nil {
             self.image = try JSONDecoder().decode(SDextensionControlNetImage.self, from: "{}".data(using: .utf8) ?? Data())
         }
+
+        self.control_mode = self.control_mode.trimmingCharacters(in: .whitespacesAndNewlines)
+        if self.control_mode.last == "\"" {
+            self.control_mode.removeLast()
+        }
     }
 }
 
