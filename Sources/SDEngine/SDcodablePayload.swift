@@ -56,7 +56,6 @@ public class SDcodablePayload: Codable, Equatable, ObservableObject, @unchecked 
     public var use_lastSeed: Bool
     public var use_adetailer: Bool
     public var use_controlnet: Bool
-    public var sourceImageBase64: String? = nil
 
 
 	required public init(from decoder: any Decoder) throws {
@@ -113,9 +112,9 @@ public class SDcodablePayload: Codable, Equatable, ObservableObject, @unchecked 
 
 
 extension SDcodablePayload {
-	public func submissablePayload(sdEngine: SDEngine) -> Data? {
+    public func submissablePayload(sdEngine: SDEngine) -> (Data?, SDextensionControlNet?) {
 		guard let payload: Data = encoded() else {
-			return nil
+			return (nil, nil)
 		}
 
 
@@ -128,7 +127,7 @@ extension SDcodablePayload {
 		}
 
 		guard extendedDictionary != nil else {
-			return nil
+			return (nil, nil)
 		}
 
 
@@ -146,13 +145,14 @@ extension SDcodablePayload {
             adetailer?.ad_cfg_scale = Int(self.cfg_scale)
             alwayson_scripts[SDExtensionName.adetailer.rawValue] = adetailer?.args
         }
-        
+
+        var controlnet: SDextensionControlNet? = nil
         if self.use_controlnet,
-           !(self.sourceImageBase64?.isEmpty ?? true),
+           !(sdEngine.sourceImageBase64.isEmpty),
            sdEngine.systemInfo?.isEnabled(.controlnet) ?? false {
 
-            var controlnet = SDextensionControlNet.minimum()
-            controlnet?.image?.image = self.sourceImageBase64
+            controlnet = SDextensionControlNet.minimum()
+            controlnet?.image?.image = sdEngine.sourceImageBase64
             alwayson_scripts[SDExtensionName.controlnet.rawValue] = controlnet?.args
         }
 
@@ -170,7 +170,6 @@ extension SDcodablePayload {
         extendedDictionary?["use_lastSeed"] = nil
 		extendedDictionary?["use_adetailer"] = nil
         extendedDictionary?["use_controlnet"] = nil
-        extendedDictionary?["sourceImageBase64"] = nil
 
 
 		var extendedPayload: Data = payload
@@ -181,7 +180,7 @@ extension SDcodablePayload {
 			fxdPrint(error)
 		}
 
-		return extendedPayload
+        return (extendedPayload, controlnet)
 	}
 }
 

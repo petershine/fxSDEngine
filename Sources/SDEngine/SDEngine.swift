@@ -23,9 +23,10 @@ public protocol SDEngine: NSObjectProtocol {
     var didInterrupt: Bool { get set }
 
 	var displayedImage: UIImage? { get set }
-    var sourceImageURL: URL? { get set }
 
 	var nextPayload: SDcodablePayload? { get set }
+    var nextControlNet: SDextensionControlNet? { get set }
+    var sourceImageBase64: String { get set }
 	var selectedImageURL: URL? { get set }
 
 
@@ -51,7 +52,7 @@ public protocol SDEngine: NSObjectProtocol {
 
 	func action_Generate(payload: SDcodablePayload)
     func execute_txt2img(payload: SDcodablePayload) async throws -> Error?
-	func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (URL?, SDcodablePayload?)
+    func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?], controlnet: SDextensionControlNet?) async throws -> (URL?, SDcodablePayload?)
 
     func continueMonitoring()
     func monitor_progress(quiet: Bool) async -> (SDcodableProgress?, Bool, Error?)

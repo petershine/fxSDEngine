@@ -36,9 +36,10 @@ import fXDKit
 
 
 	@Published open var displayedImage: UIImage? = nil
-    @Published open var sourceImageURL: URL? = nil
 
     @Published open var nextPayload: SDcodablePayload? = nil
+    @Published open var nextControlNet: SDextensionControlNet? = nil
+    @Published open var sourceImageBase64: String = ""
     @Published open var selectedImageURL: URL? = nil {
         willSet {
             if let imageURL = newValue {
@@ -74,16 +75,23 @@ import fXDKit
         }
 
 
-        let (imageURL, error_2) = try await prepare_generationPayload(pngData: pngData, imagePath: imagePath)
-        guard let imageURL else {
+        let (fileURL, error_2) = try await prepare_generationPayload(pngData: pngData, imagePath: imagePath)
+        guard let fileURL else {
             return error_2
         }
 
-        let loadedPayload = try SDcodablePayload.loaded(from: imageURL.jsonURL)
+        let loadedPayload = try SDcodablePayload.loaded(from: fileURL.jsonURL)
+
+        if (loadedPayload?.use_controlnet ?? false),
+           let loadedControlNet = try SDextensionControlNet.loaded(from: fileURL.controlnetURL) {
+            await MainActor.run {
+                nextControlNet = loadedControlNet
+            }
+        }
 
         await MainActor.run {
             nextPayload = loadedPayload
-            selectedImageURL = imageURL
+            selectedImageURL = fileURL
         }
 
         return error_2
@@ -440,7 +448,7 @@ import fXDKit
     }
 
 	public func execute_txt2img(payload: SDcodablePayload) async throws -> Error? {	fxd_log()
-		let payloadData: Data? = payload.submissablePayload(sdEngine: self)
+		let (payloadData, controlnet) = payload.submissablePayload(sdEngine: self)
 
         let (data, _, error) = await networkingModule.requestToSDServer(
 			quiet: false,
@@ -479,18 +487,20 @@ import fXDKit
 
         let (newImageURL, newPayload) = try await finish_txt2img(
             generated: generated,
-            encodedImages: encodedImages)
+            encodedImages: encodedImages,
+            controlnet: controlnet)
 
 
         await MainActor.run {
             nextPayload = newPayload
+            nextControlNet = controlnet
             selectedImageURL = newImageURL
         }
 
         return error
     }
 
-    open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?]) async throws -> (URL?, SDcodablePayload?) {
+    open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?], controlnet: SDextensionControlNet?) async throws -> (URL?, SDcodablePayload?) {
 		let decodedDataArray: [Data] = encodedImages.map { Data(base64Encoded: $0 ?? "") ?? Data() }
         guard decodedDataArray.count > 0 else {
 			return (nil, nil)
@@ -498,10 +508,10 @@ import fXDKit
 
 
 		let infotext = generated?.infotext ?? ""
-        let (payload, controlnet, _) = extract_fromInfotext(infotext: infotext)
+        let (extractedPayload, extractedControlNet, _) = extract_fromInfotext(infotext: infotext)
 
         var pngDataArray = decodedDataArray
-        if (payload?.use_controlnet ?? false),
+        if (extractedPayload?.use_controlnet ?? false),
            let firstPNGdata = decodedDataArray.first {
             pngDataArray = [firstPNGdata]
         }
@@ -509,13 +519,14 @@ import fXDKit
         var newImageURL: URL? = nil
 
         let storage = SDStorage()
-        let payloadData = payload.encoded()
-        let controlnetData = controlnet?.encoded()
+        let payloadData = extractedPayload.encoded()
+        let controlnetData = (controlnet != nil) ? controlnet?.encoded() : extractedControlNet?.encoded()
+
         for (index, pngData) in pngDataArray.enumerated() {
             newImageURL = try await storage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
 		}
 
-		return (newImageURL, payload)
+		return (newImageURL, extractedPayload)
 	}
 
 
