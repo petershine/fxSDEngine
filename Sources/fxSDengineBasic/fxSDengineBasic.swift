@@ -79,7 +79,7 @@ import fXDKit
             return error_2
         }
 
-        let loadedPayload = try SDcodablePayload.loaded(from: imageURL)
+        let loadedPayload = try SDcodablePayload.loaded(from: imageURL.jsonURL)
 
         await MainActor.run {
             nextPayload = loadedPayload

@@ -142,12 +142,12 @@ extension SDextensionControlNet: SDprotocolExtension {
 }
 
 extension SDextensionControlNet {
-    public static func loaded(from fileURL: URL?) throws -> Self? {
-        guard let jsonURL = fileURL?.controlnetURL else {
+    public static func loaded(from controlnetURL: URL?) throws -> Self? {
+        guard let controlnetURL else {
             return nil
         }
 
-        let controlnetData = try Data(contentsOf: jsonURL)
+        let controlnetData = try Data(contentsOf: controlnetURL)
         return controlnetData.decode(Self.self)
     }
 
