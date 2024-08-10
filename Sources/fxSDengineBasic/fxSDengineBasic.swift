@@ -356,25 +356,26 @@ import fXDKit
             return (nil, error)
         }
 
-        let (payload, _) = extract_fromInfotext(infotext: infotext)
+        let (payload, controlnet, _) = extract_fromInfotext(infotext: infotext)
         guard let payload else {
             return (nil, error)
         }
 
 
         let payloadData = payload.encoded()
-        let imageURL = try await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, index: 0)
+        let controlnetData = controlnet?.encoded()
+        let imageURL = try await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: 0)
 
         fxd_log()
         return (imageURL, error)
 	}
 
-	public func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionADetailer?) {
+    public func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionControlNet?, SDextensionADetailer?) {
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Steps:"))
 		else {	fxd_log()
 			fxdPrint("[infotext]", infotext)
-			return (nil, nil)
+			return (nil, nil, nil)
 		}
 
 
@@ -393,7 +394,7 @@ import fXDKit
 
 		guard !(prompt.isEmpty) else {	fxd_log()
 			fxdPrint("[infotext]", infotext)
-			return (nil, nil)
+			return (nil, nil, nil)
 		}
 
 
@@ -419,7 +420,7 @@ import fXDKit
             payload?.use_controlnet = true
         }
 
-		return (payload, adetailer)
+        return (payload, controlnet, adetailer)
 	}
 
 	open func action_Generate(payload: SDcodablePayload) {
@@ -497,7 +498,7 @@ import fXDKit
 
 
 		let infotext = generated?.infotext ?? ""
-		let (payload, _) = extract_fromInfotext(infotext: infotext)
+        let (payload, controlnet, _) = extract_fromInfotext(infotext: infotext)
 
         var pngDataArray = decodedDataArray
         if (payload?.use_controlnet ?? false),
@@ -509,8 +510,9 @@ import fXDKit
 
         let storage = SDStorage()
         let payloadData = payload.encoded()
+        let controlnetData = controlnet?.encoded()
         for (index, pngData) in pngDataArray.enumerated() {
-            newImageURL = try await storage.saveGenerated(pngData: pngData, payloadData: payloadData, index: index)
+            newImageURL = try await storage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
 		}
 
 		return (newImageURL, payload)

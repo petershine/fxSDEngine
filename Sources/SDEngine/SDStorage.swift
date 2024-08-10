@@ -18,7 +18,7 @@ open class SDStorage: NSObject {
 }
 
 extension SDStorage {
-    func saveGenerated(pngData: Data, payloadData: Data?, controlnetData: Data? = nil, index: Int = 0) async throws -> URL? {
+    func saveGenerated(pngData: Data, payloadData: Data?, controlnetData: Data?, index: Int = 0) async throws -> URL? {
         guard let imageURL = URL.newFileURL(prefix: "GenerArt", index: index, contentType: UTType.png) else {
 			return nil
 		}
