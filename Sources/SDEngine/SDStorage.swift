@@ -19,48 +19,56 @@ open class SDStorage: NSObject {
 
 extension SDStorage {
     func saveGenerated(pngData: Data, payloadData: Data?, controlnetData: Data?, index: Int = 0) async throws -> URL? {
-        guard let imageURL = URL.newFileURL(prefix: "GenerArt", index: index, contentType: UTType.png) else {
+        guard let fileURL = URL.newFileURL(prefix: "GenerArt", index: index, contentType: UTType.png) else {
 			return nil
 		}
 
 
 		fxd_log()
-        try pngData.write(to: imageURL)
-        fxdPrint("[IMAGE FILE SAVED]: ", pngData, imageURL)
+        try pngData.write(to: fileURL)
+        fxdPrint("[IMAGE FILE SAVED]: ", pngData, fileURL)
 
-        try payloadData?.write(to: imageURL.jsonURL)
-        fxdPrint("[PAYLOAD JSON SAVED]: ", payloadData, imageURL.jsonURL)
+        try payloadData?.write(to: fileURL.jsonURL)
+        fxdPrint("[PAYLOAD JSON SAVED]: ", payloadData, fileURL.jsonURL)
 
-        if let controlnetData {
-            try controlnetData.write(to: imageURL.controlnetURL)
-            fxdPrint("[CONTROLNET JSON SAVED]: ", controlnetData, imageURL.controlnetURL)
-        }
+        let _ = try await saveControlnet(fileURL: fileURL, controlnetData: controlnetData)
+        let _ = try await saveThumbnail(fileURL: fileURL, pngData: pngData)
 
-        let _ = try await saveThumbnail(imageURL: imageURL, pngData: pngData)
-
-        return imageURL
+        return fileURL
 	}
 
-    func saveThumbnail(imageURL: URL, pngData: Data?) async throws -> Bool {
-        var imageData: Data? = pngData
-        if imageData == nil {
-            imageData = try Data(contentsOf: imageURL)
+    fileprivate func saveControlnet(fileURL: URL, controlnetData: Data?) async throws -> Bool {
+        guard let controlnetData else {
+            return false
         }
 
-        guard imageData != nil,
-              let pngImage = UIImage(data: imageData!) else {
+
+        let controlnetURL = fileURL.controlnetURL
+
+        let controlnetDirectory = controlnetURL.deletingPathExtension().deletingLastPathComponent()
+        try FileManager.default.createDirectory(at: controlnetDirectory, withIntermediateDirectories: true)
+
+        try controlnetData.write(to: controlnetURL)
+        fxdPrint("[CONTROLNET JSON SAVED]: ", controlnetData, controlnetURL)
+
+        return true
+    }
+
+    fileprivate func saveThumbnail(fileURL: URL, pngData: Data?) async throws -> Bool {
+        guard let pngData,
+              let pngImage = UIImage(data: pngData) else {
             return false
         }
 
 
         let thumbnailSize = pngImage.aspectSize(for: .fill, containerSize: CGSize(width: DIMENSION_MINIMUM_IMAGE, height: DIMENSION_MINIMUM_IMAGE))
-        guard let thumbnailImage = await UIImage(data: imageData!)?.byPreparingThumbnail(ofSize: thumbnailSize) else {
+        guard let thumbnail = await pngImage.byPreparingThumbnail(ofSize: thumbnailSize) else {
             return false
         }
 
 
-        let thumbnailData = thumbnailImage.pngData()
-        let thumbnailURL = imageURL.thumbnailURL
+        let thumbnailData = thumbnail.pngData()
+        let thumbnailURL = fileURL.thumbnailURL
 
         let thumbnailDirectory = thumbnailURL.deletingPathExtension().deletingLastPathComponent()
         try FileManager.default.createDirectory(at: thumbnailDirectory, withIntermediateDirectories: true)
@@ -100,13 +108,13 @@ extension SDStorage {
 
                         try FileManager.default.removeItem(at: imageURL)
                         try FileManager.default.removeItem(at: imageURL.jsonURL)
-                        try FileManager.default.removeItem(at: imageURL.thumbnailURL)
 
                         do {
                             try FileManager.default.removeItem(at: imageURL.controlnetURL)
+                            try FileManager.default.removeItem(at: imageURL.thumbnailURL)
                         }
                         catch {
-                            // It's okay. controlnetURL may not always be there
+                            // It's okay. controlnet, or thumbnail, may not always be there
                             fxdPrint(error)
                         }
 
