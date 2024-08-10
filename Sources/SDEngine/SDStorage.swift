@@ -101,7 +101,14 @@ extension SDStorage {
                         try FileManager.default.removeItem(at: imageURL)
                         try FileManager.default.removeItem(at: imageURL.jsonURL)
                         try FileManager.default.removeItem(at: imageURL.thumbnailURL)
-                        try FileManager.default.removeItem(at: imageURL.controlnetURL)
+
+                        do {
+                            try FileManager.default.removeItem(at: imageURL.controlnetURL)
+                        }
+                        catch {
+                            // It's okay. controlnetURL may not always be there
+                            fxdPrint(error)
+                        }
 
                         deletedCount = deletedCount + 1
                     }
