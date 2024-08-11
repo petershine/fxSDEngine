@@ -39,7 +39,7 @@ public struct SDextensionControlNet: SDprotocolCodable {
     var weight: Double
 
     public var image: SDextensionControlNetImage?
-    public struct SDextensionControlNetImage: Codable {
+    public struct SDextensionControlNetImage: Codable, Equatable {
         public var image: String?
         var mask: String?
     }

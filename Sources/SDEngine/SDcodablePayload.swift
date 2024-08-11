@@ -134,10 +134,8 @@ extension SDcodablePayload {
         if (self.userConfiguration?.use_adetailer ?? false),
            mainSDEngine.systemInfo?.isEnabled(.adetailer) ?? false {
 
-            if var adetailer = SDextensionADetailer.minimum() {
-                adetailer.ad_cfg_scale = Int(self.cfg_scale)
-                alwayson_scripts[SDExtensionName.adetailer.rawValue] = adetailer.args
-            }
+            self.userConfiguration?.adetailer?.ad_cfg_scale = Int(self.cfg_scale)
+            alwayson_scripts[SDExtensionName.adetailer.rawValue] = self.userConfiguration?.adetailer?.args
         }
 
         if (self.userConfiguration?.use_controlnet ?? false),
@@ -272,6 +270,8 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
     public var use_controlnet: Bool
 
     public var controlnet: SDextensionControlNet? = nil
+    public var adetailer: SDextensionADetailer? = nil
+
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -281,8 +281,14 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
         self.use_controlnet = try container.decodeIfPresent(Bool.self, forKey: .use_controlnet) ?? false
 
         self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet)
+        self.adetailer = try container.decodeIfPresent(SDextensionADetailer.self, forKey: .adetailer)
+
         if self.controlnet == nil {
             self.controlnet = SDextensionControlNet.minimum()
+        }
+
+        if self.adetailer == nil {
+            self.adetailer = SDextensionADetailer.minimum()
         }
     }
 }

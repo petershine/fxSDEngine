@@ -358,26 +358,26 @@ import fXDKit
             return (nil, error)
         }
 
-        let (payload, controlnet, _) = extract_fromInfotext(infotext: infotext)
+        let payload = extract_fromInfotext(infotext: infotext)
         guard let payload else {
             return (nil, error)
         }
 
 
         let payloadData = payload.encoded()
-        let controlnetData = controlnet?.encoded()
+        let controlnetData = payload.userConfiguration?.controlnet?.encoded()
         let imageURL = try await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: 0)
 
         fxd_log()
         return (imageURL, error)
 	}
 
-    public func extract_fromInfotext(infotext: String) -> (SDcodablePayload?, SDextensionControlNet?, SDextensionADetailer?) {
+    public func extract_fromInfotext(infotext: String) -> SDcodablePayload? {
 		guard !(infotext.isEmpty)
 				&& (infotext.contains("Steps:"))
 		else {	fxd_log()
 			fxdPrint("[infotext]", infotext)
-			return (nil, nil, nil)
+			return nil
 		}
 
 
@@ -396,7 +396,7 @@ import fXDKit
 
 		guard !(prompt.isEmpty) else {	fxd_log()
 			fxdPrint("[infotext]", infotext)
-			return (nil, nil, nil)
+			return nil
 		}
 
 
@@ -416,13 +416,15 @@ import fXDKit
 
         if adetailer != nil {
             payload?.userConfiguration?.use_adetailer = true
+            payload?.userConfiguration?.adetailer = adetailer
         }
 
         if controlnet != nil {
             payload?.userConfiguration?.use_controlnet = true
+            payload?.userConfiguration?.controlnet = controlnet
         }
 
-        return (payload, controlnet, adetailer)
+        return payload
 	}
 
 	open func action_Generate(payload: SDcodablePayload) {
@@ -503,7 +505,7 @@ import fXDKit
 
 
 		let infotext = generated?.infotext ?? ""
-        let (extractedPayload, extractedControlNet, _) = extract_fromInfotext(infotext: infotext)
+        let extractedPayload = extract_fromInfotext(infotext: infotext)
 
         var pngDataArray = decodedDataArray
         if (extractedPayload?.userConfiguration?.use_controlnet ?? false),
@@ -515,7 +517,7 @@ import fXDKit
 
         let storage = SDStorage()
         let payloadData = extractedPayload.encoded()
-        let controlnetData = (controlnet != nil) ? controlnet?.encoded() : extractedControlNet?.encoded()
+        let controlnetData = (controlnet != nil) ? controlnet?.encoded() : extractedPayload?.userConfiguration?.controlnet?.encoded()
 
         for (index, pngData) in pngDataArray.enumerated() {
             newImageURL = try await storage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
