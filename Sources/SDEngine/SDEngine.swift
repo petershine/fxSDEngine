@@ -7,9 +7,9 @@ import fXDKit
 
 
 public protocol SDEngine: NSObjectProtocol {
-	var networkingModule: SDNetworking { get set }
-	init(networkingModule: SDNetworking)
-	
+	var mainSDNetworking: SDNetworking { get set }
+	init(mainSDNetworking: SDNetworking)
+
 
 	var systemInfo: SDcodableSysInfo? { get set }
 	var systemCheckpoints: [SDcodableCheckpoint] { get set }

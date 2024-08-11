@@ -7,10 +7,10 @@ import fXDKit
 
 @preconcurrency open class fxSDengineBasic: NSObject, ObservableObject, @unchecked Sendable, SDEngine {
 
-	open var networkingModule: SDNetworking
+	open var mainSDNetworking: SDNetworking
 
-	required public init(networkingModule: SDNetworking) {
-        self.networkingModule = networkingModule
+	required public init(mainSDNetworking: SDNetworking) {
+        self.mainSDNetworking = mainSDNetworking
 	}
 
 
@@ -97,7 +97,7 @@ import fXDKit
     }
 
     public func refresh_systemInfo() async -> Error? {
-        let (data, _, error) = await networkingModule.requestToSDServer(
+        let (data, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
 			api_endpoint: .INTERNAL_SYSINFO,
 			method: nil,
@@ -163,7 +163,7 @@ import fXDKit
 
 
 		let optionsPayload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
-        let (_, _, error) = await networkingModule.requestToSDServer(
+        let (_, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
 			api_endpoint: .SDAPI_V1_OPTIONS,
 			method: nil,
@@ -181,7 +181,7 @@ import fXDKit
 
 
         let optionsPayload = "{\"sd_vae\" : \"\(vaeName)\"}".processedJSONData()
-        let (_, _, error) = await networkingModule.requestToSDServer(
+        let (_, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_OPTIONS,
             method: nil,
@@ -213,7 +213,7 @@ import fXDKit
     }
 
     public func refresh_systemCheckpoints() async -> Error? {
-        let (data, _, error) = await networkingModule.requestToSDServer(
+        let (data, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_MODELS,
             method: nil,
@@ -232,7 +232,7 @@ import fXDKit
     }
 
     public func refresh_systemSamplers() async -> Error? {
-        let (data, _, error) = await networkingModule.requestToSDServer(
+        let (data, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_SAMPLERS,
             method: nil,
@@ -251,7 +251,7 @@ import fXDKit
     }
 
     public func refresh_systemSchedulers() async -> Error? {
-        let (data, _, error) = await networkingModule.requestToSDServer(
+        let (data, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_SCHEDULERS,
             method: nil,
@@ -270,7 +270,7 @@ import fXDKit
     }
 
     public func refresh_systemVAEs() async -> Error? {
-        let (data, _, error) = await networkingModule.requestToSDServer(
+        let (data, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_VAE,
             method: nil,
@@ -291,7 +291,7 @@ import fXDKit
     }
 
     public func obtain_latestPNGData(path: String) async -> (Data?, String?, Error?) {
-        let (data, _, error) = await networkingModule.requestToSDServer(
+        let (data, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
 			method: nil,
@@ -334,7 +334,7 @@ import fXDKit
         }
 
 
-        let (obtained_data, _, obtained_error) = await networkingModule.requestToSDServer(
+        let (obtained_data, _, obtained_error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
             method: nil,
@@ -345,7 +345,7 @@ import fXDKit
     }
 
     public func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?) {
-        let (data, _, error) = await networkingModule.requestToSDServer(
+        let (data, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
 			method: nil,
@@ -449,7 +449,7 @@ import fXDKit
 	public func execute_txt2img(payload: SDcodablePayload) async throws -> Error? {	fxd_log()
 		let (payloadData, controlnet) = payload.submissablePayload(mainSDEngine: self)
 
-        let (data, _, error) = await networkingModule.requestToSDServer(
+        let (data, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			method: nil,
@@ -543,7 +543,7 @@ import fXDKit
     }
 
     public func monitor_progress(quiet: Bool) async -> (SDcodableProgress?, Bool, Error?) {
-        let (data, _, error) = await networkingModule.requestToSDServer(
+        let (data, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: quiet,
             api_endpoint: .SDAPI_V1_PROGRESS,
             method: nil,
@@ -563,7 +563,7 @@ import fXDKit
 
 
     @MainActor public func interrupt() async -> Error? {
-        let (_, _, error) = await networkingModule.requestToSDServer(
+        let (_, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             api_endpoint: .SDAPI_V1_INTERRUPT,
             method: "POST",
