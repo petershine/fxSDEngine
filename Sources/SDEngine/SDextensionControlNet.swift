@@ -5,7 +5,7 @@ import Foundation
 import fXDKit
 
 
-public struct SDextensionControlNet: Codable, Equatable {
+public struct SDextensionControlNet: Codable, Equatable, SDprotocolPersisted {
     public static func == (lhs: SDextensionControlNet, rhs: SDextensionControlNet) -> Bool {
         return (lhs.module == rhs.module) && (lhs.image?.image == rhs.image?.image)
     }
@@ -151,15 +151,6 @@ extension SDextensionControlNet: SDprotocolExtension {
 }
 
 extension SDextensionControlNet {
-    public static func loaded(from controlnetURL: URL?) throws -> Self? {
-        guard let controlnetURL else {
-            return nil
-        }
-
-        let controlnetData = try Data(contentsOf: controlnetURL)
-        return controlnetData.decode(Self.self)
-    }
-
     public func configurations() -> [[String]] {
         let essentials: [[String]] = [
             ["module: ", module],

@@ -11,7 +11,7 @@ public struct SDcodableOverride: Codable {
     public var samples_save: Bool?
 }
 
-public class SDcodablePayload: Codable, Equatable, ObservableObject, @unchecked Sendable {
+public class SDcodablePayload: Codable, Equatable, ObservableObject, @unchecked Sendable, SDprotocolPersisted {
 	public static func == (lhs: SDcodablePayload, rhs: SDcodablePayload) -> Bool {
 		return lhs.seed == rhs.seed
 	}
@@ -244,15 +244,6 @@ extension SDcodablePayload {
 
 
 extension SDcodablePayload {
-    public static func loaded(from jsonURL: URL?) throws -> Self? {
-        guard let jsonURL else {
-            return nil
-        }
-
-        let payloadData = try Data(contentsOf: jsonURL)
-        return payloadData.decode(Self.self)
-    }
-
     public func configurations(with checkpoints: [SDcodableCheckpoint]) -> [[String]] {
         var model_name: String = "(unknown)"
         let model_hash = override_settings?.sd_model_checkpoint ?? ""

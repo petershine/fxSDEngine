@@ -6,6 +6,22 @@ import fXDKit
 import UniformTypeIdentifiers
 
 
+public protocol SDprotocolPersisted: Codable {
+    static func loaded(from fileURL: URL?) throws -> Self?
+}
+
+extension SDprotocolPersisted {
+    public static func loaded(from fileURL: URL?) throws -> Self? {
+        guard let fileURL else {
+            return nil
+        }
+
+        let loaded = try Data(contentsOf: fileURL)
+        return loaded.decode(Self.self)
+    }
+}
+
+
 @Observable
 open class SDStorage: NSObject {
 	public var latestImageURLs: [URL]? = {
