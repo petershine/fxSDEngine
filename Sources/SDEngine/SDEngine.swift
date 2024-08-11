@@ -50,7 +50,7 @@ public protocol SDEngine: NSObjectProtocol {
 
 	func action_Generate(payload: SDcodablePayload)
     func execute_txt2img(payload: SDcodablePayload) async throws -> Error?
-    func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?], controlnet: SDextensionControlNet?) async throws -> (URL?, SDcodablePayload?)
+    func finish_txt2img(generated: SDcodableGenerated?, controlnet: SDextensionControlNet?) async throws -> (URL?, SDcodablePayload?)
 
     func continueMonitoring()
     func monitor_progress(quiet: Bool) async -> (SDcodableProgress?, Bool, Error?)

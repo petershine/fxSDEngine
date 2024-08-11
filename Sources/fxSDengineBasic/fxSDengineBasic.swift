@@ -475,15 +475,13 @@ import fXDKit
 
 
         let generated = data?.decode(SDcodableGenerated.self)
-        let encodedImages = generated?.images ?? []
-        guard encodedImages.count > 0 else {
+        guard (generated?.images?.count ?? 0) > 0 else {
             return error
         }
 
 
         let (newImageURL, newPayload) = try await finish_txt2img(
             generated: generated,
-            encodedImages: encodedImages,
             controlnet: controlnet)
 
 
@@ -497,8 +495,12 @@ import fXDKit
         return error
     }
 
-    open func finish_txt2img(generated: SDcodableGenerated?, encodedImages: [String?], controlnet: SDextensionControlNet?) async throws -> (URL?, SDcodablePayload?) {
-		let decodedDataArray: [Data] = encodedImages.map { Data(base64Encoded: $0 ?? "") ?? Data() }
+    open func finish_txt2img(generated: SDcodableGenerated?, controlnet: SDextensionControlNet?) async throws -> (URL?, SDcodablePayload?) {
+        guard let base64EncodedImages: [String] = generated?.images as? [String] else {
+            return (nil, nil)
+        }
+
+        let decodedDataArray: [Data] = base64EncodedImages.map { Data(base64Encoded: $0) ?? Data() }
         guard decodedDataArray.count > 0 else {
 			return (nil, nil)
 		}
@@ -506,6 +508,9 @@ import fXDKit
 
 		let infotext = generated?.infotext ?? ""
         let extractedPayload = extract_fromInfotext(infotext: infotext)
+        if controlnet != nil {
+            extractedPayload?.userConfiguration?.controlnet = controlnet
+        }
 
         var pngDataArray = decodedDataArray
         if (extractedPayload?.userConfiguration?.use_controlnet ?? false),
