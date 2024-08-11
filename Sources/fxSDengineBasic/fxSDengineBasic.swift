@@ -530,13 +530,11 @@ import fXDKit
 
 
     open func continueMonitoring() {
-        Task {
+        Task {	@MainActor in
             let (newProgress, isSystemBusy, _) = await monitor_progress(quiet: true)
             if newProgress != nil || (didStartGenerating || isSystemBusy) != self.isSystemBusy {
-                await MainActor.run {
-                    monitoredProgress = newProgress
-                    self.isSystemBusy = didStartGenerating || isSystemBusy
-                }
+                monitoredProgress = newProgress
+                self.isSystemBusy = didStartGenerating || isSystemBusy
             }
 
             try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
