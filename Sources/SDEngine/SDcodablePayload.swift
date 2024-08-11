@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public class SDcodablePayload: Codable, ObservableObject, @unchecked Sendable, SDprotocolPersisted {
+public class SDcodablePayload: SDprotocolCodable, ObservableObject, @unchecked Sendable {
 	public var prompt: String
 	public var negative_prompt: String
 
@@ -48,10 +48,7 @@ public class SDcodablePayload: Codable, ObservableObject, @unchecked Sendable, S
     }
 
 
-    // externally editable
-    public var use_lastSeed: Bool
-    public var use_adetailer: Bool
-    public var use_controlnet: Bool
+    public var userConfiguration: SDcodableUserConfiguration?
 
 
 	required public init(from decoder: any Decoder) throws {
@@ -99,10 +96,10 @@ public class SDcodablePayload: Codable, ObservableObject, @unchecked Sendable, S
         self.override_settings_restore_afterwards = try container.decodeIfPresent(Bool.self, forKey: .override_settings_restore_afterwards) ?? true
         self.override_settings = try container.decodeIfPresent(SDcodableOverride.self, forKey: .override_settings)
 
-		// externally editable
-		self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed) ?? false
-		self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer) ?? false
-        self.use_controlnet = try container.decodeIfPresent(Bool.self, forKey: .use_controlnet) ?? false
+        self.userConfiguration = try container.decodeIfPresent(SDcodableUserConfiguration.self, forKey: .userConfiguration)
+        if self.userConfiguration == nil {
+            self.userConfiguration = SDcodableUserConfiguration.minimum()
+        }
 	}
 }
 
@@ -127,28 +124,24 @@ extension SDcodablePayload {
 		}
 
 
-		if !self.use_lastSeed {
+        if !(self.userConfiguration?.use_lastSeed ?? false) {
 			extendedDictionary?["seed"] = -1
 		}
 
 
         var alwayson_scripts: Dictionary<String, Any?> = [:]
 
-        if self.use_adetailer,
+        if (self.userConfiguration?.use_adetailer ?? false),
            mainSDEngine.systemInfo?.isEnabled(.adetailer) ?? false {
 
-            do {
-                var adetailer = try SDextensionADetailer.minimum()
-                adetailer?.ad_cfg_scale = Int(self.cfg_scale)
-                alwayson_scripts[SDExtensionName.adetailer.rawValue] = adetailer?.args
-            }
-            catch {	fxd_log()
-                fxdPrint(error)
+            if var adetailer = SDextensionADetailer.minimum() {
+                adetailer.ad_cfg_scale = Int(self.cfg_scale)
+                alwayson_scripts[SDExtensionName.adetailer.rawValue] = adetailer.args
             }
         }
 
         var controlnet: SDextensionControlNet? = nil
-        if self.use_controlnet,
+        if (self.userConfiguration?.use_controlnet ?? false),
            mainSDEngine.systemInfo?.isEnabled(.controlnet) ?? false {
 
             controlnet = mainSDEngine.nextControlNet
@@ -168,10 +161,8 @@ extension SDcodablePayload {
         extendedDictionary?["override_settings"] = override_settings
 
 
-		// clean unnecessary keys
-        extendedDictionary?["use_lastSeed"] = nil
-		extendedDictionary?["use_adetailer"] = nil
-        extendedDictionary?["use_controlnet"] = nil
+		// clean userConfiguration, not for submission
+        extendedDictionary?["userConfiguration"] = nil
 
 
 		var extendedPayload: Data = payload
@@ -269,9 +260,24 @@ extension SDcodablePayload {
             ["SEED: ", String(seed)],
         ]
 
-        essentials.append(["FACE IMPROVEMENT: ", (use_adetailer ? "YES" : "NO")])
-        essentials.append(["CONTROLNET: ", (use_controlnet ? "YES" : "NO")])
+        essentials.append(["FACE IMPROVEMENT: ", (userConfiguration?.use_adetailer ?? false) ? "YES" : "NO"])
+        essentials.append(["CONTROLNET: ", (userConfiguration?.use_controlnet ?? false) ? "YES" : "NO"])
 
         return essentials
+    }
+}
+
+
+public struct SDcodableUserConfiguration: SDprotocolCodable {
+    public var use_lastSeed: Bool
+    public var use_adetailer: Bool
+    public var use_controlnet: Bool
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed) ?? false
+        self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer) ?? false
+        self.use_controlnet = try container.decodeIfPresent(Bool.self, forKey: .use_controlnet) ?? false
     }
 }

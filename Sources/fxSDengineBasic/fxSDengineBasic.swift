@@ -416,11 +416,11 @@ import fXDKit
         let controlnet: SDextensionControlNet? = SDextensionControlNet.decoded(using: &payloadDictionary)
 
         if adetailer != nil {
-            payload?.use_adetailer = true
+            payload?.userConfiguration?.use_adetailer = true
         }
 
         if controlnet != nil {
-            payload?.use_controlnet = true
+            payload?.userConfiguration?.use_controlnet = true
         }
 
         return (payload, controlnet, adetailer)
@@ -507,7 +507,7 @@ import fXDKit
         let (extractedPayload, extractedControlNet, _) = extract_fromInfotext(infotext: infotext)
 
         var pngDataArray = decodedDataArray
-        if (extractedPayload?.use_controlnet ?? false),
+        if (extractedPayload?.userConfiguration?.use_controlnet ?? false),
            let firstPNGdata = decodedDataArray.first {
             pngDataArray = [firstPNGdata]
         }

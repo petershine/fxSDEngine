@@ -6,37 +6,6 @@ import fXDKit
 import UniformTypeIdentifiers
 
 
-public protocol SDprotocolPersisted: Codable {
-    static func loaded(from fileURL: URL?) throws -> Self?
-    static func minimum() throws -> Self?
-}
-
-public extension SDprotocolPersisted {
-    static func loaded(from fileURL: URL?) throws -> Self? {
-        guard let fileURL else {
-            return nil
-        }
-
-        do {
-            let loaded = try Data(contentsOf: fileURL)
-            return loaded.decode(Self.self)
-        }
-        catch {
-            return try Self.minimum()
-        }
-    }
-
-    static func minimum() throws -> Self? {
-        guard let minimumData = "{}".data(using: .utf8) else {
-            return nil
-        }
-
-        let minimumInstance: Self? = try JSONDecoder().decode(Self.self, from: minimumData)
-        return minimumInstance
-    }
-}
-
-
 @Observable
 open class SDStorage: NSObject {
 	public var latestImageURLs: [URL]? = {
