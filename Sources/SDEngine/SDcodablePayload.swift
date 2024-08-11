@@ -140,14 +140,12 @@ extension SDcodablePayload {
             }
         }
 
-        var controlnet: SDextensionControlNet? = nil
         if (self.userConfiguration?.use_controlnet ?? false),
            mainSDEngine.systemInfo?.isEnabled(.controlnet) ?? false {
-
-            controlnet = mainSDEngine.nextControlNet
-            if let sourceImageBase64 = controlnet?.image?.image,
+            
+            if let sourceImageBase64 = self.userConfiguration?.controlnet?.image?.image,
                !(sourceImageBase64.isEmpty) {
-                alwayson_scripts[SDExtensionName.controlnet.rawValue] = controlnet?.args
+                alwayson_scripts[SDExtensionName.controlnet.rawValue] = self.userConfiguration?.controlnet?.args
             }
         }
 
@@ -173,7 +171,7 @@ extension SDcodablePayload {
 			fxdPrint(error)
 		}
 
-        return (extendedPayload, controlnet)
+        return (extendedPayload, self.userConfiguration?.controlnet)
 	}
 }
 
@@ -273,11 +271,18 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
     public var use_adetailer: Bool
     public var use_controlnet: Bool
 
+    public var controlnet: SDextensionControlNet? = nil
+
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed) ?? false
         self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer) ?? false
         self.use_controlnet = try container.decodeIfPresent(Bool.self, forKey: .use_controlnet) ?? false
+
+        self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet)
+        if self.controlnet == nil {
+            self.controlnet = SDextensionControlNet.minimum()
+        }
     }
 }

@@ -25,7 +25,6 @@ public protocol SDEngine: NSObjectProtocol {
 	var displayedImage: UIImage? { get set }
 
 	var nextPayload: SDcodablePayload? { get set }
-    var nextControlNet: SDextensionControlNet? { get set }
 	var selectedImageURL: URL? { get set }
 
 

@@ -38,7 +38,6 @@ import fXDKit
 	@Published open var displayedImage: UIImage? = nil
 
     @Published open var nextPayload: SDcodablePayload? = nil
-    @Published open var nextControlNet: SDextensionControlNet? = nil
     @Published open var selectedImageURL: URL? = nil {
         willSet {
             if let imageURL = newValue {
@@ -84,7 +83,7 @@ import fXDKit
 
         await MainActor.run {
             nextPayload = loadedPayload
-            nextControlNet = loadedControlNet
+            nextPayload?.userConfiguration?.controlnet = loadedControlNet
 
             selectedImageURL = fileURL
         }
@@ -488,7 +487,7 @@ import fXDKit
 
         await MainActor.run {
             nextPayload = newPayload
-            nextControlNet = controlnet
+            nextPayload?.userConfiguration?.controlnet = controlnet
 
             selectedImageURL = newImageURL
         }
