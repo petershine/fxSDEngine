@@ -447,7 +447,7 @@ import fXDKit
     }
 
 	public func execute_txt2img(payload: SDcodablePayload) async throws -> Error? {	fxd_log()
-		let (payloadData, controlnet) = payload.submissablePayload(sdEngine: self)
+		let (payloadData, controlnet) = payload.submissablePayload(mainSDEngine: self)
 
         let (data, _, error) = await networkingModule.requestToSDServer(
 			quiet: false,

@@ -108,7 +108,7 @@ public class SDcodablePayload: Codable, ObservableObject, @unchecked Sendable, S
 
 
 extension SDcodablePayload {
-    public func submissablePayload(sdEngine: SDEngine) -> (Data?, SDextensionControlNet?) {
+    public func submissablePayload(mainSDEngine: SDEngine) -> (Data?, SDextensionControlNet?) {
 		guard let payload: Data = encoded() else {
 			return (nil, nil)
 		}
@@ -135,7 +135,7 @@ extension SDcodablePayload {
         var alwayson_scripts: Dictionary<String, Any?> = [:]
 
         if self.use_adetailer,
-           sdEngine.systemInfo?.isEnabled(.adetailer) ?? false {
+           mainSDEngine.systemInfo?.isEnabled(.adetailer) ?? false {
 
             var adetailer = SDextensionADetailer.minimum()
             adetailer?.ad_cfg_scale = Int(self.cfg_scale)
@@ -144,9 +144,9 @@ extension SDcodablePayload {
 
         var controlnet: SDextensionControlNet? = nil
         if self.use_controlnet,
-           sdEngine.systemInfo?.isEnabled(.controlnet) ?? false {
+           mainSDEngine.systemInfo?.isEnabled(.controlnet) ?? false {
 
-            controlnet = sdEngine.nextControlNet
+            controlnet = mainSDEngine.nextControlNet
             if let sourceImageBase64 = controlnet?.image?.image,
                !(sourceImageBase64.isEmpty) {
                 alwayson_scripts[SDExtensionName.controlnet.rawValue] = controlnet?.args
