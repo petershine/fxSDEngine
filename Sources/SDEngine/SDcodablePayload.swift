@@ -11,11 +11,7 @@ public struct SDcodableOverride: Codable {
     public var samples_save: Bool?
 }
 
-public class SDcodablePayload: Codable, Equatable, ObservableObject, @unchecked Sendable, SDprotocolPersisted {
-	public static func == (lhs: SDcodablePayload, rhs: SDcodablePayload) -> Bool {
-		return lhs.seed == rhs.seed
-	}
-
+public class SDcodablePayload: Codable, ObservableObject, @unchecked Sendable, SDprotocolPersisted {
 	public var prompt: String
 	public var negative_prompt: String
 

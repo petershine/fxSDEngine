@@ -5,11 +5,7 @@ import Foundation
 import fXDKit
 
 
-public struct SDextensionControlNet: Codable, Equatable, SDprotocolPersisted {
-    public static func == (lhs: SDextensionControlNet, rhs: SDextensionControlNet) -> Bool {
-        return (lhs.module == rhs.module) && (lhs.image?.image == rhs.image?.image)
-    }
-
+public struct SDextensionControlNet: Codable, SDprotocolPersisted {
     var advanced_weighting: String?
     var animatediff_batch: Bool
     var batch_image_files: [String?]?
