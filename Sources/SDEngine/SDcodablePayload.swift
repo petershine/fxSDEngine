@@ -5,11 +5,6 @@ import UIKit
 
 import fXDKit
 
-public struct SDcodableOverride: Codable {
-    public var sd_model_checkpoint: String?
-    public var sd_vae: String?
-    public var samples_save: Bool?
-}
 
 public class SDcodablePayload: Codable, ObservableObject, @unchecked Sendable, SDprotocolPersisted {
 	public var prompt: String
@@ -46,6 +41,11 @@ public class SDcodablePayload: Codable, ObservableObject, @unchecked Sendable, S
 
     var override_settings_restore_afterwards: Bool
     public var override_settings: SDcodableOverride?
+    public struct SDcodableOverride: Codable {
+        public var sd_model_checkpoint: String?
+        public var sd_vae: String?
+        public var samples_save: Bool?
+    }
 
 
     // externally editable
