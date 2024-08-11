@@ -19,22 +19,6 @@ public enum SDExtensionName: String {
 }
 
 public protocol SDprotocolExtension: Codable {
-    static func minimum() -> Self?
-
     var args: Dictionary<String, Any?>? { get }
     static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self?
-}
-
-extension SDprotocolExtension {
-    public static func minimum() -> Self? {
-        var minimumInstance: Self? = nil
-        do {
-            minimumInstance = try JSONDecoder().decode(Self.self, from: "{}".data(using: .utf8) ?? Data())
-        }
-        catch {    fxd_log()
-            fxdPrint(error)
-        }
-
-        return minimumInstance
-    }
 }

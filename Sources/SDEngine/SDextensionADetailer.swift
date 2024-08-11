@@ -5,7 +5,7 @@ import Foundation
 import fXDKit
 
 
-public struct SDextensionADetailer: Codable {
+public struct SDextensionADetailer: Codable, SDprotocolPersisted {
     var ad_confidence: Double
     var ad_denoising_strength: Double
     var ad_dilate_erode: Int

@@ -137,9 +137,14 @@ extension SDcodablePayload {
         if self.use_adetailer,
            mainSDEngine.systemInfo?.isEnabled(.adetailer) ?? false {
 
-            var adetailer = SDextensionADetailer.minimum()
-            adetailer?.ad_cfg_scale = Int(self.cfg_scale)
-            alwayson_scripts[SDExtensionName.adetailer.rawValue] = adetailer?.args
+            do {
+                var adetailer = try SDextensionADetailer.minimum()
+                adetailer?.ad_cfg_scale = Int(self.cfg_scale)
+                alwayson_scripts[SDExtensionName.adetailer.rawValue] = adetailer?.args
+            }
+            catch {	fxd_log()
+                fxdPrint(error)
+            }
         }
 
         var controlnet: SDextensionControlNet? = nil

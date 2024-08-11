@@ -80,7 +80,7 @@ import fXDKit
         }
 
         let loadedPayload = try SDcodablePayload.loaded(from: fileURL.jsonURL)
-        let loadedControlNet = try SDextensionControlNet.loaded(from: fileURL.controlnetURL) ?? SDextensionControlNet.minimum()
+        let loadedControlNet = try SDextensionControlNet.loaded(from: fileURL.controlnetURL)
 
         await MainActor.run {
             nextPayload = loadedPayload
@@ -489,7 +489,7 @@ import fXDKit
         await MainActor.run {
             nextPayload = newPayload
             nextControlNet = controlnet
-            
+
             selectedImageURL = newImageURL
         }
 
