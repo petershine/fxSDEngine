@@ -19,6 +19,7 @@ public enum SDExtensionName: String {
 }
 
 public protocol SDprotocolExtension: Codable {
-    var args: Dictionary<String, Any?>? { get }
     static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self?
+    var args: Dictionary<String, Any?>? { get }
+    func configurations() -> [[String]]
 }

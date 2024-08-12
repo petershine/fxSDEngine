@@ -276,9 +276,6 @@ extension SDcodablePayload {
             ["SEED: ", String(seed)],
         ]
 
-        essentials.append(["ADETAILER: ", (userConfiguration?.use_adetailer ?? false) ? "YES" : "NO"])
-        essentials.append(["CONTROLNET: ", (userConfiguration?.use_controlnet ?? false) ? "YES" : "NO"])
-
         return essentials
     }
 }

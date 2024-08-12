@@ -89,22 +89,6 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
 
 
 extension SDextensionControlNet: SDprotocolExtension {
-    public var args: Dictionary<String, Any?>? {
-        var args: Dictionary<String, Any?>? = nil
-        do {
-            args = [
-                "args" : [
-                    try JSONEncoder().encode(self).jsonDictionary() ?? [:],
-                ]
-            ]
-        }
-        catch {    fxd_log()
-            fxdPrint(error)
-        }
-
-        return args
-    }
-    
     public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
         var extractedDictionary: [String:Any?] = [:]
         let extractingKeyPairs_controlnet = [
@@ -154,9 +138,23 @@ extension SDextensionControlNet: SDprotocolExtension {
 
         return decoded
     }
-}
 
-extension SDextensionControlNet {
+    public var args: Dictionary<String, Any?>? {
+        var args: Dictionary<String, Any?>? = nil
+        do {
+            args = [
+                "args" : [
+                    try JSONEncoder().encode(self).jsonDictionary() ?? [:],
+                ]
+            ]
+        }
+        catch {    fxd_log()
+            fxdPrint(error)
+        }
+
+        return args
+    }
+    
     public func configurations() -> [[String]] {
         let essentials: [[String]] = [
             ["module: ", module],

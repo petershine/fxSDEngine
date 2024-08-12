@@ -100,24 +100,6 @@ public struct SDextensionADetailer: SDprotocolCodable {
 }
 
 extension SDextensionADetailer: SDprotocolExtension {
-    public var args: Dictionary<String, Any?>? {
-        var args: Dictionary<String, Any?>? = nil
-        do {
-            args = [
-                "args" : [
-                    true,
-                    false,
-                    try JSONEncoder().encode(self).jsonDictionary() ?? [:],
-                ]
-            ]
-        }
-        catch {    fxd_log()
-            fxdPrint(error)
-        }
-
-        return args
-    }
-    
     public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
 
         var extractedDictionary: [String:Any?] = [:]
@@ -151,5 +133,33 @@ extension SDextensionADetailer: SDprotocolExtension {
         }
 
         return decoded
+    }
+
+    public var args: Dictionary<String, Any?>? {
+        var args: Dictionary<String, Any?>? = nil
+        do {
+            args = [
+                "args" : [
+                    true,
+                    false,
+                    try JSONEncoder().encode(self).jsonDictionary() ?? [:],
+                ]
+            ]
+        }
+        catch {    fxd_log()
+            fxdPrint(error)
+        }
+
+        return args
+    }
+
+    public func configurations() -> [[String]] {
+        let essentials: [[String]] = [
+            ["ad_model: ", ad_model],
+            ["ad_cfg_scale: ", String(ad_cfg_scale)],
+            ["ad_denoising_strength", String(ad_denoising_strength)],
+        ]
+
+        return essentials
     }
 }
