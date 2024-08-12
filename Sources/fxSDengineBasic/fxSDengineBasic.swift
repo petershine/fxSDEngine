@@ -505,7 +505,10 @@ import fXDKit
 
 		let infotext = generated?.infotext ?? ""
         let extractedPayload = extract_fromInfotext(infotext: infotext)
-        extractedPayload?.userConfiguration?.controlnet = utilizedControlNet
+        if (utilizedControlNet != nil) {
+            extractedPayload?.userConfiguration?.use_controlnet = true
+            extractedPayload?.userConfiguration?.controlnet = utilizedControlNet
+        }
 
         var pngDataArray = decodedDataArray
         if (extractedPayload?.userConfiguration?.use_controlnet ?? false),
@@ -517,7 +520,7 @@ import fXDKit
 
         let storage = SDStorage()
         let payloadData = extractedPayload.encoded()
-        let controlnetData = utilizedControlNet?.encoded()
+        let controlnetData = (extractedPayload?.userConfiguration?.use_controlnet ?? false) ? utilizedControlNet?.encoded() : nil
 
         for (index, pngData) in pngDataArray.enumerated() {
             newImageURL = try await storage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)

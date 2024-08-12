@@ -115,8 +115,7 @@ extension SDcodablePayload {
 
 
         if withControlNet,
-           (loaded.userConfiguration?.use_controlnet ?? false) {
-            let controlnet = try SDextensionControlNet.loaded(from: fileURL?.controlnetURL)
+           let controlnet = try SDextensionControlNet.loaded(from: fileURL?.controlnetURL) {
             loaded.userConfiguration?.controlnet = controlnet
         }
 
@@ -305,5 +304,9 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
 
         self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet)
         self.adetailer = try container.decodeIfPresent(SDextensionADetailer.self, forKey: .adetailer)
+
+        if self.controlnet == nil {
+            self.controlnet = SDextensionControlNet.minimum()
+        }
     }
 }
