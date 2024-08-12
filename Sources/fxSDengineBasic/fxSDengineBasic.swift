@@ -409,15 +409,14 @@ import fXDKit
 		fxdPrint("[infotext]", infotext)
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
 		let payload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
-		let adetailer: SDextensionADetailer? = SDextensionADetailer.decoded(using: &payloadDictionary)
-        let controlnet: SDextensionControlNet? = SDextensionControlNet.decoded(using: &payloadDictionary)
 
-        if adetailer != nil {
+        if let adetailer = SDextensionADetailer.decoded(using: &payloadDictionary) {
             payload?.userConfiguration?.use_adetailer = true
             payload?.userConfiguration?.adetailer = adetailer
         }
 
-        if controlnet != nil {
+        if let controlnet = SDextensionControlNet.decoded(using: &payloadDictionary),
+           !(controlnet.image?.image?.isEmpty ?? false) {
             payload?.userConfiguration?.use_controlnet = true
             payload?.userConfiguration?.controlnet = controlnet
         }
@@ -506,9 +505,7 @@ import fXDKit
 
 		let infotext = generated?.infotext ?? ""
         let extractedPayload = extract_fromInfotext(infotext: infotext)
-        if extractedPayload?.userConfiguration?.controlnet == nil {
-            extractedPayload?.userConfiguration?.controlnet = utilizedControlNet
-        }
+        extractedPayload?.userConfiguration?.controlnet = utilizedControlNet
 
         var pngDataArray = decodedDataArray
         if (extractedPayload?.userConfiguration?.use_controlnet ?? false),

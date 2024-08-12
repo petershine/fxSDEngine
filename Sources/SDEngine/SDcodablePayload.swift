@@ -115,8 +115,8 @@ extension SDcodablePayload {
 
 
         if withControlNet,
-           (loaded.userConfiguration?.use_controlnet ?? false),
-           let controlnet = try SDextensionControlNet.loaded(from: fileURL?.controlnetURL) {
+           (loaded.userConfiguration?.use_controlnet ?? false) {
+            let controlnet = try SDextensionControlNet.loaded(from: fileURL?.controlnetURL)
             loaded.userConfiguration?.controlnet = controlnet
         }
 
@@ -155,6 +155,10 @@ extension SDcodablePayload {
         if (self.userConfiguration?.use_adetailer ?? false),
            mainSDEngine.systemInfo?.isEnabled(.adetailer) ?? false {
 
+            if self.userConfiguration?.adetailer == nil {
+                self.userConfiguration?.adetailer = SDextensionADetailer.minimum()
+            }
+
             self.userConfiguration?.adetailer?.ad_cfg_scale = Int(self.cfg_scale)
             alwayson_scripts[SDExtensionName.adetailer.rawValue] = self.userConfiguration?.adetailer?.args
         }
@@ -167,7 +171,7 @@ extension SDcodablePayload {
                 alwayson_scripts[SDExtensionName.controlnet.rawValue] = self.userConfiguration?.controlnet?.args
             }
         }
-        let utilizedControlNet = (self.userConfiguration?.use_controlnet ?? false) ? self.userConfiguration?.controlnet : SDextensionControlNet.minimum()
+        let utilizedControlNet = (self.userConfiguration?.use_controlnet ?? false) ? self.userConfiguration?.controlnet : nil
 
         if alwayson_scripts.count > 0 {
             extendedDictionary?["alwayson_scripts"] = alwayson_scripts
@@ -301,13 +305,5 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
 
         self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet)
         self.adetailer = try container.decodeIfPresent(SDextensionADetailer.self, forKey: .adetailer)
-
-        if self.controlnet == nil {
-            self.controlnet = SDextensionControlNet.minimum()
-        }
-
-        if self.adetailer == nil {
-            self.adetailer = SDextensionADetailer.minimum()
-        }
     }
 }
