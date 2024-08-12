@@ -416,7 +416,7 @@ import fXDKit
         }
 
         if let controlnet = SDextensionControlNet.decoded(using: &payloadDictionary),
-           !(controlnet.image?.image?.isEmpty ?? false) {
+           !(controlnet.image?.image?.isEmpty ?? true) {
             payload?.userConfiguration?.use_controlnet = true
             payload?.userConfiguration?.controlnet = controlnet
         }
