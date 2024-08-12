@@ -6,7 +6,11 @@ import UIKit
 import fXDKit
 
 
-public class SDcodablePayload: SDprotocolCodable, ObservableObject, @unchecked Sendable {
+public class SDcodablePayload: SDprotocolCodable, ObservableObject, @unchecked Sendable, Equatable {
+    public static func == (lhs: SDcodablePayload, rhs: SDcodablePayload) -> Bool {
+        return false
+    }
+
 	public var prompt: String
 	public var negative_prompt: String
 
@@ -101,6 +105,22 @@ public class SDcodablePayload: SDprotocolCodable, ObservableObject, @unchecked S
             self.userConfiguration = SDcodableUserConfiguration.minimum()
         }
 	}
+}
+
+extension SDcodablePayload {
+    public static func loaded(from fileURL: URL?, withControlNet: Bool) throws -> Self? {
+        guard let loaded = try Self.loaded(from: fileURL) else {
+            return nil
+        }
+
+
+        if withControlNet,
+           let controlnet = try SDextensionControlNet.loaded(from: fileURL?.controlnetURL) {
+            loaded.userConfiguration?.controlnet = controlnet
+        }
+
+        return loaded
+    }
 }
 
 

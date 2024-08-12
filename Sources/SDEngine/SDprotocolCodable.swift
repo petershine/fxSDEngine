@@ -17,8 +17,7 @@ public extension SDprotocolCodable {
         }
 
         do {
-            let loaded = try Data(contentsOf: fileURL)
-            return loaded.decode(Self.self)
+            return (try Data(contentsOf: fileURL)).decode(Self.self)
         }
         catch {
             return Self.minimum()

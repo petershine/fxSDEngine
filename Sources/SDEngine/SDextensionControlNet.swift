@@ -5,7 +5,7 @@ import Foundation
 import fXDKit
 
 
-public struct SDextensionControlNet: SDprotocolCodable {
+public struct SDextensionControlNet: SDprotocolCodable, Equatable {
     var advanced_weighting: String?
     var animatediff_batch: Bool
     var batch_image_files: [String?]?

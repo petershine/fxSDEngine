@@ -78,12 +78,10 @@ import fXDKit
             return error_2
         }
 
-        let loadedPayload = try SDcodablePayload.loaded(from: fileURL.jsonURL)
-        let loadedControlNet = try SDextensionControlNet.loaded(from: fileURL.controlnetURL)
+        let loadedPayload = try SDcodablePayload.loaded(from: fileURL.jsonURL, withControlNet: true)
 
         await MainActor.run {
             nextPayload = loadedPayload
-            nextPayload?.userConfiguration?.controlnet = loadedControlNet
 
             selectedImageURL = fileURL
         }
