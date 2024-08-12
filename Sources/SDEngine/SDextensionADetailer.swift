@@ -13,7 +13,7 @@ public struct SDextensionADetailer: SDprotocolCodable {
     var ad_inpaint_only_masked_padding: Int
     var ad_mask_blur: Int
     var ad_mask_k_largest: Int
-    var ad_model: String
+    public var ad_model: String
 
     var ad_cfg_scale: Int
     var ad_checkpoint: String

@@ -26,8 +26,8 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
     var loopback: Bool
     var low_vram: Bool
     var mask: String?
-    var model: String
-    var module: String
+    public var model: String
+    public var module: String
     var output_dir: String
     var pixel_perfect: Bool
     var processor_res: Int
@@ -110,6 +110,7 @@ extension SDextensionControlNet: SDprotocolExtension {
         let extractingKeyPairs_controlnet = [
             ("control_mode", "control mode"),
             ("module", "controlnet 0"),
+            ("model", "model"),
             ("guidance_end", "guidance end"),
             ("guidance_start", "guidance start"),
             ("pixel_perfect", "pixel perfect"),
