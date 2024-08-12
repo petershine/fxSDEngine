@@ -84,11 +84,6 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
         if self.image == nil {
             self.image = try JSONDecoder().decode(SDextensionControlNetImage.self, from: "{}".data(using: .utf8) ?? Data())
         }
-
-        self.control_mode = self.control_mode.trimmingCharacters(in: .whitespacesAndNewlines)
-        if self.control_mode.last == "\"" {
-            self.control_mode.removeLast()
-        }
     }
 }
 
@@ -126,6 +121,20 @@ extension SDextensionControlNet: SDprotocolExtension {
         for (key, extractedKey) in extractingKeyPairs_controlnet {
             extractedDictionary[key] = jsonDictionary[extractedKey]
             jsonDictionary[extractedKey] = nil
+        }
+
+
+        enum SDcontrolnetMode: String, CaseIterable {
+            case balanced = "Balanced"
+            case myPrompt = "My prompt is more important"
+            case controlNet = "ControlNet is more important"
+        }
+
+        let control_mode = extractedDictionary["control_mode"] as? String
+        for controlMode in SDcontrolnetMode.allCases {
+            if (control_mode?.contains(controlMode.rawValue) ?? false) {
+                extractedDictionary["control_mode"] = controlMode.rawValue
+            }
         }
 
         fxdPrint(name: "extractedDictionary", dictionary: extractedDictionary)
