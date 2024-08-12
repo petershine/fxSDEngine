@@ -442,7 +442,7 @@ import fXDKit
     }
 
 	public func execute_txt2img(payload: SDcodablePayload) async throws -> Error? {	fxd_log()
-		let (payloadData, controlnet) = payload.submissablePayload(mainSDEngine: self)
+		let (payloadData, utilizedControlNet) = payload.submissablePayload(mainSDEngine: self)
 
         let (data, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
@@ -480,12 +480,12 @@ import fXDKit
 
         let (newImageURL, newPayload) = try await finish_txt2img(
             generated: generated,
-            controlnet: controlnet)
+            utilizedControlNet: utilizedControlNet)
 
 
         await MainActor.run {
             nextPayload = newPayload
-            nextPayload?.userConfiguration?.controlnet = controlnet
+            nextPayload?.userConfiguration?.controlnet = utilizedControlNet
 
             selectedImageURL = newImageURL
         }
@@ -493,7 +493,7 @@ import fXDKit
         return error
     }
 
-    open func finish_txt2img(generated: SDcodableGenerated?, controlnet: SDextensionControlNet?) async throws -> (URL?, SDcodablePayload?) {
+    open func finish_txt2img(generated: SDcodableGenerated?, utilizedControlNet: SDextensionControlNet?) async throws -> (URL?, SDcodablePayload?) {
         guard let base64EncodedImages: [String] = generated?.images as? [String] else {
             return (nil, nil)
         }
@@ -506,8 +506,8 @@ import fXDKit
 
 		let infotext = generated?.infotext ?? ""
         let extractedPayload = extract_fromInfotext(infotext: infotext)
-        if controlnet != nil {
-            extractedPayload?.userConfiguration?.controlnet = controlnet
+        if extractedPayload?.userConfiguration?.controlnet == nil {
+            extractedPayload?.userConfiguration?.controlnet = utilizedControlNet
         }
 
         var pngDataArray = decodedDataArray
@@ -520,7 +520,7 @@ import fXDKit
 
         let storage = SDStorage()
         let payloadData = extractedPayload.encoded()
-        let controlnetData = (controlnet != nil) ? controlnet?.encoded() : extractedPayload?.userConfiguration?.controlnet?.encoded()
+        let controlnetData = utilizedControlNet?.encoded()
 
         for (index, pngData) in pngDataArray.enumerated() {
             newImageURL = try await storage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)

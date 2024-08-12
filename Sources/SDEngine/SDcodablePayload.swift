@@ -115,6 +115,7 @@ extension SDcodablePayload {
 
 
         if withControlNet,
+           (loaded.userConfiguration?.use_controlnet ?? false),
            let controlnet = try SDextensionControlNet.loaded(from: fileURL?.controlnetURL) {
             loaded.userConfiguration?.controlnet = controlnet
         }
@@ -166,6 +167,7 @@ extension SDcodablePayload {
                 alwayson_scripts[SDExtensionName.controlnet.rawValue] = self.userConfiguration?.controlnet?.args
             }
         }
+        let utilizedControlNet = (self.userConfiguration?.use_controlnet ?? false) ? self.userConfiguration?.controlnet : SDextensionControlNet.minimum()
 
         if alwayson_scripts.count > 0 {
             extendedDictionary?["alwayson_scripts"] = alwayson_scripts
@@ -177,19 +179,19 @@ extension SDcodablePayload {
         extendedDictionary?["override_settings"] = override_settings
 
 
-		// clean userConfiguration, not for submission
+        // clean userConfiguration, not for submission
         extendedDictionary?["userConfiguration"] = nil
 
 
-		var extendedPayload: Data = payload
-		do {
-			extendedPayload = try JSONSerialization.data(withJSONObject: extendedDictionary!)
-		}
-		catch {	fxd_log()
-			fxdPrint(error)
-		}
+        var extendedPayload: Data = payload
+        do {
+            extendedPayload = try JSONSerialization.data(withJSONObject: extendedDictionary!)
+        }
+        catch {    fxd_log()
+            fxdPrint(error)
+        }
 
-        return (extendedPayload, self.userConfiguration?.controlnet)
+        return (extendedPayload, utilizedControlNet)
 	}
 }
 
@@ -262,7 +264,7 @@ extension SDcodablePayload {
             }
         }
 
-        var essentials: [[String]] = [
+        let essentials: [[String]] = [
             ["MODEL: ", model_name],
             ["SAMPLER: ", sampler_name],
             ["SCHEDULER: ", scheduler],
