@@ -47,6 +47,11 @@ import fXDKit
             }
         }
     }
+    @Published open var controlnetImageBase64: String? = nil {
+        didSet {
+            nextPayload?.userConfiguration?.controlnet?.image?.image = controlnetImageBase64
+        }
+    }
 
 
 	open func action_Synchronize() {
