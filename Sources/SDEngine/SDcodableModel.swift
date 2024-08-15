@@ -1,5 +1,12 @@
 
 
+public enum SDModelType: String, CaseIterable {
+    case checkpoints
+    case vaes
+    case samplers
+    case schedulers
+}
+
 public protocol SDprotocolModel: Hashable, Sendable {
     var name: String? { get set }
 }
