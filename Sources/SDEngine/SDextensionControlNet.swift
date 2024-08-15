@@ -157,10 +157,10 @@ extension SDextensionControlNet: SDprotocolExtension {
     
     public func configurations() -> [[String]] {
         let essentials: [[String]] = [
-            ["module: ", module],
-            ["model: ", model],
-            ["control mode", control_mode],
-            ["resize mode: ", resize_mode],
+            ["module:", module],
+            ["model:", model],
+            ["control mode:", control_mode],
+            ["resize mode:", resize_mode],
         ]
 
         return essentials

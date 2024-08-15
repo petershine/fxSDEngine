@@ -155,9 +155,9 @@ extension SDextensionADetailer: SDprotocolExtension {
 
     public func configurations() -> [[String]] {
         let essentials: [[String]] = [
-            ["ad_model: ", ad_model],
-            ["ad_cfg_scale: ", String(ad_cfg_scale)],
-            ["ad_denoising_strength", String(ad_denoising_strength)],
+            ["ad_model:", ad_model],
+            ["ad_cfg_scale:", String(ad_cfg_scale)],
+            ["ad_denoising_strength:", String(ad_denoising_strength)],
         ]
 
         return essentials
