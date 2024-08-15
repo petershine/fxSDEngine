@@ -228,6 +228,11 @@ extension SDcodablePayload {
             jsonDictionary["override_settings"] = ["sd_model_checkpoint" : model_hash]
         }
 
+        let vae_name: String = (jsonDictionary["vae"] ?? jsonDictionary["vae"]) as? String ?? ""
+        if !vae_name.isEmpty {
+            jsonDictionary["override_settings"] = ["sd_vae" : vae_name]
+        }
+
 
         var decoded: Self? = nil
         do {
@@ -267,18 +272,21 @@ extension SDcodablePayload {
             }
         }
 
+        let vae_name: String = override_settings?.sd_vae ?? "(unknown)"
+
         let essentials: [[String]] = [
-            ["MODEL: ", model_name],
-            ["SAMPLER: ", sampler_name],
-            ["SCHEDULER: ", scheduler],
-            ["STEPS: ", String(Int(steps))],
-            ["CFG: ", String(format: "%.1f", cfg_scale)],
+            ["MODEL:", model_name],
+            ["VAE:", vae_name],
+            ["SAMPLER:", sampler_name],
+            ["SCHEDULER:", scheduler],
+            ["STEPS:", String(Int(steps))],
+            ["CFG:", String(format: "%.1f", cfg_scale)],
 
-            ["WIDTH: ", String(Int(width))],
-            ["HEIGHT: ", String(Int(height))],
-            ["RESIZED: ", "x\(String(format: "%.2f", hr_scale)) (\(String(Int(Double(width)*hr_scale))) by \(String(Int(Double(height)*hr_scale))))"],
+            ["WIDTH:", String(Int(width))],
+            ["HEIGHT:", String(Int(height))],
+            ["RESIZED:", "x\(String(format: "%.2f", hr_scale)) (\(String(Int(Double(width)*hr_scale))) by \(String(Int(Double(height)*hr_scale))))"],
 
-            ["SEED: ", String(seed)],
+            ["SEED:", String(seed)],
         ]
 
         return essentials
