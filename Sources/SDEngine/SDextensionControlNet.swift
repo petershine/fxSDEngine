@@ -39,7 +39,7 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
     var weight: Double
 
     public var image: SDextensionControlNetImage?
-    public struct SDextensionControlNetImage: Codable, Equatable {
+    public struct SDextensionControlNetImage: SDprotocolCodable, Equatable {
         public var image: String?
         var mask: String?
     }
@@ -82,7 +82,7 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
 
         self.image = try container.decodeIfPresent(SDextensionControlNetImage.self, forKey: .image) ?? nil
         if self.image == nil {
-            self.image = try JSONDecoder().decode(SDextensionControlNetImage.self, from: "{}".data(using: .utf8) ?? Data())
+            self.image = SDextensionControlNetImage.minimum()
         }
     }
 }
