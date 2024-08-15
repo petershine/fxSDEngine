@@ -228,7 +228,7 @@ extension SDcodablePayload {
             jsonDictionary["override_settings"] = ["sd_model_checkpoint" : model_hash]
         }
 
-        let vae_name: String = (jsonDictionary["vae"] ?? jsonDictionary["vae"]) as? String ?? ""
+        let vae_name: String = jsonDictionary["vae"] as? String ?? ""
         if !vae_name.isEmpty {
             jsonDictionary["override_settings"] = ["sd_vae" : vae_name]
         }
