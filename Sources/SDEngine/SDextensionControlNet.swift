@@ -125,7 +125,8 @@ extension SDextensionControlNet: SDprotocolExtension {
         fxdPrint(name: "extractedDictionary", dictionary: extractedDictionary)
 
         var decoded: Self? = nil
-        if extractedDictionary.count > 0 {
+        if extractedDictionary.count > 0,
+           let module = extractedDictionary["module"] {
             do {
                 let controlnetData = try JSONSerialization.data(withJSONObject: extractedDictionary)
                 decoded = try JSONDecoder().decode(Self.self, from: controlnetData)
@@ -135,6 +136,7 @@ extension SDextensionControlNet: SDprotocolExtension {
                 fxdPrint(error)
             }
         }
+        fxdPrint("decoded:", decoded)
 
         return decoded
     }
