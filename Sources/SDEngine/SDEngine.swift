@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public protocol SDEngine {
+public protocol SDEngine: Observable {
 	var mainSDNetworking: SDNetworking { get set }
 	init(mainSDNetworking: SDNetworking)
 
