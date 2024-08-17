@@ -13,31 +13,31 @@ open class fxSDengineBasic: SDEngine {
 	}
 
 
-	open var systemInfo: SDcodableSysInfo? = nil
-	open var systemCheckpoints: [SDcodableCheckpoint] = []
-    open var systemSamplers: [SDcodableSampler] = []
-    open var systemSchedulers: [SDcodableScheduler] = []
-    open var systemVAEs: [SDcodableVAE] = []
+	public var systemInfo: SDcodableSysInfo? = nil
+	public var systemCheckpoints: [SDcodableCheckpoint] = []
+    public var systemSamplers: [SDcodableSampler] = []
+    public var systemSchedulers: [SDcodableScheduler] = []
+    public var systemVAEs: [SDcodableVAE] = []
 
 
-    @Published open var monitoredProgress: SDcodableProgress? = nil
-    @Published open var isSystemBusy: Bool = false
-    @Published open var didStartGenerating: Bool = false {
+    public var monitoredProgress: SDcodableProgress? = nil
+    public var isSystemBusy: Bool = false
+    public var didStartGenerating: Bool = false {
         didSet {
             isSystemBusy = (isSystemBusy || didStartGenerating)
         }
     }
-    @Published open var didInterrupt: Bool = false {
+    public var didInterrupt: Bool = false {
         didSet {
             isSystemBusy = (isSystemBusy || !didInterrupt)
         }
     }
 
 
-	@Published open var displayedImage: UIImage? = nil
+	public var displayedImage: UIImage? = nil
 
-    @Published open var nextPayload: SDcodablePayload? = nil
-    @Published open var selectedImageURL: URL? = nil {
+    public var nextPayload: SDcodablePayload? = nil
+    public var selectedImageURL: URL? = nil {
         willSet {
             if let imageURL = newValue {
                 Task {	@MainActor in
@@ -46,7 +46,7 @@ open class fxSDengineBasic: SDEngine {
             }
         }
     }
-    @Published open var controlnetImageBase64: String? = nil {
+    public var controlnetImageBase64: String? = nil {
         didSet {
             nextPayload?.userConfiguration?.controlnet?.image?.image = controlnetImageBase64
         }
