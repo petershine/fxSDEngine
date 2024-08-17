@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-public class SDcodablePayload: SDprotocolCodable, ObservableObject, @unchecked Sendable, Equatable {
+public class SDcodablePayload: SDprotocolCodable, Equatable {
     public static func == (lhs: SDcodablePayload, rhs: SDcodablePayload) -> Bool {
         return false
     }
