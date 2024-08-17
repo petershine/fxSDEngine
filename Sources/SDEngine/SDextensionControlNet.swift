@@ -126,7 +126,7 @@ extension SDextensionControlNet: SDprotocolExtension {
 
         var decoded: Self? = nil
         if extractedDictionary.count > 0,
-           let module = extractedDictionary["module"] {
+           let _ = extractedDictionary["module"] {
             do {
                 let controlnetData = try JSONSerialization.data(withJSONObject: extractedDictionary)
                 decoded = try JSONDecoder().decode(Self.self, from: controlnetData)

@@ -5,10 +5,9 @@ import UIKit
 import fXDKit
 
 
-@preconcurrency open class fxSDengineBasic: NSObject, ObservableObject, @unchecked Sendable, SDEngine {
-
-	open var mainSDNetworking: SDNetworking
-
+@Observable
+open class fxSDengineBasic: SDEngine {
+    public var mainSDNetworking: any SDNetworking
 	required public init(mainSDNetworking: SDNetworking) {
         self.mainSDNetworking = mainSDNetworking
 	}
