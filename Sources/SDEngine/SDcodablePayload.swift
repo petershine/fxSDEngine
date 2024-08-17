@@ -131,25 +131,25 @@ extension SDcodablePayload {
 		}
 
 
-		var extendedDictionary: Dictionary<String, Any?>? = nil
+		var submissable: Dictionary<String, Any?>? = nil
 		do {
-			extendedDictionary = try JSONSerialization.jsonObject(with: payload) as? Dictionary<String, Any?>
+			submissable = try JSONSerialization.jsonObject(with: payload) as? Dictionary<String, Any?>
 		}
 		catch {	fxd_log()
 			fxdPrint(error)
 		}
 
-		guard extendedDictionary != nil else {
+		guard var submissable else {
 			return (nil, nil)
 		}
 
 
         if !(self.userConfiguration?.use_lastSeed ?? false) {
-			extendedDictionary?["seed"] = -1
+			submissable["seed"] = -1
 		}
 
 
-        var alwayson_scripts: Dictionary<String, Any?> = [:]
+        var alwayson_scripts: [String:Any?] = [:]
 
         if (self.userConfiguration?.use_adetailer ?? false),
            mainSDEngine.systemInfo?.isEnabled(.adetailer) ?? false {
@@ -173,28 +173,28 @@ extension SDcodablePayload {
         let utilizedControlNet = (self.userConfiguration?.use_controlnet ?? false) ? self.userConfiguration?.controlnet : nil
 
         if alwayson_scripts.count > 0 {
-            extendedDictionary?["alwayson_scripts"] = alwayson_scripts
+            submissable["alwayson_scripts"] = alwayson_scripts
         }
 
 
-        var override_settings: [String:Any?]? = extendedDictionary?["override_settings"] as? [String:Any?]
+        var override_settings: [String:Any?]? = submissable["override_settings"] as? [String:Any?]
         override_settings?["samples_save"] = true
-        extendedDictionary?["override_settings"] = override_settings
+        submissable["override_settings"] = override_settings
 
 
         // clean userConfiguration, not for submission
-        extendedDictionary?["userConfiguration"] = nil
+        submissable["userConfiguration"] = nil
 
 
-        var extendedPayload: Data = payload
+        var submissablePayload: Data = payload
         do {
-            extendedPayload = try JSONSerialization.data(withJSONObject: extendedDictionary!)
+            submissablePayload = try JSONSerialization.data(withJSONObject: submissable)
         }
         catch {    fxd_log()
             fxdPrint(error)
         }
 
-        return (extendedPayload, utilizedControlNet)
+        return (submissablePayload, utilizedControlNet)
 	}
 }
 
