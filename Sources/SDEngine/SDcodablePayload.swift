@@ -216,6 +216,8 @@ extension SDcodablePayload {
             ("hr_scale", "hires upscale"),
             ("hr_second_pass_steps", "hires steps"),
             ("hr_upscaler", "hires upscaler"),
+
+            ("model_hash", "model hash"),
         ]
 
         for (key, replacedKey) in replacingKeyPairs {
@@ -223,15 +225,20 @@ extension SDcodablePayload {
             jsonDictionary[replacedKey] = nil
         }
 
-        let model_hash: String = (jsonDictionary["model hash"] ?? jsonDictionary["model_hash"]) as? String ?? ""
+
+        var override_settings: [String:String] = [:]
+        
+        let model_hash: String = jsonDictionary["model_hash"] as? String ?? ""
         if !model_hash.isEmpty {
-            jsonDictionary["override_settings"] = ["sd_model_checkpoint" : model_hash]
+            override_settings["sd_model_checkpoint"] = model_hash
         }
 
         let vae_name: String = jsonDictionary["vae"] as? String ?? ""
         if !vae_name.isEmpty {
-            jsonDictionary["override_settings"] = ["sd_vae" : vae_name]
+            override_settings["sd_vae"] = vae_name
         }
+
+        jsonDictionary["override_settings"] = override_settings
 
 
         var decoded: Self? = nil
