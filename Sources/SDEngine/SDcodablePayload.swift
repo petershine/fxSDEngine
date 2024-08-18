@@ -306,8 +306,8 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
     public var use_adetailer: Bool
     public var use_controlnet: Bool
 
-    public var controlnet: SDextensionControlNet? = nil
     public var adetailer: SDextensionADetailer? = nil
+    public var controlnet: SDextensionControlNet? = nil
 
 
     public init(from decoder: any Decoder) throws {
@@ -317,8 +317,8 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
         self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer) ?? false
         self.use_controlnet = try container.decodeIfPresent(Bool.self, forKey: .use_controlnet) ?? false
 
-        self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet)
         self.adetailer = try container.decodeIfPresent(SDextensionADetailer.self, forKey: .adetailer)
+        self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet)
 
         if self.controlnet == nil {
             self.controlnet = SDextensionControlNet.minimum()
