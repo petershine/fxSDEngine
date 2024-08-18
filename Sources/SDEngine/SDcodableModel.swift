@@ -7,12 +7,12 @@ public enum SDModelType: String, CaseIterable {
     case schedulers
 }
 
-public protocol SDprotocolModel: Hashable, Sendable {
+public protocol SDprotocolModel: Codable, Hashable, Sendable {
     var name: String? { get set }
 }
 
 
-public struct SDcodableCheckpoint: Codable, SDprotocolModel {
+public struct SDcodableCheckpoint: SDprotocolModel {
     public var name: String? {
         get {
             return model_name
@@ -30,7 +30,7 @@ public struct SDcodableCheckpoint: Codable, SDprotocolModel {
     var config: String?
 }
 
-public struct SDcodableSampler: Codable, SDprotocolModel {
+public struct SDcodableSampler: SDprotocolModel {
     public var name: String?
 
     var aliases: [String?]?
@@ -45,7 +45,7 @@ public struct SDcodableSampler: Codable, SDprotocolModel {
     }
 }
 
-public struct SDcodableScheduler: Codable, SDprotocolModel {
+public struct SDcodableScheduler: SDprotocolModel {
 	public var name: String?
 
     var label: String?
@@ -54,7 +54,7 @@ public struct SDcodableScheduler: Codable, SDprotocolModel {
     var need_inner_model: Bool?
 }
 
-public struct SDcodableVAE: Codable, SDprotocolModel {
+public struct SDcodableVAE: SDprotocolModel {
     public var name: String? {
         get {
             return model_name

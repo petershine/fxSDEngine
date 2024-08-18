@@ -15,7 +15,9 @@ public struct SDcodableFile: Codable {
 	var is_under_scanned_path: Bool? = nil
 	var date: String? = nil
 	var created_time: String? = nil
+}
 
+extension SDcodableFile {
     var updated_time: Date? {
         guard date != nil else {
             return nil
