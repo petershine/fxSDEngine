@@ -29,6 +29,7 @@ public protocol SDEngine {
 	func action_Synchronize()
     func synchronize_withSystem() async throws -> Error?
     func refresh_systemInfo() async -> Error?
+    func evaluateEnteredServerHostname(enteredServerHostname: String?)
 
     func checkpoint(for model_hash: String?) -> SDcodableCheckpoint?
 	func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint)

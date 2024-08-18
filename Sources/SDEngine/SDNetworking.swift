@@ -23,7 +23,7 @@ public enum SDAPIendpoint: String, CaseIterable {
 
 
 public protocol SDNetworking {
-	var serverHostname: String { get }
+	var serverHostname: String { get set }
 
     func httpRequest(
         api_endpoint: SDAPIendpoint,
