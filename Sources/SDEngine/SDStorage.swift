@@ -1,8 +1,6 @@
 
 import Foundation
 import UIKit
-
-import fXDKit
 import UniformTypeIdentifiers
 
 
@@ -16,6 +14,9 @@ open class SDStorage: NSObject {
 		super.init()
 	}
 }
+
+
+import fXDKit
 
 extension SDStorage {
     func saveGenerated(pngData: Data, payloadData: Data?, controlnetData: Data?, index: Int = 0) async throws -> URL? {

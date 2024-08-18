@@ -3,8 +3,6 @@
 import Foundation
 import UIKit
 
-import fXDKit
-
 
 public class SDcodablePayload: SDprotocolCodable, Equatable {
     public static func == (lhs: SDcodablePayload, rhs: SDcodablePayload) -> Bool {
@@ -123,6 +121,8 @@ extension SDcodablePayload {
     }
 }
 
+
+import fXDKit
 
 extension SDcodablePayload {
     public func submissablePayload(mainSDEngine: SDEngine) -> (Data?, SDextensionControlNet?) {

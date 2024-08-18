@@ -2,8 +2,6 @@
 
 import Foundation
 
-import fXDKit
-
 
 public struct SDextensionADetailer: SDprotocolCodable {
     var ad_confidence: Double
@@ -98,6 +96,9 @@ public struct SDextensionADetailer: SDprotocolCodable {
         self.is_api = try container.decodeIfPresent([Bool?].self, forKey: .is_api) ?? []
     }
 }
+
+
+import fXDKit
 
 extension SDextensionADetailer: SDprotocolExtension {
     public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {

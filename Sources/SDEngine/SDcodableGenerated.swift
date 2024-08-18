@@ -3,13 +3,13 @@
 import Foundation
 import UIKit
 
-import fXDKit
-
 
 public struct SDcodableGenerated: Codable {
-	public var images: [String?]? = nil
-	var info: String? = nil
+    public var images: [String?]? = nil
+    var info: String? = nil
+}
 
+extension SDcodableGenerated {
     var infotext: String? {
         guard let info,
               let infoData = info.data(using: .utf8)
@@ -21,12 +21,10 @@ public struct SDcodableGenerated: Codable {
         do {
             let infoDictionary = try JSONSerialization.jsonObject(with: infoData) as? Dictionary<String, Any?>
 
-            if let infotext = (infoDictionary?["infotexts"] as? Array<Any>)?.first {
-                return infotext as? String
-            }
+            let infotext = (infoDictionary?["infotexts"] as? Array<Any>)?.first
+            return infotext as? String
         }
-        catch {    fxd_log()
-            fxdPrint(error)
+        catch {
         }
 
         return nil
@@ -34,9 +32,7 @@ public struct SDcodableGenerated: Codable {
 }
 
 extension SDcodableGenerated {
-	public func decodedImages(quiet: Bool = false) -> [UIImage] {	fxd_log()
-		fxdPrint("[STARTED DECODING]: ", images?.count, " image(s)", quiet:quiet)
-
+	public func decodedImages(quiet: Bool = false) -> [UIImage] {
 		var decodedImageArray: [UIImage] = []
 		for base64string in (images ?? []) {
 			guard base64string != nil, !(base64string!.isEmpty) else {
@@ -47,7 +43,6 @@ extension SDcodableGenerated {
 				continue
 			}
 
-			fxdPrint("decodedImage: ", decodedImage, quiet:quiet)
 			decodedImageArray.append(decodedImage)
 		}
 

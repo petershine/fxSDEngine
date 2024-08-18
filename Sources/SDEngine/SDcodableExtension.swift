@@ -2,8 +2,6 @@
 
 import Foundation
 
-import fXDKit
-
 
 struct SDcodableExtension: Codable {
 	var branch: String? = nil

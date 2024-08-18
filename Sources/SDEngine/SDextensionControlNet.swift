@@ -2,8 +2,6 @@
 
 import Foundation
 
-import fXDKit
-
 
 public struct SDextensionControlNet: SDprotocolCodable, Equatable {
     var advanced_weighting: String?
@@ -87,6 +85,8 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
     }
 }
 
+
+import fXDKit
 
 extension SDextensionControlNet: SDprotocolExtension {
     public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {

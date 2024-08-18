@@ -2,8 +2,6 @@
 
 import Foundation
 
-import fXDKit
-
 
 public protocol SDprotocolCodable: Codable {
     static func loaded(from fileURL: URL?) throws -> Self?
@@ -33,8 +31,7 @@ public extension SDprotocolCodable {
         do {
             minimumInstance = try JSONDecoder().decode(Self.self, from: minimumData)
         }
-        catch {    fxd_log()
-            fxdPrint(error)
+        catch {
         }
 
         return minimumInstance

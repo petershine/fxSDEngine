@@ -3,8 +3,6 @@
 import Foundation
 import UIKit
 
-import fXDKit
-
 
 public protocol SDEngine {
 	var mainSDNetworking: SDNetworking { get set }

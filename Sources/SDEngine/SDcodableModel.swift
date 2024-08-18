@@ -30,6 +30,26 @@ public struct SDcodableCheckpoint: SDprotocolModel {
     var config: String?
 }
 
+public struct SDcodableVAE: SDprotocolModel {
+    public var name: String? {
+        get {
+            return model_name
+        }
+        set {
+            model_name = newValue
+        }
+    }
+
+    var model_name: String?
+    var filename: String?
+}
+
+extension SDcodableVAE {
+    static func defaultArray() -> [SDcodableVAE] {
+        return [SDcodableVAE(model_name: "Automatic"), SDcodableVAE(model_name: "None")]
+    }
+}
+
 public struct SDcodableSampler: SDprotocolModel {
     public var name: String?
 
@@ -54,22 +74,3 @@ public struct SDcodableScheduler: SDprotocolModel {
     var need_inner_model: Bool?
 }
 
-public struct SDcodableVAE: SDprotocolModel {
-    public var name: String? {
-        get {
-            return model_name
-        }
-        set {
-            model_name = newValue
-        }
-    }
-
-    var model_name: String?
-    var filename: String?
-}
-
-extension SDcodableVAE {
-    static func defaultArray() -> [SDcodableVAE] {
-        return [SDcodableVAE(model_name: "Automatic"), SDcodableVAE(model_name: "None")]
-    }
-}
