@@ -43,7 +43,15 @@ public protocol SDNetworking {
 
 
 class SDError: NSError, @unchecked Sendable {
-	class func processsed(_ data: Data?, _ response: URLResponse?, _ error: Error?) -> SDError? {
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
+    required override init(domain: String, code: Int, userInfo dict: [String : Any]? = nil) {
+        super.init(domain: domain, code: code, userInfo: dict)
+    }
+
+    class func processsed(_ data: Data?, _ response: URLResponse?, _ error: Error?) -> Self? {
 		guard !(error is Self) else {
 			return error as? Self
 		}
@@ -102,7 +110,7 @@ class SDError: NSError, @unchecked Sendable {
 			NSLocalizedFailureReasonErrorKey : errorFailureReason
 		]
 
-		let processed = SDError(
+        let processed = Self(
 			domain: "SDEngine",
 			code: errorStatusCode,
 			userInfo: errorUserInfo)
