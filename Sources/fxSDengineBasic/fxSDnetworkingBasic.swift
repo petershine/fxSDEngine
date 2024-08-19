@@ -44,6 +44,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
 
     public func requestToSDServer(
         quiet: Bool = false,
+        request: URLRequest? = nil,
         api_endpoint: SDAPIendpoint,
         method: String? = nil,
         query: String? = nil,
@@ -52,7 +53,11 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
 				fxd_log()
 			}
 
-            guard let httpRequest = httpRequest(api_endpoint: api_endpoint, method: method, query: query, payload: payload) else {
+            var httpRequest = request
+            if httpRequest == nil {
+                httpRequest = self.httpRequest(api_endpoint: api_endpoint, method: method, query: query, payload: payload)
+            }
+            guard let httpRequest else {
                 return (nil, nil, nil)
             }
 

@@ -34,6 +34,7 @@ public protocol SDNetworking {
 
 	func requestToSDServer(
 		quiet: Bool,
+        request: URLRequest?,
 		api_endpoint: SDAPIendpoint,
 		method: String?,
 		query: String?,
