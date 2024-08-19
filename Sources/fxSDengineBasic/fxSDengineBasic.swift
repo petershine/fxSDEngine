@@ -96,6 +96,7 @@ open class fxSDengineBasic: SDEngine {
     public func refresh_systemInfo() async -> Error? {
         let (data, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
+            request: nil,
 			api_endpoint: .INTERNAL_SYSINFO,
 			method: nil,
 			query: nil,
@@ -162,6 +163,7 @@ open class fxSDengineBasic: SDEngine {
 		let optionsPayload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
         let (_, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
+            request: nil,
 			api_endpoint: .SDAPI_V1_OPTIONS,
 			method: nil,
 			query: nil,
@@ -180,6 +182,7 @@ open class fxSDengineBasic: SDEngine {
         let optionsPayload = "{\"sd_vae\" : \"\(vaeName)\"}".processedJSONData()
         let (_, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
+            request: nil,
             api_endpoint: .SDAPI_V1_OPTIONS,
             method: nil,
             query: nil,
@@ -212,6 +215,7 @@ open class fxSDengineBasic: SDEngine {
     public func refresh_systemCheckpoints() async -> Error? {
         let (data, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
+            request: nil,
             api_endpoint: .SDAPI_V1_MODELS,
             method: nil,
             query: nil,
@@ -231,6 +235,7 @@ open class fxSDengineBasic: SDEngine {
     public func refresh_systemSamplers() async -> Error? {
         let (data, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
+            request: nil,
             api_endpoint: .SDAPI_V1_SAMPLERS,
             method: nil,
             query: nil,
@@ -250,6 +255,7 @@ open class fxSDengineBasic: SDEngine {
     public func refresh_systemSchedulers() async -> Error? {
         let (data, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
+            request: nil,
             api_endpoint: .SDAPI_V1_SCHEDULERS,
             method: nil,
             query: nil,
@@ -269,6 +275,7 @@ open class fxSDengineBasic: SDEngine {
     public func refresh_systemVAEs() async -> Error? {
         let (data, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
+            request: nil,
             api_endpoint: .SDAPI_V1_VAE,
             method: nil,
             query: nil,
@@ -290,6 +297,7 @@ open class fxSDengineBasic: SDEngine {
     public func obtain_latestPNGData(path: String) async -> (Data?, String?, Error?) {
         let (data, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
+            request: nil,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
 			method: nil,
 			query: "folder_path=\(path)",
@@ -333,6 +341,7 @@ open class fxSDengineBasic: SDEngine {
 
         let (obtained_data, _, obtained_error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
+            request: nil,
             api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
             method: nil,
             query: "path=\(fullpath)&t=file",
@@ -344,6 +353,7 @@ open class fxSDengineBasic: SDEngine {
     public func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?) {
         let (data, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
+            request: nil,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
 			method: nil,
 			query: "path=\(imagePath)",
@@ -449,6 +459,7 @@ open class fxSDengineBasic: SDEngine {
 
         let (data, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
+            request: nil,
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			method: nil,
 			query: nil,
@@ -550,6 +561,7 @@ open class fxSDengineBasic: SDEngine {
     public func monitor_progress(quiet: Bool) async -> (SDcodableProgress?, Bool, Error?) {
         let (data, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: quiet,
+            request: nil,
             api_endpoint: .SDAPI_V1_PROGRESS,
             method: nil,
             query: nil,
@@ -570,6 +582,7 @@ open class fxSDengineBasic: SDEngine {
     @MainActor public func interrupt() async -> Error? {
         let (_, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
+            request: nil,
             api_endpoint: .SDAPI_V1_INTERRUPT,
             method: "POST",
             query: nil,
