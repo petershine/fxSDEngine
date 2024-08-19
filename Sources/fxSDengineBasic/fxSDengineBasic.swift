@@ -577,7 +577,24 @@ open class fxSDengineBasic: SDEngine {
 
         didInterrupt = true
 
-        return error
+        guard !didStartGenerating else {
+            return error
+        }
+
+
+        didInterrupt = false
+
+        let interruptedError = SDError(
+            domain: "SDEngine",
+            code: -1,
+            userInfo: [
+                NSLocalizedDescriptionKey: "Interrupted",
+                NSLocalizedFailureReasonErrorKey: "Server's image generating is canceled",
+            ])
+
+        UIAlertController.errorAlert(error: interruptedError)
+
+        return interruptedError
     }
 }
 
