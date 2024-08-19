@@ -10,10 +10,13 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
     open var serverHostname: String = "http://127.0.0.1:7860"
 
     public func httpRequest(
+        serverHostname: String? = nil,
         api_endpoint: SDAPIendpoint,
         method: String? = nil,
         query: String? = nil,
         payload: Data? = nil) -> URLRequest? {
+            let serverHostname = serverHostname ?? self.serverHostname
+
             var requestPath = "\(serverHostname)/\(api_endpoint.rawValue)"
             if !(query?.isEmpty ?? true),
                let escapedQuery = query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {

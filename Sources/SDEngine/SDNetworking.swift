@@ -26,6 +26,7 @@ public protocol SDNetworking {
 	var serverHostname: String { get set }
 
     func httpRequest(
+        serverHostname: String?,
         api_endpoint: SDAPIendpoint,
         method: String?,
         query: String?,
