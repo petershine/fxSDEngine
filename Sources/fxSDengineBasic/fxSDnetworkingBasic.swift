@@ -7,12 +7,18 @@ import fXDKit
 
 
 open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
-    open var serverHostname: String = "http://127.0.0.1:7860"
+    open var serverHostname: String = {
+        guard let savedHostname = UserDefaults.standard.value(forKey: USER_DEFAULT_HOSTNAME) else {
+            return ""
+        }
+
+        return (savedHostname as? String) ?? ""
+    }()
 
     public func evaluateEnteredServerHostname(enteredServerHostname: String?) {    fxd_log()
         fxdPrint("enteredServerHostname:", enteredServerHostname)
 
-
+        UserDefaults.standard.set(enteredServerHostname, forKey: Self.USER_DEFAULT_HOSTNAME)
     }
 
     public func httpRequest(

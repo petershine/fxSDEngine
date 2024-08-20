@@ -23,6 +23,7 @@ public enum SDAPIendpoint: String, CaseIterable {
 
 
 public protocol SDNetworking {
+    static var USER_DEFAULT_HOSTNAME: String { get }
 	var serverHostname: String { get set }
 
     func evaluateEnteredServerHostname(enteredServerHostname: String?)
@@ -41,4 +42,10 @@ public protocol SDNetworking {
 		method: String?,
 		query: String?,
         payload: Data?) async -> (Data?, URLResponse?, Error?)
+}
+
+extension SDNetworking {
+    public static var USER_DEFAULT_HOSTNAME: String {
+        return "USER_DEFAULT_HOSTNAME"
+    }
 }
