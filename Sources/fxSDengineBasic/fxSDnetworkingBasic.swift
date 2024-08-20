@@ -9,6 +9,12 @@ import fXDKit
 open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
     open var serverHostname: String = "http://127.0.0.1:7860"
 
+    public func evaluateEnteredServerHostname(enteredServerHostname: String?) {    fxd_log()
+        fxdPrint("enteredServerHostname:", enteredServerHostname)
+
+
+    }
+
     public func httpRequest(
         serverHostname: String? = nil,
         api_endpoint: SDAPIendpoint,
