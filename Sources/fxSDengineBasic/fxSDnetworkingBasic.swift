@@ -15,10 +15,10 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
         return (savedHostname as? String) ?? ""
     }()
 
-    public func evaluateEnteredServerHostname(enteredServerHostname: String?) {    fxd_log()
-        fxdPrint("enteredServerHostname:", enteredServerHostname)
+    public func evaluateServerHostname(serverHostname: String?) {    fxd_log()
+        fxdPrint("serverHostname:", serverHostname)
 
-        UserDefaults.standard.set(enteredServerHostname, forKey: Self.USER_DEFAULT_HOSTNAME)
+        UserDefaults.standard.set(serverHostname, forKey: Self.USER_DEFAULT_HOSTNAME)
     }
 
     public func httpRequest(
