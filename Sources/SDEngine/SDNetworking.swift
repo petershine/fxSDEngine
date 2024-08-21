@@ -26,7 +26,7 @@ public protocol SDNetworking {
     static var USER_DEFAULT_HOSTNAME: String { get }
 	var serverHostname: String { get set }
 
-    func evaluateServerHostname(serverHostname: String?)
+    func evaluateServerHostname(serverHostname: String?) -> Bool
 
     func httpRequest(
         serverHostname: String?,
