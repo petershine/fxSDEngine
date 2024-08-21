@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
+open class fxSDnetworkingBasic: NSObject, @preconcurrency SDNetworking, @unchecked Sendable {
     open var serverHostname: String = {
         guard let savedHostname = UserDefaults.standard.value(forKey: USER_DEFAULT_HOSTNAME) else {
             return ""
@@ -15,9 +15,14 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
         return (savedHostname as? String) ?? ""
     }()
 
-    public func evaluateServerHostname(serverHostname: String?) {    fxd_log()
+    @MainActor public func evaluateServerHostname(serverHostname: String?) {    fxd_log()
         fxdPrint("serverHostname:", serverHostname)
 
+        guard let serverHostname else {
+            return
+        }
+
+        self.serverHostname = serverHostname
         UserDefaults.standard.set(serverHostname, forKey: Self.USER_DEFAULT_HOSTNAME)
     }
 
