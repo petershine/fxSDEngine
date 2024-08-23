@@ -18,11 +18,11 @@ open class fxSDnetworkingBasic: NSObject, @preconcurrency SDNetworking, @uncheck
     @MainActor public func evaluateServerHostname(serverHostname: String?) -> Bool {    fxd_log()
         fxdPrint("serverHostname:", serverHostname)
 
-        guard let serverHostname else {
+        guard let serverHostname, !serverHostname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return false
         }
 
-        self.serverHostname = serverHostname
+        self.serverHostname = serverHostname.trimmingCharacters(in: .whitespacesAndNewlines)
         UserDefaults.standard.set(serverHostname, forKey: Self.USER_DEFAULT_HOSTNAME)
         return true
     }
