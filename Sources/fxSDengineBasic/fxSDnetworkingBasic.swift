@@ -6,7 +6,7 @@ import UIKit
 import fXDKit
 
 
-open class fxSDnetworkingBasic: NSObject, @preconcurrency SDNetworking, @unchecked Sendable {
+open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
     open var serverHostname: String = {
         guard let savedHostname = UserDefaults.standard.value(forKey: USER_DEFAULT_HOSTNAME) else {
             return ""
@@ -15,15 +15,46 @@ open class fxSDnetworkingBasic: NSObject, @preconcurrency SDNetworking, @uncheck
         return (savedHostname as? String) ?? ""
     }()
 
-    @MainActor public func evaluateServerHostname(serverHostname: String?) -> Bool {    fxd_log()
+    nonisolated public func evaluateServerHostname(serverHostname: String?) async -> Bool {    fxd_log()
         fxdPrint("serverHostname:", serverHostname)
 
         guard let serverHostname, !serverHostname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return false
         }
 
-        self.serverHostname = serverHostname.trimmingCharacters(in: .whitespacesAndNewlines)
-        UserDefaults.standard.set(serverHostname, forKey: Self.USER_DEFAULT_HOSTNAME)
+
+        let httpRequest = httpRequest(
+            serverHostname: serverHostname,
+            api_endpoint: .INTERNAL_PING,
+            method: nil,
+            query: nil,
+            payload: nil)
+
+        let (data, response, error) = await requestToSDServer(
+            quiet: false,
+            request: httpRequest)
+#if DEBUG
+        if let jsonDictionary = data?.jsonDictionary(quiet: true) {
+            fxdPrint(name: "INTERNAL_PING", dictionary: jsonDictionary)
+        }
+#endif
+        guard data != nil,
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              error == nil
+        else {
+            await MainActor.run {
+                UIAlertController.errorAlert(error: error, title: "Possibly, you entered wrong server hostname, or server is not operating.")
+            }
+
+            return false
+        }
+
+
+        await MainActor.run {
+            self.serverHostname = serverHostname.trimmingCharacters(in: .whitespacesAndNewlines)
+            UserDefaults.standard.set(serverHostname, forKey: Self.USER_DEFAULT_HOSTNAME)
+        }
+
         return true
     }
 
