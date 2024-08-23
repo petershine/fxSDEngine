@@ -5,6 +5,7 @@ import UIKit
 
 public enum SDAPIendpoint: String, CaseIterable {
 	case INTERNAL_SYSINFO = "internal/sysinfo"
+    case INTERNAL_PING = "internal/ping"
 
 	case SDAPI_V1_TXT2IMG = "sdapi/v1/txt2img"
 	case SDAPI_V1_PROGRESS = "sdapi/v1/progress"
@@ -26,7 +27,7 @@ public protocol SDNetworking {
     static var USER_DEFAULT_HOSTNAME: String { get }
 	var serverHostname: String { get set }
 
-    func evaluateServerHostname(serverHostname: String?) -> Bool
+    func evaluateServerHostname(serverHostname: String?) async -> Bool
 
     func httpRequest(
         serverHostname: String?,
@@ -38,7 +39,7 @@ public protocol SDNetworking {
 	func requestToSDServer(
 		quiet: Bool,
         request: URLRequest?,
-		api_endpoint: SDAPIendpoint,
+		api_endpoint: SDAPIendpoint?,
 		method: String?,
 		query: String?,
         payload: Data?) async -> (Data?, URLResponse?, Error?)

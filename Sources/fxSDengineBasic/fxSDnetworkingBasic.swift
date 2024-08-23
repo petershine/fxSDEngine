@@ -28,13 +28,13 @@ open class fxSDnetworkingBasic: NSObject, @preconcurrency SDNetworking, @uncheck
     }
 
     public func httpRequest(
-        serverHostname: String? = nil,
+        serverHostname: String?,
         api_endpoint: SDAPIendpoint,
         method: String? = nil,
         query: String? = nil,
         payload: Data? = nil) -> URLRequest? {
             let serverHostname = serverHostname ?? self.serverHostname
-
+            
             var requestPath = "\(serverHostname)/\(api_endpoint.rawValue)"
             if !(query?.isEmpty ?? true),
                let escapedQuery = query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
@@ -63,7 +63,7 @@ open class fxSDnetworkingBasic: NSObject, @preconcurrency SDNetworking, @uncheck
     public func requestToSDServer(
         quiet: Bool = false,
         request: URLRequest? = nil,
-        api_endpoint: SDAPIendpoint,
+        api_endpoint: SDAPIendpoint? = nil,
         method: String? = nil,
         query: String? = nil,
         payload: Data? = nil) async -> (Data?, URLResponse?, Error?) {
@@ -72,8 +72,13 @@ open class fxSDnetworkingBasic: NSObject, @preconcurrency SDNetworking, @uncheck
 			}
 
             var httpRequest = request
-            if httpRequest == nil {
-                httpRequest = self.httpRequest(api_endpoint: api_endpoint, method: method, query: query, payload: payload)
+            if httpRequest == nil, let api_endpoint {
+                httpRequest = self.httpRequest(
+                    serverHostname: self.serverHostname,
+                    api_endpoint: api_endpoint,
+                    method: method,
+                    query: query,
+                    payload: payload)
             }
             guard let httpRequest else {
                 return (nil, nil, nil)
@@ -130,7 +135,12 @@ extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
                                           query: String? = nil,
                                           payload: Data? = nil) {
 
-        guard let httpRequest = httpRequest(api_endpoint: api_endpoint, method: method, query: query, payload: payload) else {
+        guard let httpRequest = httpRequest(
+            serverHostname: self.serverHostname,
+            api_endpoint: api_endpoint,
+            method: method,
+            query: query,
+            payload: payload) else {
             return
         }
 
