@@ -30,7 +30,7 @@ public protocol SDEngine {
     func synchronize_withSystem() async throws -> Error?
     func refresh_systemInfo() async -> Error?
 
-    func checkpoint(for model_hash: String?) -> SDcodableCheckpoint?
+    func checkpoint(for model_identifier: String?) -> SDcodableCheckpoint?
 	func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint)
     func action_ChangeVAE(_ vae: SDcodableVAE)
     func change_systemCheckpoints(checkpoint: SDcodableCheckpoint) async -> Error?

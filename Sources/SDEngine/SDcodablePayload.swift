@@ -241,11 +241,11 @@ extension SDcodablePayload {
 
         var override_settings: [String:String] = [:]
 
-        if let model_name = jsonDictionary["model"] as? String, !model_name.isEmpty {
-            override_settings["sd_model_checkpoint"] = model_name
-        }
-        else if let model_hash = jsonDictionary["model_hash"] as? String, !model_hash.isEmpty {
+        if let model_hash = jsonDictionary["model_hash"] as? String, !model_hash.isEmpty {
             override_settings["sd_model_checkpoint"] = model_hash
+        }
+        else if let model_name = jsonDictionary["model"] as? String, !model_name.isEmpty {
+            override_settings["sd_model_checkpoint"] = model_name
         }
 
         let vae_name: String = jsonDictionary["vae"] as? String ?? ""
@@ -270,8 +270,8 @@ extension SDcodablePayload {
     }
 
     public func update(with checkpoint: SDcodableCheckpoint) throws {
-        guard let model_name = checkpoint.model_name,
-              let overrideSettings = "{\"sd_model_checkpoint\" : \"\(model_name)\"}".processedJSONData()
+        guard let checkpointTitle = checkpoint.title,
+              let overrideSettings = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
         else {	fxd_log()
             fxdPrint(checkpoint)
             return
@@ -286,9 +286,9 @@ extension SDcodablePayload {
 extension SDcodablePayload {
     public func configurations(with checkpoints: [SDcodableCheckpoint]) -> [[String]] {
         var model_name: String = "(unknown)"
-        let model_title = override_settings?.sd_model_checkpoint ?? ""
-        if !model_title.isEmpty {
-            let filtered = checkpoints.filter { $0.title == model_title }
+        let model_identifier = override_settings?.sd_model_checkpoint ?? ""
+        if !model_identifier.isEmpty {
+            let filtered = checkpoints.filter { ($0.title == model_identifier || $0.hash == model_identifier) }
             if filtered.first != nil {
                 model_name = filtered.first?.model_name ?? "(unknown)"
             }

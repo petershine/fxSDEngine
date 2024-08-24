@@ -113,9 +113,11 @@ open class fxSDengineBasic: SDEngine {
         return error
     }
 
-    open func checkpoint(for model_hash: String?) -> SDcodableCheckpoint? {
+    open func checkpoint(for model_identifier: String?) -> SDcodableCheckpoint? {
         return systemCheckpoints.filter({
-            return ($0.hash?.isEmpty ?? true) ? false : (model_hash ?? "").contains(($0.hash)!)
+            let matching_hash: Bool = ($0.hash?.isEmpty ?? true) ? false : (model_identifier ?? "").contains(($0.hash)!)
+            let matching_name: Bool = ($0.model_name?.isEmpty ?? true) ? false : (model_identifier ?? "").contains(($0.model_name)!)
+            return (matching_hash || matching_name)
         }).first
     }
 
@@ -154,13 +156,13 @@ open class fxSDengineBasic: SDEngine {
     public func change_systemCheckpoints(checkpoint: SDcodableCheckpoint) async -> Error? {
 		//https://github.com/AUTOMATIC1111/stable-diffusion-webui/discussions/7839
 
-        let checkpointName = checkpoint.model_name ?? ""
-		guard !(checkpointName.isEmpty) else {
+        let checkpointTitle = checkpoint.title ?? ""
+		guard !(checkpointTitle.isEmpty) else {
 			return nil
 		}
 
 
-		let optionsPayload = "{\"sd_model_checkpoint\" : \"\(checkpointName)\"}".processedJSONData()
+		let optionsPayload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
         let (_, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
