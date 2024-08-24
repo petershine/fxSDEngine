@@ -240,9 +240,11 @@ extension SDcodablePayload {
 
 
         var override_settings: [String:String] = [:]
-        
-        let model_hash: String = jsonDictionary["model_hash"] as? String ?? ""
-        if !model_hash.isEmpty {
+
+        if let model_name = jsonDictionary["model"] as? String, !model_name.isEmpty {
+            override_settings["sd_model_checkpoint"] = model_name
+        }
+        else if let model_hash = jsonDictionary["model_hash"] as? String, !model_hash.isEmpty {
             override_settings["sd_model_checkpoint"] = model_hash
         }
 
