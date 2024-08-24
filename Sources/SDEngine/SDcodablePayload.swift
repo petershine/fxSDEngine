@@ -159,6 +159,8 @@ extension SDcodablePayload {
             }
 
             self.userConfiguration?.adetailer?.ad_cfg_scale = Int(self.cfg_scale)
+            self.userConfiguration?.adetailer?.ad_prompt = self.prompt
+            self.userConfiguration?.adetailer?.ad_negative_prompt = self.negative_prompt
             alwayson_scripts[SDExtensionName.adetailer.rawValue] = self.userConfiguration?.adetailer?.args
         }
 
@@ -255,8 +257,8 @@ extension SDcodablePayload {
     }
 
     public func update(with checkpoint: SDcodableCheckpoint) throws {
-        guard let model_hash = checkpoint.hash,
-              let overrideSettings = "{\"sd_model_checkpoint\" : \"\(model_hash)\"}".processedJSONData()
+        guard let model_title = checkpoint.title,
+              let overrideSettings = "{\"sd_model_checkpoint\" : \"\(model_title)\"}".processedJSONData()
         else {	fxd_log()
             fxdPrint(checkpoint)
             return
@@ -271,9 +273,9 @@ extension SDcodablePayload {
 extension SDcodablePayload {
     public func configurations(with checkpoints: [SDcodableCheckpoint]) -> [[String]] {
         var model_name: String = "(unknown)"
-        let model_hash = override_settings?.sd_model_checkpoint ?? ""
-        if !model_hash.isEmpty {
-            let filtered = checkpoints.filter { $0.hash == model_hash }
+        let model_title = override_settings?.sd_model_checkpoint ?? ""
+        if !model_title.isEmpty {
+            let filtered = checkpoints.filter { $0.title == model_title }
             if filtered.first != nil {
                 model_name = filtered.first?.model_name ?? "(unknown)"
             }
