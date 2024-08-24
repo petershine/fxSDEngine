@@ -154,13 +154,13 @@ open class fxSDengineBasic: SDEngine {
     public func change_systemCheckpoints(checkpoint: SDcodableCheckpoint) async -> Error? {
 		//https://github.com/AUTOMATIC1111/stable-diffusion-webui/discussions/7839
 
-        let checkpointName = checkpoint.model_name ?? ""
-		guard !(checkpointName.isEmpty) else {
+		let checkpointTitle = checkpoint.title ?? ""
+		guard !(checkpointTitle.isEmpty) else {
 			return nil
 		}
 
 
-		let optionsPayload = "{\"sd_model_checkpoint\" : \"\(checkpointName)\"}".processedJSONData()
+		let optionsPayload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
         let (_, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
