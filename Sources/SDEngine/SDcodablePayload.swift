@@ -270,8 +270,8 @@ extension SDcodablePayload {
     }
 
     public func update(with checkpoint: SDcodableCheckpoint) throws {
-        guard let model_title = checkpoint.title,
-              let overrideSettings = "{\"sd_model_checkpoint\" : \"\(model_title)\"}".processedJSONData()
+        guard let model_name = checkpoint.model_name,
+              let overrideSettings = "{\"sd_model_checkpoint\" : \"\(model_name)\"}".processedJSONData()
         else {	fxd_log()
             fxdPrint(checkpoint)
             return
