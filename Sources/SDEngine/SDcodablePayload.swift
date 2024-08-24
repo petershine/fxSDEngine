@@ -26,7 +26,8 @@ public class SDcodablePayload: SDprotocolCodable, Equatable {
 	var denoising_strength: Double
 	var hr_second_pass_steps: Int
 	var hr_upscaler: String
-	var hr_scheduler: String
+    public var hr_sampler_name: String?
+	public var hr_scheduler: String?
 	var hr_prompt: String
 	var hr_negative_prompt: String
 
@@ -79,7 +80,17 @@ public class SDcodablePayload: SDprotocolCodable, Equatable {
 		self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength) ?? 0.3
 		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps) ?? 10
 		self.hr_upscaler = try container.decodeIfPresent(String.self, forKey: .hr_upscaler) ?? "4x-UltraSharp"
-		self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler) ?? "Karras"
+
+        self.hr_sampler_name = try container.decodeIfPresent(String.self, forKey: .hr_sampler_name)
+        if self.hr_sampler_name == nil {
+            self.hr_sampler_name = self.sampler_name
+        }
+        
+        self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler)
+        if self.hr_scheduler == nil {
+            self.hr_scheduler = self.scheduler
+        }
+
 		self.hr_prompt = try container.decodeIfPresent(String.self, forKey: .hr_prompt) ?? ""
 		self.hr_negative_prompt = try container.decodeIfPresent(String.self, forKey: .hr_negative_prompt) ?? ""
 
