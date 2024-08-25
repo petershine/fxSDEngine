@@ -72,7 +72,7 @@ open class fxSDengineBasic: SDEngine {
         }
 
 
-        let (pngData, imagePath, updated_time, error_1) = await obtain_latestPNGData(path: folderPath, otherPath: systemInfo?.Config?.outdir_txt2img_samples)
+        let (pngData, imagePath, error_1) = try await obtain_latestPNGData(folderPath: folderPath, otherFolderPath: systemInfo?.Config?.outdir_txt2img_samples)
         guard let pngData, let imagePath else {
             return error_1
         }
@@ -297,19 +297,53 @@ open class fxSDengineBasic: SDEngine {
         return error
     }
 
-    public func obtain_latestPNGData(path: String, otherPath: String?) async -> (Data?, String?, Date?, Error?) {
-        let (data, _, error) = await mainSDNetworking.requestToSDServer(
-			quiet: false,
+    public func obtain_latestPNGData(folderPath: String, otherFolderPath: String?) async throws -> (Data?, String?, Error?) {
+        let (filePath, updated_time, error) = try await obtain_latestFilePath(folderPath: folderPath)
+
+        guard let filePath, let updated_time
+        else {
+            return (nil, nil, error)
+        }
+
+
+        var imagePath = filePath
+
+        if let otherFolderPath {
+            let (otherFilePath, otherUpdate_Time, otherError) = try await obtain_latestFilePath(folderPath: otherFolderPath)
+
+            if otherError == nil,
+               otherUpdate_Time?.compare(updated_time) == .orderedDescending,
+
+               let otherFilePath {
+                imagePath = otherFilePath
+            }
+        }
+
+
+        let (pngData, _, obtainingError) = await mainSDNetworking.requestToSDServer(
+            quiet: false,
             request: nil,
-			api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
-			method: nil,
-			query: "folder_path=\(path)",
-			payload: nil)
+            api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
+            method: nil,
+            query: "path=\(imagePath)&t=file",
+            payload: nil)
+
+        return (pngData, imagePath, obtainingError)
+    }
+
+    public func obtain_latestFilePath(folderPath: String) async throws -> (String?, Date?, Error?) {
+        let (data, _, error) = await mainSDNetworking.requestToSDServer(
+            quiet: false,
+            request: nil,
+            api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
+            method: nil,
+            query: "folder_path=\(folderPath)",
+            payload: nil)
 
         guard let decodedResponse = data?.decode(SDcodableFiles.self),
               let filesORfolders = decodedResponse.files
         else {
-            return (nil, nil, nil, error)
+            return (nil, nil, error)
         }
 
         fxdPrint("filesORfolders.count: ", filesORfolders.count)
@@ -326,10 +360,10 @@ open class fxSDengineBasic: SDEngine {
         fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time)
         fxdPrint("latestFileORfolder?.fullpath: ", latestFileORfolder?.fullpath)
         guard latestFileORfolder != nil,
-              let imagePath = latestFileORfolder?.fullpath
+              let filePath = latestFileORfolder?.fullpath
         else {
             //TODO: error can be nil here. Prepare an error for alerting
-            return (nil, nil, nil, error)
+            return (nil, nil, error)
         }
 
 
@@ -338,34 +372,12 @@ open class fxSDengineBasic: SDEngine {
               type != "dir"
         else {
             //recursive
-            return await obtain_latestPNGData(path: imagePath, otherPath: otherPath)
+            return try await obtain_latestFilePath(folderPath: folderPath)
         }
 
-
-        let (pngData, _, obtained_error) = await mainSDNetworking.requestToSDServer(
-            quiet: false,
-            request: nil,
-            api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
-            method: nil,
-            query: "path=\(imagePath)&t=file",
-            payload: nil)
 
         let updated_time = latestFileORfolder?.updated_time
-        guard let otherPath else {
-            return (pngData, imagePath, updated_time, obtained_error)
-        }
-
-
-        let (otherPNGdata, otherImagePath, otherUpdated_Time, otherObtained_Error) = await obtain_latestPNGData(path: otherPath, otherPath: nil)
-        
-        if error == nil,
-           let updated_time,
-           otherUpdated_Time?.compare(updated_time) == .orderedDescending {
-            return (otherPNGdata, otherImagePath, otherUpdated_Time, otherObtained_Error)
-        }
-        else {
-            return (pngData, imagePath, updated_time, obtained_error)
-        }
+        return (filePath, updated_time, error)
     }
 
     public func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?) {
