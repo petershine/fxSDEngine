@@ -271,8 +271,8 @@ extension SDcodablePayload {
     }
 
     public func update(with checkpoint: SDcodableCheckpoint) throws {
-        guard let checkpointTitle = checkpoint.title,
-              let overrideSettings = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
+        guard let checkpointName = checkpoint.model_name,
+              let overrideSettings = "{\"sd_model_checkpoint\" : \"\(checkpointName)\"}".processedJSONData()
         else {	fxd_log()
             fxdPrint(checkpoint)
             return
@@ -295,7 +295,7 @@ extension SDcodablePayload {
         var model_name: String = "(unknown)"
         let model_identifier = override_settings?.sd_model_checkpoint ?? ""
         if !model_identifier.isEmpty {
-            let filtered = checkpoints.filter { ($0.title == model_identifier || $0.hash == model_identifier) }
+            let filtered = checkpoints.filter { ($0.model_name == model_identifier || $0.hash == model_identifier) }
             if filtered.first != nil {
                 model_name = filtered.first?.model_name ?? "(unknown)"
             }
