@@ -326,7 +326,7 @@ open class fxSDengineBasic: SDEngine {
         fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time)
         fxdPrint("latestFileORfolder?.fullpath: ", latestFileORfolder?.fullpath)
         guard latestFileORfolder != nil,
-              let fullpath = latestFileORfolder?.fullpath
+              let imagePath = latestFileORfolder?.fullpath
         else {
             //TODO: error can be nil here. Prepare an error for alerting
             return (nil, nil, nil, error)
@@ -338,32 +338,33 @@ open class fxSDengineBasic: SDEngine {
               type != "dir"
         else {
             //recursive
-            return await obtain_latestPNGData(path: fullpath, otherPath: nil)
+            return await obtain_latestPNGData(path: imagePath, otherPath: otherPath)
         }
 
 
-        let (obtained_data, _, obtained_error) = await mainSDNetworking.requestToSDServer(
+        let (pngData, _, obtained_error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             request: nil,
             api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
             method: nil,
-            query: "path=\(fullpath)&t=file",
+            query: "path=\(imagePath)&t=file",
             payload: nil)
 
         let updated_time = latestFileORfolder?.updated_time
         guard let otherPath else {
-            return (obtained_data, fullpath, updated_time, obtained_error)
+            return (pngData, imagePath, updated_time, obtained_error)
         }
 
 
         let (otherPNGdata, otherImagePath, otherUpdated_Time, otherObtained_Error) = await obtain_latestPNGData(path: otherPath, otherPath: nil)
+        
         if error == nil,
            let updated_time,
            otherUpdated_Time?.compare(updated_time) == .orderedDescending {
             return (otherPNGdata, otherImagePath, otherUpdated_Time, otherObtained_Error)
         }
         else {
-            return (obtained_data, fullpath, updated_time, obtained_error)
+            return (pngData, imagePath, updated_time, obtained_error)
         }
     }
 
