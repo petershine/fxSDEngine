@@ -66,13 +66,13 @@ open class fxSDengineBasic: SDEngine {
         let error_0 = await refresh_systemInfo()
 
         guard error_0 == nil,
-              let folderPath = systemInfo?.Config?.outdir_txt2img_samples
+              let folderPath = systemInfo?.Config?.outdir_samples
         else {
             return error_0
         }
 
 
-        let (pngData, imagePath, updated_time, error_1) = await obtain_latestPNGData(path: folderPath, otherPath: systemInfo?.Config?.outdir_samples)
+        let (pngData, imagePath, updated_time, error_1) = await obtain_latestPNGData(path: folderPath, otherPath: systemInfo?.Config?.outdir_txt2img_samples)
         guard let pngData, let imagePath else {
             return error_1
         }
