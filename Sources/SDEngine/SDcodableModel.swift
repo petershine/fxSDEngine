@@ -57,11 +57,11 @@ public struct SDcodableSampler: SDprotocolModel {
     var options: SDcodableSamplerOption?
     struct SDcodableSamplerOption: Codable, Hashable {
         var scheduler: String?
-        var second_order: String?
-        var brownian_noise: String?
+        var second_order: Bool?
+        var brownian_noise: Bool?
         var solver_type: String?
-        var discard_next_to_last_sigma: String?
-        var uses_ensd: String?
+        var discard_next_to_last_sigma: Bool?
+        var uses_ensd: Bool?
     }
 }
 
