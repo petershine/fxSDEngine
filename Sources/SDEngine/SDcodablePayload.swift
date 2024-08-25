@@ -77,7 +77,7 @@ public class SDcodablePayload: SDprotocolCodable, Equatable {
 		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale) ?? 1.0
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? (self.hr_scale > 1.0)
 
-		self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength) ?? 0.3
+        self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength) ?? 0.4
 		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps) ?? 10
 		self.hr_upscaler = try container.decodeIfPresent(String.self, forKey: .hr_upscaler) ?? "4x-UltraSharp"
 
@@ -164,10 +164,6 @@ extension SDcodablePayload {
 
         if (self.userConfiguration?.use_adetailer ?? false),
            mainSDEngine.systemInfo?.isEnabled(.adetailer) ?? false {
-
-            if self.userConfiguration?.adetailer == nil {
-                self.userConfiguration?.adetailer = SDextensionADetailer.minimum()
-            }
 
             self.userConfiguration?.adetailer?.ad_cfg_scale = Int(self.cfg_scale)
             self.userConfiguration?.adetailer?.ad_denoising_strength = self.denoising_strength
@@ -341,6 +337,10 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
         self.adetailer = try container.decodeIfPresent(SDextensionADetailer.self, forKey: .adetailer)
         self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet)
 
+        if self.adetailer == nil {
+            self.adetailer = SDextensionADetailer.minimum()
+        }
+        
         if self.controlnet == nil {
             self.controlnet = SDextensionControlNet.minimum()
         }

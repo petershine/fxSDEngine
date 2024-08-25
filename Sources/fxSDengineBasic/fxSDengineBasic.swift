@@ -429,6 +429,14 @@ open class fxSDengineBasic: SDEngine {
         if let adetailer = SDextensionADetailer.decoded(using: &payloadDictionary) {
             payload?.userConfiguration?.use_adetailer = true
             payload?.userConfiguration?.adetailer = adetailer
+
+            if payload?.userConfiguration?.adetailer?.ad_cfg_scale == nil {
+                payload?.userConfiguration?.adetailer?.ad_cfg_scale = Int(payload?.cfg_scale ?? 7.0)
+            }
+
+            if payload?.userConfiguration?.adetailer?.ad_denoising_strength == nil {
+                payload?.userConfiguration?.adetailer?.ad_denoising_strength = payload?.denoising_strength ?? 0.4
+            }
         }
 
         if let controlnet = SDextensionControlNet.decoded(using: &payloadDictionary),
