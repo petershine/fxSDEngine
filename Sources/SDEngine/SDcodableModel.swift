@@ -57,11 +57,36 @@ public struct SDcodableSampler: SDprotocolModel {
     var options: SDcodableSamplerOption?
     struct SDcodableSamplerOption: Codable, Hashable {
         var scheduler: String?
+        var solver_type: String?
         var second_order: Bool?
         var brownian_noise: Bool?
-        var solver_type: String?
         var discard_next_to_last_sigma: Bool?
         var uses_ensd: Bool?
+
+        init(from decoder: any Decoder) throws {
+            let container: KeyedDecodingContainer<SDcodableSampler.SDcodableSamplerOption.CodingKeys> = try decoder.container(keyedBy: SDcodableSampler.SDcodableSamplerOption.CodingKeys.self)
+
+            self.scheduler = try container.decodeIfPresent(String.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.scheduler)
+            self.solver_type = try container.decodeIfPresent(String.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.solver_type)
+
+            do {
+                self.second_order = try container.decodeIfPresent(Bool.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.second_order)
+                self.brownian_noise = try container.decodeIfPresent(Bool.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.brownian_noise)
+                self.discard_next_to_last_sigma = try container.decodeIfPresent(Bool.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.discard_next_to_last_sigma)
+                self.uses_ensd = try container.decodeIfPresent(Bool.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.uses_ensd)
+            }
+            catch {
+                do {
+                    self.second_order = Bool(try container.decodeIfPresent(String.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.second_order) ?? "false")
+                    self.brownian_noise = Bool(try container.decodeIfPresent(String.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.brownian_noise) ?? "false")
+                    self.discard_next_to_last_sigma = Bool(try container.decodeIfPresent(String.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.discard_next_to_last_sigma) ?? "false")
+                    self.uses_ensd = Bool(try container.decodeIfPresent(String.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.uses_ensd) ?? "false")
+                }
+                catch {
+                    throw error
+                }
+            }
+        }
     }
 }
 
