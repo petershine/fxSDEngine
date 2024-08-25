@@ -65,8 +65,10 @@ open class fxSDengineBasic: SDEngine {
     public func synchronize_withSystem() async throws -> Error? {
         let error_0 = await refresh_systemInfo()
 
-        // TODO: find better evaluation for newly started server
-        guard let folderPath = systemInfo?.Config?.outdir_samples else {
+        //TODO: evaluate last generation attempt and try obtaining latest image from different path: "outdir_txt2img_samples"
+        guard error_0 == nil,
+              let folderPath = systemInfo?.Config?.outdir_txt2img_samples
+        else {
             return error_0
         }
 
