@@ -42,7 +42,7 @@ public protocol SDEngine {
     func refresh_systemSchedulers() async -> Error?
     func refresh_systemVAEs() async -> Error?
 
-    func obtain_latestPNGData(path: String) async -> (Data?, String?, Error?)
+    func obtain_latestPNGData(path: String, otherPath: String?) async -> (Data?, String?, Date?, Error?)
     func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?)
     func extract_fromInfotext(infotext: String) -> SDcodablePayload?
 
