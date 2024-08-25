@@ -170,8 +170,7 @@ extension SDcodablePayload {
             }
 
             self.userConfiguration?.adetailer?.ad_cfg_scale = Int(self.cfg_scale)
-            self.userConfiguration?.adetailer?.ad_prompt = self.prompt
-            self.userConfiguration?.adetailer?.ad_negative_prompt = self.negative_prompt
+            self.userConfiguration?.adetailer?.ad_denoising_strength = self.denoising_strength
             alwayson_scripts[SDExtensionName.adetailer.rawValue] = self.userConfiguration?.adetailer?.args
         }
 
