@@ -359,24 +359,24 @@ open class fxSDengineBasic: SDEngine {
 
         fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time)
         fxdPrint("latestFileORfolder?.fullpath: ", latestFileORfolder?.fullpath)
-        guard latestFileORfolder != nil,
-              let filePath = latestFileORfolder?.fullpath
+        guard let latestFileORfolder,
+              let filePath = latestFileORfolder.fullpath
         else {
             //TODO: error can be nil here. Prepare an error for alerting
             return (nil, nil, error)
         }
 
 
-        fxdPrint("latestFileORfolder?.type: ", latestFileORfolder?.type)
-        guard let type = latestFileORfolder?.type,
+        fxdPrint("latestFileORfolder?.type: ", latestFileORfolder.type)
+        guard let type = latestFileORfolder.type,
               type != "dir"
         else {
-            //recursive
-            return try await obtain_latestFilePath(folderPath: folderPath)
+            let nextFolderPath = filePath
+            return try await obtain_latestFilePath(folderPath: nextFolderPath)
         }
 
 
-        let updated_time = latestFileORfolder?.updated_time
+        let updated_time = latestFileORfolder.updated_time
         return (filePath, updated_time, error)
     }
 
