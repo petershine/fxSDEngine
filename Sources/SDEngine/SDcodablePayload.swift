@@ -241,12 +241,13 @@ extension SDcodablePayload {
 
         var override_settings: [String:String] = [:]
 
-        if let model_hash = jsonDictionary["model_hash"] as? String, !model_hash.isEmpty {
-            override_settings["sd_model_checkpoint"] = model_hash
-        }
-        else if let model_name = jsonDictionary["model"] as? String, !model_name.isEmpty {
+        if let model_name = jsonDictionary["model"] as? String, !model_name.isEmpty {
             override_settings["sd_model_checkpoint"] = model_name
         }
+        else if let model_hash = jsonDictionary["model_hash"] as? String, !model_hash.isEmpty {
+            override_settings["sd_model_checkpoint"] = model_hash
+        }
+
 
         let vae_name: String = jsonDictionary["vae"] as? String ?? ""
         if !vae_name.isEmpty {
@@ -278,7 +279,13 @@ extension SDcodablePayload {
         }
 
 
-        self.override_settings = try JSONDecoder().decode(SDcodableOverride.self, from: overrideSettings)
+        let decoded = try JSONDecoder().decode(SDcodableOverride.self, from: overrideSettings)
+        if self.override_settings == nil {
+            self.override_settings = decoded
+        }
+        else {
+            self.override_settings?.sd_model_checkpoint = decoded.sd_model_checkpoint
+        }
     }
 }
 
