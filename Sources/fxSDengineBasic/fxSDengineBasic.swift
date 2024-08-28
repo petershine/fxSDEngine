@@ -79,7 +79,7 @@ open class fxSDengineBasic: SDEngine {
         }
 
 
-        let (fileURL, error_2) = try await prepare_generationPayload(pngData: pngData, imagePath: imagePath)
+        let (fileURL, error_2) = try await prepare_nextPayload(pngData: pngData, imagePath: imagePath)
         guard let fileURL else {
             return error_2
         }
@@ -381,7 +381,7 @@ open class fxSDengineBasic: SDEngine {
         return (filePath, updated_time, error)
     }
 
-    public func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?) {
+    public func prepare_nextPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?) {
         let (data, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
             request: nil,

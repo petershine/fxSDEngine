@@ -44,7 +44,7 @@ public protocol SDEngine {
 
     func obtain_latestPNGData(folderPath: String, otherFolderPath: String?) async throws -> (Data?, String?, Error?)
     func obtain_latestFilePath(folderPath: String) async throws -> (String?, Date?, Error?)
-    func prepare_generationPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?)
+    func prepare_nextPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?)
     func extract_fromInfotext(infotext: String) -> SDcodablePayload?
 
 	func action_Generate(payload: SDcodablePayload)
