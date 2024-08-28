@@ -41,6 +41,7 @@ public protocol SDEngine {
     func refresh_systemSamplers() async -> Error?
     func refresh_systemSchedulers() async -> Error?
     func refresh_systemVAEs() async -> Error?
+    func refresh_system<T: SDprotocolModel>(_ modelType: T.Type) async -> Error?
 
     func obtain_latestPNGData(folderPath: String, otherFolderPath: String?) async throws -> (Data?, String?, Error?)
     func obtain_latestFilePath(folderPath: String) async throws -> (String?, Date?, Error?)

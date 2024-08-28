@@ -298,6 +298,61 @@ open class fxSDengineBasic: SDEngine {
         return error
     }
 
+    public func refresh_system<T: SDprotocolModel>(_ modelType: T.Type) async -> Error? {
+
+        var api_endpoint: SDAPIendpoint? = nil
+        switch T.self {
+            case is SDcodableCheckpoint.Type:
+                api_endpoint = .SDAPI_V1_MODELS
+            case is SDcodableVAE.Type:
+                api_endpoint = .SDAPI_V1_VAE
+            case is SDcodableSampler.Type:
+                api_endpoint = .SDAPI_V1_SAMPLERS
+            case is SDcodableScheduler.Type:
+                api_endpoint = .SDAPI_V1_SCHEDULERS
+
+            default:
+                break
+        }
+
+        guard let api_endpoint else {
+            return nil
+        }
+
+
+        let (data, _, error) = await mainSDNetworking.requestToSDServer(
+            quiet: false,
+            request: nil,
+            api_endpoint: api_endpoint,
+            method: nil,
+            query: nil,
+            payload: nil)
+#if DEBUG
+        if let jsonObject = data?.jsonObject(quiet: true) {
+            fxdPrint("\(String(describing: T.self))", (jsonObject as? Array<Any>)?.count)
+        }
+#endif
+        await MainActor.run {
+            let models = data?.decode(Array<T>.self) ?? []
+
+            switch T.self {
+                case is SDcodableCheckpoint.Type:
+                    systemCheckpoints = models as? Array<SDcodableCheckpoint> ?? []
+                case is SDcodableVAE.Type:
+                    systemVAEs = SDcodableVAE.defaultArray() + (models as? Array<SDcodableVAE> ?? [])
+                case is SDcodableSampler.Type:
+                    systemSamplers = models as? Array<SDcodableSampler> ?? []
+                case is SDcodableScheduler.Type:
+                    systemSchedulers = models as? Array<SDcodableScheduler> ?? []
+
+                default:
+                    break
+            }
+        }
+
+        return error
+    }
+
     public func obtain_latestPNGData(folderPath: String, otherFolderPath: String?) async throws -> (Data?, String?, Error?) {
         let (filePath, updated_time, error) = try await obtain_latestFilePath(folderPath: folderPath)
 
