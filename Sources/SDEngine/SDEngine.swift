@@ -36,11 +36,11 @@ public protocol SDEngine {
     func change_systemCheckpoints(checkpoint: SDcodableCheckpoint) async -> Error?
     func change_systemVAE(vae: SDcodableVAE) async -> Error?
 
-    func refresh_AllConfigurations() async -> Error?
     func refresh_systemCheckpoints() async -> Error?
     func refresh_systemSamplers() async -> Error?
     func refresh_systemSchedulers() async -> Error?
     func refresh_systemVAEs() async -> Error?
+    func refresh_allModels() async -> Error?
     func refresh_system<T: SDprotocolModel>(_ modelType: T.Type) async -> Error?
 
     func obtain_latestPNGData(folderPath: String, otherFolderPath: String?) async throws -> (Data?, String?, Error?)

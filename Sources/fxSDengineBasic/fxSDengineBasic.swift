@@ -57,7 +57,7 @@ open class fxSDengineBasic: SDEngine {
 	open func action_Synchronize() {
         Task {	@MainActor in
             let error = try await synchronize_withSystem()
-            let _ = await refresh_AllConfigurations()
+            let _ = await refresh_allModels()
 
             UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
         }
@@ -196,23 +196,23 @@ open class fxSDengineBasic: SDEngine {
     }
 
 
-    public func refresh_AllConfigurations() async -> Error? {
-        let error_0 = await refresh_systemCheckpoints()
+    public func refresh_allModels() async -> Error? {
+        let error_0 = await refresh_system(SDcodableCheckpoint.self)
         guard error_0 == nil else {
             return error_0
         }
 
-        let error_1 = await refresh_systemSamplers()
+        let error_1 = await refresh_system(SDcodableSampler.self)
         guard error_1 == nil else {
             return error_1
         }
 
-        let error_2 = await refresh_systemSchedulers()
+        let error_2 = await refresh_system(SDcodableScheduler.self)
         guard error_2 == nil else {
             return error_2
         }
 
-        let error_3 = await refresh_systemVAEs()
+        let error_3 = await refresh_system(SDcodableVAE.self)
         return error_3
     }
 
