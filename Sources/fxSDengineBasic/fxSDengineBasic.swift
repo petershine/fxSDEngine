@@ -52,6 +52,7 @@ open class fxSDengineBasic: SDEngine {
         }
     }
 
+    public var lastHTTPURLResponses: [HTTPURLResponse] = []
 
 	open func action_Synchronize() {
         Task {	@MainActor in
@@ -495,7 +496,7 @@ open class fxSDengineBasic: SDEngine {
 	public func execute_txt2img(payload: SDcodablePayload) async throws -> Error? {	fxd_log()
 		let (payloadData, utilizedControlNet) = payload.submissablePayload(mainSDEngine: self)
 
-        let (data, _, error) = await mainSDNetworking.requestToSDServer(
+        let (data, urlResponse, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
 			api_endpoint: .SDAPI_V1_TXT2IMG,
@@ -508,6 +509,13 @@ open class fxSDengineBasic: SDEngine {
             fxdPrint(name: "TXT2IMG", dictionary: jsonDictionary)
         }
 #endif
+        if let httpURLResponse = urlResponse as? HTTPURLResponse {
+            lastHTTPURLResponses.append(httpURLResponse)
+            if lastHTTPURLResponses.count > 100 {
+                lastHTTPURLResponses.removeFirst()
+            }
+        }
+
         guard !didInterrupt else {
             await MainActor.run {
                 didInterrupt = false
