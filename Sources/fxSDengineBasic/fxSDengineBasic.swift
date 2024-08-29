@@ -6,7 +6,7 @@ import fXDKit
 
 
 @Observable
-open class fxSDengineBasic: SDEngine {
+open class fxSDengineBasic: @preconcurrency SDEngine {
     public var mainSDNetworking: any SDNetworking
 	required public init(mainSDNetworking: SDNetworking) {
         self.mainSDNetworking = mainSDNetworking
@@ -450,7 +450,7 @@ open class fxSDengineBasic: SDEngine {
         return payload
 	}
 
-	open func action_Generate(payload: SDcodablePayload) {
+	@MainActor open func action_Generate(payload: SDcodablePayload) {
         guard !didStartGenerating else {
             return
         }

@@ -4,7 +4,7 @@ import Foundation
 import fXDKit
 
 
-class SDError: NSError, @unchecked Sendable {
+public class SDError: NSError, @unchecked Sendable {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
