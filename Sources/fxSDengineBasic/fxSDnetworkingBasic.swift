@@ -15,7 +15,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
         return (savedHostname as? String) ?? ""
     }()
 
-    nonisolated public func evaluateServerHostname(serverHostname: String?) async -> Bool {    fxd_log()
+    public func evaluateServerHostname(serverHostname: String?) async -> Bool {    fxd_log()
         fxdPrint("serverHostname:", serverHostname)
 
         guard let serverHostname, !serverHostname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
