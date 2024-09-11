@@ -118,7 +118,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine {
     open func checkpoint(for model_identifier: String?) -> SDcodableCheckpoint? {
         return systemCheckpoints.filter({
             let matching_hash: Bool = ($0.hash?.isEmpty ?? true) ? false : (model_identifier ?? "").contains(($0.hash)!)
-            let matching_name: Bool = ($0.model_name?.isEmpty ?? true) ? false : (model_identifier ?? "").contains(($0.model_name)!)
+            let matching_name: Bool = ($0.model_name?.isEmpty ?? true) ? false : (model_identifier ?? "") == (($0.model_name)!)
             return (matching_hash || matching_name)
         }).first
     }
