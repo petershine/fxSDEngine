@@ -4,7 +4,7 @@ import Foundation
 import UIKit
 
 
-public class SDcodablePayload: SDprotocolCodable, Equatable {
+public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable {
     public static func == (lhs: SDcodablePayload, rhs: SDcodablePayload) -> Bool {
         return false
     }

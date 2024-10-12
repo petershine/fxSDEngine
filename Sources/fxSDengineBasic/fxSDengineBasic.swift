@@ -55,13 +55,11 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
     public var lastHTTPURLResponses: [HTTPURLResponse] = []
 
 	open func action_Synchronize() {
-        Task {
+        Task {	@MainActor in
             let error = try await synchronize_withSystem()
             let _ = await refresh_allModels()
 
-            DispatchQueue.main.async {
-                UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
-            }
+            UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
         }
 	}
 
@@ -88,9 +86,11 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
 
         let loadedPayload = try SDcodablePayload.loaded(from: fileURL.jsonURL, withControlNet: true)
 
-        nextPayload = loadedPayload
+        await MainActor.run {
+            nextPayload = loadedPayload
 
-        selectedImageURL = fileURL
+            selectedImageURL = fileURL
+        }
 
         return error_2
     }
@@ -108,7 +108,9 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
             fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonDictionary)
         }
 #endif
-        systemInfo = data?.decode(SDcodableSysInfo.self)
+        await MainActor.run {
+            systemInfo = data?.decode(SDcodableSysInfo.self)
+        }
 
         return error
     }
@@ -122,42 +124,34 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
     }
 
 	open func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint) {
-        Task {
+        Task {	@MainActor in
             let error_0 = await change_systemCheckpoints(checkpoint: checkpoint)
 
 			guard error_0 == nil else {
-                DispatchQueue.main.async {
-                    UIAlertController.errorAlert(error: error_0)
-                }
+                UIAlertController.errorAlert(error: error_0)
 				return
 			}
 
 
             let error_1 = await refresh_systemInfo()
 
-            DispatchQueue.main.async {
-                UIAlertController.errorAlert(error: error_1)
-            }
+            UIAlertController.errorAlert(error: error_1)
         }
 	}
 
     open func action_ChangeVAE(_ vae: SDcodableVAE) {
-        Task {
+        Task {    @MainActor in
             let error_0 = await change_systemVAE(vae: vae)
 
             guard error_0 == nil else {
-                DispatchQueue.main.async {
-                    UIAlertController.errorAlert(error: error_0)
-                }
+                UIAlertController.errorAlert(error: error_0)
                 return
             }
 
 
             let error_1 = await refresh_systemInfo()
 
-            DispatchQueue.main.async {
-                UIAlertController.errorAlert(error: error_1)
-            }
+            UIAlertController.errorAlert(error: error_1)
         }
     }
 
@@ -256,20 +250,22 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
             fxdPrint("\(String(describing: T.self))", (jsonObject as? Array<Any>)?.count)
         }
 #endif
-        let models = data?.decode(Array<T>.self) ?? []
+        await MainActor.run {
+            let models = data?.decode(Array<T>.self) ?? []
 
-        switch T.self {
-            case is SDcodableCheckpoint.Type:
-                systemCheckpoints = models as? Array<SDcodableCheckpoint> ?? []
-            case is SDcodableVAE.Type:
-                systemVAEs = SDcodableVAE.defaultArray() + (models as? Array<SDcodableVAE> ?? [])
-            case is SDcodableSampler.Type:
-                systemSamplers = models as? Array<SDcodableSampler> ?? []
-            case is SDcodableScheduler.Type:
-                systemSchedulers = models as? Array<SDcodableScheduler> ?? []
+            switch T.self {
+                case is SDcodableCheckpoint.Type:
+                    systemCheckpoints = models as? Array<SDcodableCheckpoint> ?? []
+                case is SDcodableVAE.Type:
+                    systemVAEs = SDcodableVAE.defaultArray() + (models as? Array<SDcodableVAE> ?? [])
+                case is SDcodableSampler.Type:
+                    systemSamplers = models as? Array<SDcodableSampler> ?? []
+                case is SDcodableScheduler.Type:
+                    systemSchedulers = models as? Array<SDcodableScheduler> ?? []
 
-            default:
-                break
+                default:
+                    break
+            }
         }
 
         return error
@@ -515,7 +511,9 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
 
 
         guard !didInterrupt else {
-            didInterrupt = false
+            await MainActor.run {
+                didInterrupt = false
+            }
 
             let interruptedError = SDError(
                 domain: "SDEngine",
@@ -539,10 +537,12 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
             utilizedControlNet: utilizedControlNet)
 
 
+        await MainActor.run {
             nextPayload = newPayload
             nextPayload?.userConfiguration?.controlnet = utilizedControlNet
 
             selectedImageURL = newImageURL
+        }
 
         return error
     }
@@ -586,7 +586,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
 
 
     open func continueMonitoring() {
-        Task {
+        Task {	@MainActor in
             let (newProgress, isSystemBusy, _) = await monitor_progress(quiet: true)
             if newProgress != nil || (didStartGenerating || isSystemBusy) != self.isSystemBusy {
                 monitoredProgress = newProgress
@@ -645,9 +645,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
                 NSLocalizedFailureReasonErrorKey: "Server's image generating is canceled",
             ])
 
-        DispatchQueue.main.async {
-            UIAlertController.errorAlert(error: interruptedError)
-        }
+        UIAlertController.errorAlert(error: interruptedError)
 
         return interruptedError
     }
