@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 
 
 @Observable
-open class SDStorage: NSObject {
+open class SDStorage: NSObject, @unchecked Sendable {
 	public var latestImageURLs: [URL]? = {
 		return FileManager.default.fileURLs(contentType: .png)
 	}()
@@ -62,7 +62,7 @@ extension SDStorage {
         }
 
 
-        let thumbnailSize = pngImage.aspectSize(for: .fill, containerSize: CGSize(width: DIMENSION_MINIMUM_IMAGE, height: DIMENSION_MINIMUM_IMAGE))
+        let thumbnailSize = await pngImage.aspectSize(for: .fill, containerSize: CGSize(width: DIMENSION_MINIMUM_IMAGE, height: DIMENSION_MINIMUM_IMAGE))
         guard let thumbnail = await pngImage.byPreparingThumbnail(ofSize: thumbnailSize) else {
             return false
         }

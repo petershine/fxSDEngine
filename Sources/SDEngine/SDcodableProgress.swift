@@ -4,7 +4,7 @@ import Foundation
 import UIKit
 
 
-public struct SDcodableProgress: Codable {
+public struct SDcodableProgress: Codable, Sendable {
 	public var progress: Double? = nil
 	var eta_relative: Date? = nil
 	var textinfo: String? = nil
@@ -13,7 +13,7 @@ public struct SDcodableProgress: Codable {
 	public var state: SDcodableState? = nil
 }
 
-public struct SDcodableState: Codable {
+public struct SDcodableState: Codable, Sendable {
 	var interrupted: Bool? = nil
 	public var job: String? = nil
 	public var job_count: Int? = nil

@@ -64,15 +64,9 @@ public class SDcodablePayload: SDprotocolCodable, Equatable {
 		self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 7.0
 		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "DPM++ 2M SDE"
 		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Karras"
-
-
-		var aspectRatio = UIScreen.main.nativeBounds.size.width/UIScreen.main.nativeBounds.size.height
-		if UIDevice.current.userInterfaceIdiom == .phone {
-			aspectRatio = max(504.0/768.0, aspectRatio)
-		}
 		
-		self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
-		self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? Int(CGFloat(self.height) * aspectRatio)
+        self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 504
+        self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
 
 		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale) ?? 1.0
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? (self.hr_scale > 1.0)

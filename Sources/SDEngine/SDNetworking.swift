@@ -23,7 +23,7 @@ public enum SDAPIendpoint: String, CaseIterable {
 }
 
 
-public protocol SDNetworking {
+public protocol SDNetworking: Sendable {
     static var USER_DEFAULT_HOSTNAME: String { get }
 	var serverHostname: String { get set }
 

@@ -160,7 +160,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
 }
 
 
-extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
+extension fxSDnetworkingBasic: @preconcurrency URLSessionDelegate, URLSessionDataDelegate {
     public func execute_backgroundURLtask(api_endpoint: SDAPIendpoint,
                                           method: String? = nil,
                                           query: String? = nil,
@@ -184,7 +184,7 @@ extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
         backgroundTask.resume()
     }
 
-	public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: (any Error)?) {	fxd_log()
+    @MainActor public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: (any Error)?) {	fxd_log()
         UIAlertController.errorAlert(error: error)
 	}
 
@@ -203,7 +203,7 @@ extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
         self.receivedData = nil
 	}
 
-    public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {	fxd_log()
+    @MainActor public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {	fxd_log()
         fxdPrint(session)
         fxdPrint(responseHandler)
         fxdPrint(receivedData)

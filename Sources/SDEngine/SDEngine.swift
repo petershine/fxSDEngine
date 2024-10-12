@@ -4,7 +4,7 @@ import Foundation
 import UIKit
 
 
-public protocol SDEngine {
+public protocol SDEngine: Sendable {
 	var mainSDNetworking: SDNetworking { get set }
 	init(mainSDNetworking: SDNetworking)
 
