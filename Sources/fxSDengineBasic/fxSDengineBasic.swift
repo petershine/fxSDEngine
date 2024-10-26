@@ -48,7 +48,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
     }
     public var controlnetImageBase64: String? = nil {
         didSet {
-            nextPayload?.userConfiguration?.controlnet?.image?.image = controlnetImageBase64
+            nextPayload?.userConfiguration?.controlnet?.image = controlnetImageBase64
         }
     }
 
@@ -451,7 +451,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
         }
 
         if let controlnet = SDextensionControlNet.decoded(using: &payloadDictionary),
-           !(controlnet.image?.image?.isEmpty ?? true) {
+           !(controlnet.image?.isEmpty ?? true) {
             payload?.userConfiguration?.use_controlnet = true
             payload?.userConfiguration?.controlnet = controlnet
         }

@@ -6,14 +6,18 @@ import Foundation
 public struct SDextensionControlNet: SDprotocolCodable, Equatable {
     var advanced_weighting: String?
     var animatediff_batch: Bool
+    var batch_image_dir: String?
+    var batch_input_gallery: String?
     var batch_image_files: [String?]?
     var batch_images: String
     var batch_keyframe_idx: String?
     var batch_mask_dir: String?
+    var batch_mask_gallery: String?
     var batch_modifiers: [String?]?
     var control_mode: String
     var effective_region_mask: String?
     var enabled: Bool
+    var generated_image: String?
     var guidance_end: Double
     var guidance_start: Double
     var hr_option: String
@@ -28,19 +32,19 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
     public var module: String
     var output_dir: String
     var pixel_perfect: Bool
-    var processor_res: Int
+    var processor_res: Double
     var pulid_mode: String
     var resize_mode: String
     var save_detected_map: Bool
     var threshold_a: Double
     var threshold_b: Double
+    var use_preview_as_input: Bool
     var weight: Double
 
-    public var image: SDextensionControlNetImage?
-    public struct SDextensionControlNetImage: SDprotocolCodable, Equatable {
-        public var image: String?
-        var mask: String?
-    }
+    public var image: String?
+    var image_fg: String?
+    var mask_image: String?
+    var mask_image_fg: String?
 
 
     public init(from decoder: any Decoder) throws {
@@ -48,14 +52,18 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
 
         self.advanced_weighting = try container.decodeIfPresent(String.self, forKey: .advanced_weighting) ?? nil
         self.animatediff_batch = try container.decodeIfPresent(Bool.self, forKey: .animatediff_batch) ?? false
+        self.batch_image_dir = try container.decodeIfPresent(String.self, forKey: .batch_image_dir) ?? nil
+        self.batch_input_gallery = try container.decodeIfPresent(String.self, forKey: .batch_input_gallery) ?? nil
         self.batch_image_files = try container.decodeIfPresent([String?].self, forKey: .batch_image_files) ?? nil
         self.batch_images = try container.decodeIfPresent(String.self, forKey: .batch_images) ?? ""
         self.batch_keyframe_idx = try container.decodeIfPresent(String.self, forKey: .batch_keyframe_idx) ?? nil
         self.batch_mask_dir = try container.decodeIfPresent(String.self, forKey: .batch_mask_dir) ?? nil
+        self.batch_mask_gallery = try container.decodeIfPresent(String.self, forKey: .batch_mask_gallery) ?? nil
         self.batch_modifiers = try container.decodeIfPresent([String?].self, forKey: .batch_modifiers) ?? nil
-        self.control_mode = try container.decodeIfPresent(String.self, forKey: .control_mode) ?? "My prompt is more important"
+        self.control_mode = try container.decodeIfPresent(String.self, forKey: .control_mode) ?? "Balanced"	//"My prompt is more important"
         self.effective_region_mask = try container.decodeIfPresent(String.self, forKey: .effective_region_mask) ?? nil
         self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
+        self.generated_image = try container.decodeIfPresent(String.self, forKey: .generated_image) ?? nil
         self.guidance_end = try container.decodeIfPresent(Double.self, forKey: .guidance_end) ?? 1.0
         self.guidance_start = try container.decodeIfPresent(Double.self, forKey: .guidance_start) ?? 0.0
         self.hr_option = try container.decodeIfPresent(String.self, forKey: .hr_option) ?? "Both"
@@ -70,18 +78,19 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
         self.module = try container.decodeIfPresent(String.self, forKey: .module) ?? "lineart_realistic"
         self.output_dir = try container.decodeIfPresent(String.self, forKey: .output_dir) ?? ""
         self.pixel_perfect = try container.decodeIfPresent(Bool.self, forKey: .pixel_perfect) ?? true
-        self.processor_res = try container.decodeIfPresent(Int.self, forKey: .processor_res) ?? 512
+        self.processor_res = try container.decodeIfPresent(Double.self, forKey: .processor_res) ?? 0.5
         self.pulid_mode = try container.decodeIfPresent(String.self, forKey: .pulid_mode) ?? "Fidelity"
         self.resize_mode = try container.decodeIfPresent(String.self, forKey: .resize_mode) ?? "Resize and Fill"
         self.save_detected_map = try container.decodeIfPresent(Bool.self, forKey: .save_detected_map) ?? true
         self.threshold_a = try container.decodeIfPresent(Double.self, forKey: .threshold_a) ?? 0.5
         self.threshold_b = try container.decodeIfPresent(Double.self, forKey: .threshold_b) ?? 0.5
+        self.use_preview_as_input = try container.decodeIfPresent(Bool.self, forKey: .use_preview_as_input) ?? false
         self.weight = try container.decodeIfPresent(Double.self, forKey: .weight) ?? 1.0
 
-        self.image = try container.decodeIfPresent(SDextensionControlNetImage.self, forKey: .image) ?? nil
-        if self.image == nil {
-            self.image = SDextensionControlNetImage.minimum()
-        }
+        self.image = try container.decodeIfPresent(String.self, forKey: .image) ?? nil
+        self.image_fg = try container.decodeIfPresent(String.self, forKey: .image_fg) ?? nil
+        self.mask_image = try container.decodeIfPresent(String.self, forKey: .mask_image) ?? nil
+        self.mask_image_fg = try container.decodeIfPresent(String.self, forKey: .mask_image_fg) ?? nil
     }
 }
 

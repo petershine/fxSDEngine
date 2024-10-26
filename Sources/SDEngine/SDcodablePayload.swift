@@ -189,7 +189,7 @@ extension SDcodablePayload {
 
         if (self.userConfiguration?.use_controlnet ?? false) {
     
-            if let sourceImageBase64 = self.userConfiguration?.controlnet?.image?.image,
+            if let sourceImageBase64 = self.userConfiguration?.controlnet?.image,
                !(sourceImageBase64.isEmpty) {
                 alwayson_scripts[SDExtensionName.controlnet.rawValue] = self.userConfiguration?.controlnet?.args
             }
