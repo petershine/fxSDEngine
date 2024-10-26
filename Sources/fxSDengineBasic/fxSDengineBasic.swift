@@ -299,19 +299,19 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
             request: nil,
             api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
             method: nil,
-            query: "path=\(imagePath)&t=file",
+            query: "path=\(imagePath.addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? "")&t=file",
             payload: nil)
 
         return (pngData, imagePath, obtainingError)
     }
 
     public func obtain_latestFilePath(folderPath: String) async throws -> (String?, Date?, Error?) {
-        let (data, _, error) = await mainSDNetworking.requestToSDServer(
+        let (data, response, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             request: nil,
             api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
             method: nil,
-            query: "folder_path=\(folderPath)",
+            query: "folder_path=\(folderPath.addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? "")",
             payload: nil)
 
         guard let decodedResponse = data?.decode(SDcodableFiles.self),
@@ -320,17 +320,26 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
             return (nil, nil, error)
         }
 
+        fxdPrint("response?.url", response?.url)
         fxdPrint("filesORfolders.count: ", filesORfolders.count)
+        if filesORfolders.count == 0 {
+            fxdPrint(data?.jsonObject())
+        }
 
-        let latestFileORfolder = filesORfolders
+        let sortedFilesORfolders = filesORfolders
             .sorted {
                 ($0?.updated_time)! > ($1?.updated_time)!
             }
             .filter {
                 !($0?.fullpath?.contains("DS_Store") ?? false)
             }
-            .first as? SDcodableFile
 
+        for file in sortedFilesORfolders {
+            fxdPrint("file.fullpath: ", file?.date, file?.fullpath)
+        }
+
+
+        let latestFileORfolder = sortedFilesORfolders.first as? SDcodableFile
         fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time)
         fxdPrint("latestFileORfolder?.fullpath: ", latestFileORfolder?.fullpath)
         guard let latestFileORfolder,
@@ -360,7 +369,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
             request: nil,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
 			method: nil,
-			query: "path=\(imagePath)",
+			query: "path=\(imagePath.addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? "")",
             payload: nil)
 
         guard let data,

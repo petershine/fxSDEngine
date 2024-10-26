@@ -68,7 +68,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
             
             var requestPath = "\(serverHostname)/\(api_endpoint.rawValue)"
             if !(query?.isEmpty ?? true),
-               let escapedQuery = query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+               let escapedQuery = query {	//query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
                 requestPath += "?\(escapedQuery)"
             }
 
