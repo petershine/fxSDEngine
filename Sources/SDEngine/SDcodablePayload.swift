@@ -14,6 +14,7 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 
 	public var steps: Int
 	public var cfg_scale: Double
+    public var distilled_cfg_scale: Double
 	public var sampler_name: String
 	public var scheduler: String
 
@@ -21,15 +22,21 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 	public var width: Int
 	public var height: Int
 
-	public var hr_scale: Double
-	public var enable_hr: Bool
-	var denoising_strength: Double
-	var hr_second_pass_steps: Int
-	var hr_upscaler: String
+    var hr_cfg: Double
+    var hr_distilled_cfg: Double
+    public var hr_scale: Double
+    public var enable_hr: Bool
+    var hr_resize_x: Int
+    var hr_resize_y: Int
+    var denoising_strength: Double
+    var hr_second_pass_steps: Int
+    var hr_upscaler: String
     public var hr_sampler_name: String?
-	public var hr_scheduler: String?
-	var hr_prompt: String
-	var hr_negative_prompt: String
+    public var hr_scheduler: String?
+    var hr_prompt: String
+    var hr_negative_prompt: String
+    var highresfix_quick: Bool
+    var hr_additional_modules: [String?]?
 
 	public var n_iter: Int
 	var batch_size: Int
@@ -38,6 +45,7 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 	var send_images: Bool
 
 	public var seed: Int
+    var seed_enable_extras: Bool
 
 	var do_not_save_samples: Bool
 	var do_not_save_grid: Bool
@@ -53,6 +61,12 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 
     public var userConfiguration: SDcodableUserConfiguration?
 
+    /*
+     comments: Dictionary
+     disable_extra_networks: Bool
+     restore_faces: Bool
+     */
+
 
 	required public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -60,16 +74,22 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? ""
 		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt) ?? ""
 
-		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 30
-		self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 7.0
-		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "DPM++ 2M SDE"
-		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Karras"
-		
+		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 35
+		self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 7.5
+        self.distilled_cfg_scale = try container.decodeIfPresent(Double.self, forKey: .distilled_cfg_scale) ?? 3.5
+		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "Euler a"
+		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Polyexponential"
+
         self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 504
         self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
 
+        self.hr_cfg = try container.decodeIfPresent(Double.self, forKey: .hr_cfg) ?? 7.5
+        self.hr_distilled_cfg = try container.decodeIfPresent(Double.self, forKey: .hr_distilled_cfg) ?? 3.5
 		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale) ?? 1.0
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? (self.hr_scale > 1.0)
+
+        self.hr_resize_x = try container.decodeIfPresent(Int.self, forKey: .hr_resize_x) ?? 0
+        self.hr_resize_y = try container.decodeIfPresent(Int.self, forKey: .hr_resize_y) ?? 0
 
         self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength) ?? 0.4
 		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps) ?? 10
@@ -87,6 +107,8 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 
 		self.hr_prompt = try container.decodeIfPresent(String.self, forKey: .hr_prompt) ?? ""
 		self.hr_negative_prompt = try container.decodeIfPresent(String.self, forKey: .hr_negative_prompt) ?? ""
+        self.highresfix_quick = try container.decodeIfPresent(Bool.self, forKey: .highresfix_quick) ?? false
+        self.hr_additional_modules = try container.decodeIfPresent([String].self, forKey: .hr_additional_modules) ?? ["Use same choices"]
 
 		self.n_iter = try container.decodeIfPresent(Int.self, forKey: .n_iter) ?? 1
 		self.batch_size = try container.decodeIfPresent(Int.self, forKey: .batch_size) ?? 1
@@ -95,6 +117,7 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 		self.send_images = try container.decodeIfPresent(Bool.self, forKey: .send_images) ?? true
 
 		self.seed = try container.decodeIfPresent(Int.self, forKey: .seed) ?? -1
+        self.seed_enable_extras = try container.decodeIfPresent(Bool.self, forKey: .seed_enable_extras) ?? true
 
 		self.do_not_save_samples = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_samples) ?? false
 		self.do_not_save_grid = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_grid) ?? false
