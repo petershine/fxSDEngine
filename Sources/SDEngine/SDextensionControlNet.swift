@@ -3,6 +3,12 @@
 import Foundation
 
 
+fileprivate enum SDcontrolnetMode: String, CaseIterable {
+    case balanced = "Balanced"
+    case myPrompt = "My prompt is more important"
+    case controlNet = "ControlNet is more important"
+}
+
 public struct SDextensionControlNet: SDprotocolCodable, Equatable {
     var advanced_weighting: String?
     var animatediff_batch: Bool
@@ -60,7 +66,7 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
         self.batch_mask_dir = try container.decodeIfPresent(String.self, forKey: .batch_mask_dir) ?? nil
         self.batch_mask_gallery = try container.decodeIfPresent(String.self, forKey: .batch_mask_gallery) ?? nil
         self.batch_modifiers = try container.decodeIfPresent([String?].self, forKey: .batch_modifiers) ?? nil
-        self.control_mode = try container.decodeIfPresent(String.self, forKey: .control_mode) ?? "Balanced"	//"My prompt is more important"
+        self.control_mode = try container.decodeIfPresent(String.self, forKey: .control_mode) ?? SDcontrolnetMode.myPrompt.rawValue
         self.effective_region_mask = try container.decodeIfPresent(String.self, forKey: .effective_region_mask) ?? nil
         self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
         self.generated_image = try container.decodeIfPresent(String.self, forKey: .generated_image) ?? nil
@@ -117,12 +123,6 @@ extension SDextensionControlNet: SDprotocolExtension {
             jsonDictionary[extractedKey] = nil
         }
 
-
-        enum SDcontrolnetMode: String, CaseIterable {
-            case balanced = "Balanced"
-            case myPrompt = "My prompt is more important"
-            case controlNet = "ControlNet is more important"
-        }
 
         let control_mode = extractedDictionary["control_mode"] as? String
         for controlMode in SDcontrolnetMode.allCases {
