@@ -10,7 +10,9 @@ public struct SDextensionADetailer: SDprotocolCodable {
     var ad_inpaint_only_masked: Bool
     var ad_inpaint_only_masked_padding: Int
     var ad_mask_blur: Int
-    var ad_mask_k_largest: Int
+    var ad_mask_k: Int
+    var ad_mask_k_largest: Int?	//deprecated?
+    var ad_mask_filter_method: String
     public var ad_model: String
 
     var ad_cfg_scale: Int
@@ -57,7 +59,9 @@ public struct SDextensionADetailer: SDprotocolCodable {
         self.ad_inpaint_only_masked = try container.decodeIfPresent(Bool.self, forKey: .ad_inpaint_only_masked) ?? true
         self.ad_inpaint_only_masked_padding = try container.decodeIfPresent(Int.self, forKey: .ad_inpaint_only_masked_padding) ?? 31
         self.ad_mask_blur = try container.decodeIfPresent(Int.self, forKey: .ad_mask_blur) ?? 4
-        self.ad_mask_k_largest = try container.decodeIfPresent(Int.self, forKey: .ad_mask_k_largest) ?? 2
+        self.ad_mask_k = try container.decodeIfPresent(Int.self, forKey: .ad_mask_k) ?? 2
+        self.ad_mask_k_largest = try container.decodeIfPresent(Int.self, forKey: .ad_mask_k_largest)
+        self.ad_mask_filter_method = try container.decodeIfPresent(String.self, forKey: .ad_mask_filter_method) ?? "Area"
         self.ad_model = try container.decodeIfPresent(String.self, forKey: .ad_model) ?? "face_yolov8n.pt"
 
         self.ad_cfg_scale = try container.decodeIfPresent(Int.self, forKey: .ad_cfg_scale) ?? 7
@@ -111,7 +115,9 @@ extension SDextensionADetailer: SDprotocolExtension {
             ("ad_inpaint_only_masked", "adetailer inpaint only masked"),
             ("ad_inpaint_only_masked_padding", "adetailer inpaint padding"),
             ("ad_mask_blur", "adetailer mask blur"),
+            ("ad_mask_k", "adetailer mask only top k"),
             ("ad_mask_k_largest", "adetailer mask only top k largest"),
+            ("ad_mask_filter_method", "adetailer method to decide top k masks"),
             ("ad_model", "adetailer model"),
         ]
         for (key, extractedKey) in extractingKeyPairs_adetailer {
