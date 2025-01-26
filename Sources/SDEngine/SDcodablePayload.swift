@@ -74,8 +74,8 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? ""
 		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt) ?? ""
 
-		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 35
-		self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 7.5
+		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 30
+        self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 7.0
         self.distilled_cfg_scale = try container.decodeIfPresent(Double.self, forKey: .distilled_cfg_scale) ?? 3.5
 		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "Euler a"
 		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Polyexponential"
@@ -83,7 +83,7 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
         self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 504
         self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
 
-        self.hr_cfg = try container.decodeIfPresent(Double.self, forKey: .hr_cfg) ?? 7.5
+        self.hr_cfg = try container.decodeIfPresent(Double.self, forKey: .hr_cfg) ?? self.cfg_scale
         self.hr_distilled_cfg = try container.decodeIfPresent(Double.self, forKey: .hr_distilled_cfg) ?? 3.5
 		self.hr_scale = try container.decodeIfPresent(Double.self, forKey: .hr_scale) ?? 1.0
 		self.enable_hr = try container.decodeIfPresent(Bool.self, forKey: .enable_hr) ?? (self.hr_scale > 1.0)
