@@ -80,8 +80,8 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
         self.loopback = try container.decodeIfPresent(Bool.self, forKey: .loopback) ?? false
         self.low_vram = try container.decodeIfPresent(Bool.self, forKey: .low_vram) ?? false
         self.mask = try container.decodeIfPresent(String.self, forKey: .mask) ?? nil
-        self.model = try container.decodeIfPresent(String.self, forKey: .model) ?? "controlnetxlCNXL_abovzvSegment [49e0ea4a]"
-        self.module = try container.decodeIfPresent(String.self, forKey: .module) ?? "seg_ofade20k"
+        self.model = try container.decodeIfPresent(String.self, forKey: .model) ?? "diffusers_xl_canny_full [2b69fca4]"
+        self.module = try container.decodeIfPresent(String.self, forKey: .module) ?? "canny"
         self.output_dir = try container.decodeIfPresent(String.self, forKey: .output_dir) ?? ""
         self.pixel_perfect = try container.decodeIfPresent(Bool.self, forKey: .pixel_perfect) ?? true
         self.processor_res = try container.decodeIfPresent(Double.self, forKey: .processor_res) ?? 0.5
