@@ -6,7 +6,7 @@ import fXDKit
 
 
 @Observable
-open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
+open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var mainSDNetworking: any SDNetworking
 	required public init(mainSDNetworking: SDNetworking) {
         self.mainSDNetworking = mainSDNetworking
@@ -40,7 +40,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
     public var selectedImageURL: URL? = nil {
         willSet {
             if let imageURL = newValue {
-                Task {
+                Task {	@MainActor in
                     displayedImage = UIImage(contentsOfFile: imageURL.path())
                 }
             }
@@ -539,7 +539,6 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
 
         nextPayload = newPayload
         nextPayload?.userConfiguration?.controlnet = utilizedControlNet
-
         selectedImageURL = newImageURL
 
         return error
