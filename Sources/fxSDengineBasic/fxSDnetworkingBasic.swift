@@ -156,7 +156,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
 }
 
 
-extension fxSDnetworkingBasic: @preconcurrency URLSessionDelegate, URLSessionDataDelegate {
+extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
     public func execute_backgroundURLtask(api_endpoint: SDAPIendpoint,
                                           method: String? = nil,
                                           query: String? = nil,
@@ -180,8 +180,10 @@ extension fxSDnetworkingBasic: @preconcurrency URLSessionDelegate, URLSessionDat
         backgroundTask.resume()
     }
 
-    @MainActor public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: (any Error)?) {	fxd_log()
-        UIAlertController.errorAlert(error: error)
+    public func urlSession(_ session: URLSession, didBecomeInvalidWithError error: (any Error)?) {	fxd_log()
+        Task {	@MainActor in
+            UIAlertController.errorAlert(error: error)
+        }
 	}
 
 	public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
@@ -199,15 +201,17 @@ extension fxSDnetworkingBasic: @preconcurrency URLSessionDelegate, URLSessionDat
         self.receivedData = nil
 	}
 
-    @MainActor public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {	fxd_log()
+    public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {	fxd_log()
         fxdPrint(session)
         fxdPrint(responseHandler)
         fxdPrint(receivedData)
 
-        if let appDelegate = UIApplication.shared.delegate as? FXDAppDelegate,
-           let completionHandler = appDelegate.backgroundCompletionHandler {
-
-            fxdPrint(completionHandler)
+        Task {    @MainActor in
+            if let appDelegate = UIApplication.shared.delegate as? FXDAppDelegate,
+               let completionHandler = appDelegate.backgroundCompletionHandler {
+                
+                fxdPrint(completionHandler)
+            }
         }
     }
 }

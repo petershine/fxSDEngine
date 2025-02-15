@@ -40,7 +40,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
     public var selectedImageURL: URL? = nil {
         willSet {
             if let imageURL = newValue {
-                Task {	@MainActor in
+                Task {
                     displayedImage = UIImage(contentsOfFile: imageURL.path())
                 }
             }
@@ -55,11 +55,11 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
     public var lastHTTPURLResponses: [HTTPURLResponse] = []
 
 	open func action_Synchronize() {
-        Task {	@MainActor in
+        Task {
             let error = try await synchronize_withSystem()
             let _ = await refresh_allModels()
 
-            UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
+            await UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
         }
 	}
 
@@ -119,34 +119,34 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
     }
 
 	open func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint) {
-        Task {	@MainActor in
+        Task {
             let error_0 = await change_systemCheckpoints(checkpoint: checkpoint)
 
 			guard error_0 == nil else {
-                UIAlertController.errorAlert(error: error_0)
+                await UIAlertController.errorAlert(error: error_0)
 				return
 			}
 
 
             let error_1 = await refresh_systemInfo()
 
-            UIAlertController.errorAlert(error: error_1)
+            await UIAlertController.errorAlert(error: error_1)
         }
 	}
 
     open func action_ChangeVAE(_ vae: SDcodableVAE) {
-        Task {    @MainActor in
+        Task {
             let error_0 = await change_systemVAE(vae: vae)
 
             guard error_0 == nil else {
-                UIAlertController.errorAlert(error: error_0)
+                await UIAlertController.errorAlert(error: error_0)
                 return
             }
 
 
             let error_1 = await refresh_systemInfo()
 
-            UIAlertController.errorAlert(error: error_1)
+            await UIAlertController.errorAlert(error: error_1)
         }
     }
 
@@ -452,7 +452,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
         return payload
 	}
 
-	@MainActor open func action_Generate(payload: SDcodablePayload) {
+	open func action_Generate(payload: SDcodablePayload) {
         guard !didStartGenerating else {
             return
         }
@@ -460,9 +460,9 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
 
         didStartGenerating = true
 
-        Task {    @MainActor in
+        Task {
             let error = try await execute_txt2img(payload: payload)
-            UIAlertController.errorAlert(error: error)
+            await UIAlertController.errorAlert(error: error)
 
             didStartGenerating = false
         }
@@ -584,7 +584,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
 
 
     open func continueMonitoring() {
-        Task {	@MainActor in
+        Task {
             let (newProgress, isSystemBusy, _) = await monitor_progress(quiet: true)
             if newProgress != nil || (didStartGenerating || isSystemBusy) != self.isSystemBusy {
                 monitoredProgress = newProgress
@@ -617,7 +617,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
     }
 
 
-    @MainActor public func interrupt() async -> Error? {
+    public func interrupt() async -> Error? {
         let (_, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             request: nil,
@@ -643,7 +643,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
                 NSLocalizedFailureReasonErrorKey: "Server's image generating is canceled",
             ])
 
-        UIAlertController.errorAlert(error: interruptedError)
+        await UIAlertController.errorAlert(error: interruptedError)
 
         return interruptedError
     }
