@@ -350,13 +350,5 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
 
         self.adetailer = try container.decodeIfPresent(SDextensionADetailer.self, forKey: .adetailer)
         self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet)
-
-        if self.adetailer == nil {
-            self.adetailer = SDextensionADetailer.minimum()
-        }
-        
-        if self.controlnet == nil {
-            self.controlnet = SDextensionControlNet.minimum()
-        }
     }
 }
