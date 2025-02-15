@@ -42,18 +42,14 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
               (response as? HTTPURLResponse)?.statusCode == 200,
               error == nil
         else {
-            await MainActor.run {
-                UIAlertController.errorAlert(error: error, title: "Possibly, you entered wrong server hostname, or server is not operating.")
-            }
+            await UIAlertController.errorAlert(error: error, title: "Possibly, you entered wrong server hostname, or server is not operating.")
 
             return false
         }
 
 
-        await MainActor.run {
-            self.serverHostname = serverHostname.trimmingCharacters(in: .whitespacesAndNewlines)
-            UserDefaults.standard.set(serverHostname, forKey: Self.USER_DEFAULT_HOSTNAME)
-        }
+        self.serverHostname = serverHostname.trimmingCharacters(in: .whitespacesAndNewlines)
+        UserDefaults.standard.set(serverHostname, forKey: Self.USER_DEFAULT_HOSTNAME)
 
         return true
     }

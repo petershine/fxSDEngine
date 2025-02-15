@@ -86,11 +86,8 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
 
         let loadedPayload = try SDcodablePayload.loaded(from: fileURL.jsonURL, withControlNet: true)
 
-        await MainActor.run {
-            nextPayload = loadedPayload
-
-            selectedImageURL = fileURL
-        }
+        nextPayload = loadedPayload
+        selectedImageURL = fileURL
 
         return error_2
     }
@@ -108,9 +105,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
             fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonDictionary)
         }
 #endif
-        await MainActor.run {
-            systemInfo = data?.decode(SDcodableSysInfo.self)
-        }
+        systemInfo = data?.decode(SDcodableSysInfo.self)
 
         return error
     }
@@ -250,22 +245,20 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
             fxdPrint("\(String(describing: T.self))", (jsonObject as? Array<Any>)?.count)
         }
 #endif
-        await MainActor.run {
-            let models = data?.decode(Array<T>.self) ?? []
+        let models = data?.decode(Array<T>.self) ?? []
 
-            switch T.self {
-                case is SDcodableCheckpoint.Type:
-                    systemCheckpoints = models as? Array<SDcodableCheckpoint> ?? []
-                case is SDcodableVAE.Type:
-                    systemVAEs = SDcodableVAE.defaultArray() + (models as? Array<SDcodableVAE> ?? [])
-                case is SDcodableSampler.Type:
-                    systemSamplers = models as? Array<SDcodableSampler> ?? []
-                case is SDcodableScheduler.Type:
-                    systemSchedulers = models as? Array<SDcodableScheduler> ?? []
+        switch T.self {
+            case is SDcodableCheckpoint.Type:
+                systemCheckpoints = models as? Array<SDcodableCheckpoint> ?? []
+            case is SDcodableVAE.Type:
+                systemVAEs = SDcodableVAE.defaultArray() + (models as? Array<SDcodableVAE> ?? [])
+            case is SDcodableSampler.Type:
+                systemSamplers = models as? Array<SDcodableSampler> ?? []
+            case is SDcodableScheduler.Type:
+                systemSchedulers = models as? Array<SDcodableScheduler> ?? []
 
-                default:
-                    break
-            }
+            default:
+                break
         }
 
         return error
@@ -520,9 +513,7 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
 
 
         guard !didInterrupt else {
-            await MainActor.run {
-                didInterrupt = false
-            }
+            didInterrupt = false
 
             let interruptedError = SDError(
                 domain: "SDEngine",
@@ -546,12 +537,10 @@ open class fxSDengineBasic: @preconcurrency SDEngine, @unchecked Sendable {
             utilizedControlNet: utilizedControlNet)
 
 
-        await MainActor.run {
-            nextPayload = newPayload
-            nextPayload?.userConfiguration?.controlnet = utilizedControlNet
+        nextPayload = newPayload
+        nextPayload?.userConfiguration?.controlnet = utilizedControlNet
 
-            selectedImageURL = newImageURL
-        }
+        selectedImageURL = newImageURL
 
         return error
     }
