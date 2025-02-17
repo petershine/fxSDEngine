@@ -74,14 +74,14 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? ""
 		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt) ?? ""
 
-		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 30
-        self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 7.0
+		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 25
+        self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 6.0
         self.distilled_cfg_scale = try container.decodeIfPresent(Double.self, forKey: .distilled_cfg_scale) ?? 3.5
 		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "Euler a"
 		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Polyexponential"
 
-        self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 504
-        self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 768
+        self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 672
+        self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 1024
 
         self.hr_cfg = try container.decodeIfPresent(Double.self, forKey: .hr_cfg) ?? self.cfg_scale
         self.hr_distilled_cfg = try container.decodeIfPresent(Double.self, forKey: .hr_distilled_cfg) ?? 3.5
@@ -227,8 +227,8 @@ extension SDcodablePayload {
 
         if let sizeComponents = (jsonDictionary["size"] as? String)?.components(separatedBy: "x"),
            sizeComponents.count == 2 {
-            jsonDictionary["width"] = Int(sizeComponents.first ?? "504")
-            jsonDictionary["height"] = Int(sizeComponents.last ?? "768")
+            jsonDictionary["width"] = Int(sizeComponents.first ?? "672")
+            jsonDictionary["height"] = Int(sizeComponents.last ?? "1024")
         }
 
         let replacingKeyPairs = [

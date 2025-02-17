@@ -64,7 +64,7 @@ public struct SDextensionADetailer: SDprotocolCodable {
         self.ad_mask_filter_method = try container.decodeIfPresent(String.self, forKey: .ad_mask_filter_method) ?? "Area"
         self.ad_model = try container.decodeIfPresent(String.self, forKey: .ad_model) ?? "face_yolov8n.pt"
 
-        self.ad_cfg_scale = try container.decodeIfPresent(Int.self, forKey: .ad_cfg_scale) ?? 7
+        self.ad_cfg_scale = try container.decodeIfPresent(Int.self, forKey: .ad_cfg_scale) ?? 6
         self.ad_checkpoint = try container.decodeIfPresent(String.self, forKey: .ad_checkpoint) ?? "Use same checkpoint"
         self.ad_clip_skip = try container.decodeIfPresent(Int.self, forKey: .ad_clip_skip) ?? 1
         self.ad_controlnet_guidance_end = try container.decodeIfPresent(Int.self, forKey: .ad_controlnet_guidance_end) ?? 1
