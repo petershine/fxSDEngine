@@ -458,8 +458,9 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
         
         
+        didStartGenerating = true
+        
         Task {
-            didStartGenerating = true
             let error = try await execute_txt2img(payload: payload)
             didStartGenerating = false
             
