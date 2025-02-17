@@ -456,15 +456,14 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         guard !didStartGenerating else {
             return
         }
-
-
-        didStartGenerating = true
-
+        
+        
         Task {
+            didStartGenerating = true
             let error = try await execute_txt2img(payload: payload)
-            await UIAlertController.errorAlert(error: error)
-
             didStartGenerating = false
+            
+            await UIAlertController.errorAlert(error: error)
         }
     }
 
