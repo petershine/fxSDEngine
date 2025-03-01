@@ -86,8 +86,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         let loadedPayload = try SDcodablePayload.loaded(from: fileURL.jsonURL, withControlNet: true)
 
-        nextPayload = loadedPayload
-        selectedImageURL = fileURL
+        Task {	@MainActor in
+            nextPayload = loadedPayload
+            selectedImageURL = fileURL
+        }
 
         return error_2
     }
@@ -536,10 +538,11 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             generated: generated,
             utilizedControlNet: utilizedControlNet)
 
-
-        nextPayload = newPayload
-        nextPayload?.userConfiguration.controlnet = utilizedControlNet ?? SDextensionControlNet.minimum()!
-        selectedImageURL = newImageURL
+        Task {	@MainActor in
+            nextPayload = newPayload
+            nextPayload?.userConfiguration.controlnet = utilizedControlNet ?? SDextensionControlNet.minimum()!
+            selectedImageURL = newImageURL
+        }
 
         return error
     }
