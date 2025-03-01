@@ -493,24 +493,15 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             }
         }
 
-        guard error == nil,
-              await UIApplication.shared.applicationState == .active
-        else {
-            if await UIApplication.shared.applicationState != .active,
-               self.didStartGenerating {
-
-                let disconnectedError = SDError(
-                    domain: "SDEngine",
-                    code: -1,
-                    userInfo: [
-                        NSLocalizedDescriptionKey: "Disconnected",
-                        NSLocalizedFailureReasonErrorKey: "For the app is not actively opened, generated image will need to be manually retrieved. Please \"synchronize\" when you re-open this app, to obtain latest image from server",
-                    ])
-                return disconnectedError
-            }
-            else {
-                return error
-            }
+        guard error == nil else {
+            let disconnectedError = SDError(
+                domain: "SDEngine",
+                code: -1,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "Disconnected",
+                    NSLocalizedFailureReasonErrorKey: "For the app is not actively opened, generated image will need to be manually retrieved. Please \"synchronize\" when you re-open this app, to obtain latest image from server",
+                ])
+            return disconnectedError
         }
 
 
