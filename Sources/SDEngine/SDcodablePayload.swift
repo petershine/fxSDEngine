@@ -59,7 +59,7 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
     }
 
 
-    public var userConfiguration: SDcodableUserConfiguration?
+    public var userConfiguration: SDcodableUserConfiguration
 
     /*
      comments: Dictionary
@@ -126,10 +126,7 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
         self.override_settings_restore_afterwards = try container.decodeIfPresent(Bool.self, forKey: .override_settings_restore_afterwards) ?? true
         self.override_settings = try container.decodeIfPresent(SDcodableOverride.self, forKey: .override_settings)
 
-        self.userConfiguration = try container.decodeIfPresent(SDcodableUserConfiguration.self, forKey: .userConfiguration)
-        if self.userConfiguration == nil {
-            self.userConfiguration = SDcodableUserConfiguration.minimum()
-        }
+        self.userConfiguration = try container.decodeIfPresent(SDcodableUserConfiguration.self, forKey: .userConfiguration) ?? SDcodableUserConfiguration.minimum()!
 	}
 }
 
@@ -142,7 +139,7 @@ extension SDcodablePayload {
 
         if withControlNet,
            let controlnet = try SDextensionControlNet.loaded(from: fileURL?.controlnetURL) {
-            loaded.userConfiguration?.controlnet = controlnet
+            loaded.userConfiguration.controlnet = controlnet
         }
 
         return loaded
@@ -172,28 +169,27 @@ extension SDcodablePayload {
 		}
 
 
-        if !(self.userConfiguration?.use_lastSeed ?? false) {
+        if !(self.userConfiguration.use_lastSeed) {
 			submissable["seed"] = -1
 		}
 
 
         var alwayson_scripts: [String:Any?] = [:]
 
-        if (self.userConfiguration?.use_adetailer ?? false),
+        if (self.userConfiguration.use_adetailer),
            mainSDEngine.systemInfo?.isEnabled(.adetailer) ?? false {
 
-            self.userConfiguration?.adetailer?.ad_cfg_scale = Int(self.cfg_scale)
-            self.userConfiguration?.adetailer?.ad_denoising_strength = self.denoising_strength
-            alwayson_scripts[SDExtensionName.adetailer.rawValue] = self.userConfiguration?.adetailer?.args
+            self.userConfiguration.adetailer.ad_cfg_scale = Int(self.cfg_scale)
+            self.userConfiguration.adetailer.ad_denoising_strength = self.denoising_strength
+            alwayson_scripts[SDExtensionName.adetailer.rawValue] = self.userConfiguration.adetailer.args
         }
 
-        if (self.userConfiguration?.use_controlnet ?? false) {
 #if DEBUG
             Task {    @MainActor in
                 let alertMessage = """
-                        controlnet?.image?.count: \(self.userConfiguration?.controlnet?.image?.count ?? 0)
+                        controlnet?.image?.count: \(self.userConfiguration.controlnet.image?.count ?? 0)
                         
-                        userConfiguration?.controlnet != nil: \(self.userConfiguration?.controlnet != nil)
+                        userConfiguration?.controlnet != nil: \(self.userConfiguration.controlnet != nil)
                         
                         self.userConfiguration != nil: \(self.userConfiguration != nil)
                         
@@ -202,12 +198,12 @@ extension SDcodablePayload {
                 UIAlertController.simpleAlert(withTitle: "[DEBUG] ControlNet", message: alertMessage)
             }
 #endif
-            if let sourceImageBase64 = self.userConfiguration?.controlnet?.image,
+            if let sourceImageBase64 = self.userConfiguration.controlnet.image,
                !(sourceImageBase64.isEmpty) {
-                alwayson_scripts[SDExtensionName.controlnet.rawValue] = self.userConfiguration?.controlnet?.args
+                alwayson_scripts[SDExtensionName.controlnet.rawValue] = self.userConfiguration.controlnet.args
             }
         }
-        let utilizedControlNet = (self.userConfiguration?.use_controlnet ?? false) ? self.userConfiguration?.controlnet : nil
+        let utilizedControlNet = (self.userConfiguration.use_controlnet) ? self.userConfiguration.controlnet : nil
 
         if alwayson_scripts.count > 0 {
             submissable["alwayson_scripts"] = alwayson_scripts
@@ -350,8 +346,8 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
     public var use_adetailer: Bool
     public var use_controlnet: Bool
 
-    public var adetailer: SDextensionADetailer? = nil
-    public var controlnet: SDextensionControlNet? = nil
+    public var adetailer: SDextensionADetailer
+    public var controlnet: SDextensionControlNet
 
 
     public init(from decoder: any Decoder) throws {
@@ -361,7 +357,7 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
         self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer) ?? false
         self.use_controlnet = try container.decodeIfPresent(Bool.self, forKey: .use_controlnet) ?? false
 
-        self.adetailer = try container.decodeIfPresent(SDextensionADetailer.self, forKey: .adetailer)
-        self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet)
+        self.adetailer = try container.decodeIfPresent(SDextensionADetailer.self, forKey: .adetailer) ?? SDextensionADetailer.minimum()!
+        self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet) ?? SDextensionControlNet.minimum()!
     }
 }

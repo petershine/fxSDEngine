@@ -48,7 +48,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     }
     public var controlnetImageBase64: String? = nil {
         didSet {
-            nextPayload?.userConfiguration?.controlnet?.image = controlnetImageBase64
+            nextPayload?.userConfiguration.controlnet.image = controlnetImageBase64
         }
     }
 
@@ -383,7 +383,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
 
         let payloadData = payload.encoded()
-        let controlnetData = payload.userConfiguration?.controlnet?.encoded()
+        let controlnetData = payload.userConfiguration.controlnet.encoded()
         let imageURL = try await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: 0)
 
         fxd_log()
@@ -431,22 +431,22 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 		let payload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
 
         if let adetailer = SDextensionADetailer.decoded(using: &payloadDictionary) {
-            payload?.userConfiguration?.use_adetailer = true
-            payload?.userConfiguration?.adetailer = adetailer
+            payload?.userConfiguration.use_adetailer = true
+            payload?.userConfiguration.adetailer = adetailer
 
-            if payload?.userConfiguration?.adetailer?.ad_cfg_scale == nil {
-                payload?.userConfiguration?.adetailer?.ad_cfg_scale = Int(payload?.cfg_scale ?? 6.0)
+            if payload?.userConfiguration.adetailer.ad_cfg_scale == nil {
+                payload?.userConfiguration.adetailer.ad_cfg_scale = Int(payload?.cfg_scale ?? 6.0)
             }
 
-            if payload?.userConfiguration?.adetailer?.ad_denoising_strength == nil {
-                payload?.userConfiguration?.adetailer?.ad_denoising_strength = payload?.denoising_strength ?? 0.4
+            if payload?.userConfiguration.adetailer.ad_denoising_strength == nil {
+                payload?.userConfiguration.adetailer.ad_denoising_strength = payload?.denoising_strength ?? 0.4
             }
         }
 
         if let controlnet = SDextensionControlNet.decoded(using: &payloadDictionary),
            !(controlnet.image?.isEmpty ?? true) {
-            payload?.userConfiguration?.use_controlnet = true
-            payload?.userConfiguration?.controlnet = controlnet
+            payload?.userConfiguration.use_controlnet = true
+            payload?.userConfiguration.controlnet = controlnet
         }
 
         return payload
@@ -538,7 +538,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
 
         nextPayload = newPayload
-        nextPayload?.userConfiguration?.controlnet = utilizedControlNet
+        nextPayload?.userConfiguration.controlnet = utilizedControlNet ?? SDextensionControlNet.minimum()!
         selectedImageURL = newImageURL
 
         return error
@@ -558,12 +558,12 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 		let infotext = generated?.infotext ?? ""
         let extractedPayload = extract_fromInfotext(infotext: infotext)
         if (utilizedControlNet != nil) {
-            extractedPayload?.userConfiguration?.use_controlnet = true
-            extractedPayload?.userConfiguration?.controlnet = utilizedControlNet
+            extractedPayload?.userConfiguration.use_controlnet = true
+            extractedPayload?.userConfiguration.controlnet = utilizedControlNet ?? SDextensionControlNet.minimum()!
         }
 
         var pngDataArray = decodedDataArray
-        if (extractedPayload?.userConfiguration?.use_controlnet ?? false),
+        if (extractedPayload?.userConfiguration.use_controlnet ?? false),
            let firstPNGdata = decodedDataArray.first {
             pngDataArray = [firstPNGdata]
         }
@@ -572,7 +572,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         let storage = SDStorage()
         let payloadData = extractedPayload.encoded()
-        let controlnetData = (extractedPayload?.userConfiguration?.use_controlnet ?? false) ? utilizedControlNet?.encoded() : nil
+        let controlnetData = (extractedPayload?.userConfiguration.use_controlnet ?? false) ? utilizedControlNet?.encoded() : nil
 
         for (index, pngData) in pngDataArray.enumerated() {
             newImageURL = try await storage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
