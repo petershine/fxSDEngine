@@ -184,23 +184,26 @@ extension SDcodablePayload {
             alwayson_scripts[SDExtensionName.adetailer.rawValue] = self.userConfiguration.adetailer.args
         }
 
-#if DEBUG
-            Task {    @MainActor in
-                let alertMessage = """
-                        controlnet?.image?.count: \(self.userConfiguration.controlnet.image?.count ?? 0)
-                        
-                        userConfiguration?.controlnet != nil: \(self.userConfiguration.controlnet != nil)
-                        
-                        self.userConfiguration != nil: \(self.userConfiguration != nil)
-                        
-                        self: \(self)
-                        """
-                UIAlertController.simpleAlert(withTitle: "[DEBUG] ControlNet", message: alertMessage)
-            }
-#endif
+        if (self.userConfiguration.use_controlnet) {
             if let sourceImageBase64 = self.userConfiguration.controlnet.image,
                !(sourceImageBase64.isEmpty) {
                 alwayson_scripts[SDExtensionName.controlnet.rawValue] = self.userConfiguration.controlnet.args
+            }
+            else {
+                #if DEBUG
+                Task {    @MainActor in
+                    let alertMessage = """
+                        controlnet?.image?.count: \(self.userConfiguration.controlnet.image?.count ?? 0)
+                        
+                        userConfiguration?.controlnet: \(self.userConfiguration.controlnet)
+                        
+                        self.userConfiguration: \(self.userConfiguration)
+                        
+                        self: \(self)
+                        """
+                    UIAlertController.simpleAlert(withTitle: "[DEBUG] ControlNet", message: alertMessage)
+                }
+                #endif
             }
         }
         let utilizedControlNet = (self.userConfiguration.use_controlnet) ? self.userConfiguration.controlnet : nil
