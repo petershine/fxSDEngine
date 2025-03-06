@@ -272,7 +272,7 @@ extension SDcodablePayload {
         }
 
 
-        let vae_name: String = jsonDictionary["vae"] as? String ?? ""
+        let vae_name: String = jsonDictionary["module 1"] as? String ?? jsonDictionary["vae"] as? String ?? ""
         if !vae_name.isEmpty {
             override_settings["sd_vae"] = vae_name
         }
