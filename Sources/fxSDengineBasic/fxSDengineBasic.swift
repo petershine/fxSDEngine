@@ -386,7 +386,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         let payloadData = payload.encoded()
         let controlnetData = payload.userConfiguration.controlnet.encoded()
-        let imageURL = try await SDStorage().saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: 0)
+        let imageURL = try await SDStorage.shared.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: 0)
 
         fxd_log()
         return (imageURL, error)
@@ -564,12 +564,11 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         var newImageURL: URL? = nil
 
-        let storage = SDStorage()
         let payloadData = extractedPayload.encoded()
         let controlnetData = (extractedPayload?.userConfiguration.use_controlnet ?? false) ? utilizedControlNet?.encoded() : nil
 
         for (index, pngData) in pngDataArray.enumerated() {
-            newImageURL = try await storage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
+            newImageURL = try await SDStorage.shared.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
 		}
 
 		return (newImageURL, extractedPayload)

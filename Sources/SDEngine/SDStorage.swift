@@ -6,11 +6,8 @@ import UniformTypeIdentifiers
 
 @Observable
 open class SDStorage: NSObject, @unchecked Sendable {
+    public static let shared: SDStorage = SDStorage()
 	public var latestImageURLs: [URL]? = FileManager.default.fileURLs(contentType: .png)
-
-	public override required init() {
-		super.init()
-	}
 }
 
 
