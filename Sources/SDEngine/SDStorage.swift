@@ -30,6 +30,7 @@ extension SDStorage {
         let _ = try await saveControlnet(fileURL: fileURL, controlnetData: controlnetData)
         let _ = try await saveThumbnail(fileURL: fileURL, pngData: pngData)
 
+        latestImageURLs = FileManager.default.fileURLs(contentType: .png)
         return fileURL
 	}
 
@@ -131,6 +132,7 @@ extension SDStorage {
                 return ((deletedCount > 0), nil)
             })
 
+        latestImageURLs = FileManager.default.fileURLs(contentType: .png)
         return didDelete ?? false
     }
 }
