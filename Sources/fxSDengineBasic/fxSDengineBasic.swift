@@ -220,7 +220,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             case is SDcodableCheckpoint.Type:
                 api_endpoint = .SDAPI_V1_MODELS
             case is SDcodableVAE.Type:
-                api_endpoint = .SDAPI_V1_VAE
+                api_endpoint = .SDAPI_V1_MODULES
             case is SDcodableSampler.Type:
                 api_endpoint = .SDAPI_V1_SAMPLERS
             case is SDcodableScheduler.Type:
