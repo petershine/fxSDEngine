@@ -329,10 +329,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 !($0?.fullpath?.contains("DS_Store") ?? false)
             }
 
-        for file in sortedFilesORfolders {
-            fxdPrint("file.fullpath: ", file?.date, file?.fullpath)
-        }
-
 
         let latestFileORfolder = sortedFilesORfolders.first as? SDcodableFile
         fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time)
