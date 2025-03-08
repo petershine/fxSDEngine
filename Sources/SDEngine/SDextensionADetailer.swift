@@ -59,7 +59,7 @@ public struct SDextensionADetailer: SDprotocolCodable {
         self.ad_inpaint_only_masked = try container.decodeIfPresent(Bool.self, forKey: .ad_inpaint_only_masked) ?? true
         self.ad_inpaint_only_masked_padding = try container.decodeIfPresent(Int.self, forKey: .ad_inpaint_only_masked_padding) ?? 31
         self.ad_mask_blur = try container.decodeIfPresent(Int.self, forKey: .ad_mask_blur) ?? 4
-        self.ad_mask_k = try container.decodeIfPresent(Int.self, forKey: .ad_mask_k) ?? 2
+        self.ad_mask_k = try container.decodeIfPresent(Int.self, forKey: .ad_mask_k) ?? 1
         self.ad_mask_k_largest = try container.decodeIfPresent(Int.self, forKey: .ad_mask_k_largest)
         self.ad_mask_filter_method = try container.decodeIfPresent(String.self, forKey: .ad_mask_filter_method) ?? "Area"
         self.ad_model = try container.decodeIfPresent(String.self, forKey: .ad_model) ?? "face_yolov8n.pt"
