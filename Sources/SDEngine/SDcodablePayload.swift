@@ -74,8 +74,8 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 		self.prompt = try container.decodeIfPresent(String.self, forKey: .prompt) ?? ""
 		self.negative_prompt = try container.decodeIfPresent(String.self, forKey: .negative_prompt) ?? ""
 
-		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 25
-        self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 6.0
+		self.steps = try container.decodeIfPresent(Int.self, forKey: .steps) ?? 30
+        self.cfg_scale = try container.decodeIfPresent(Double.self, forKey: .cfg_scale) ?? 7.0
         self.distilled_cfg_scale = try container.decodeIfPresent(Double.self, forKey: .distilled_cfg_scale) ?? 3.5
 		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "Euler a"
 		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Polyexponential"

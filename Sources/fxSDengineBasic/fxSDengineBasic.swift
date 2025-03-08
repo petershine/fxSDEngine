@@ -433,7 +433,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             payload?.userConfiguration.adetailer = adetailer
 
             if payload?.userConfiguration.adetailer.ad_cfg_scale == nil {
-                payload?.userConfiguration.adetailer.ad_cfg_scale = Int(payload?.cfg_scale ?? 6.0)
+                payload?.userConfiguration.adetailer.ad_cfg_scale = Int(payload?.cfg_scale ?? 7.0)
             }
 
             if payload?.userConfiguration.adetailer.ad_denoising_strength == nil {
