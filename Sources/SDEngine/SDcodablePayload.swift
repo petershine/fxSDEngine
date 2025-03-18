@@ -189,22 +189,6 @@ extension SDcodablePayload {
                !(sourceImageBase64.isEmpty) {
                 alwayson_scripts[SDExtensionName.controlnet.rawValue] = self.userConfiguration.controlnet.args
             }
-            else {
-                #if DEBUG
-                Task {    @MainActor in
-                    let alertMessage = """
-                        controlnet?.image?.count: \(self.userConfiguration.controlnet.image?.count ?? 0)
-                        
-                        userConfiguration?.controlnet: \(self.userConfiguration.controlnet)
-                        
-                        self.userConfiguration: \(self.userConfiguration)
-                        
-                        self: \(self)
-                        """
-                    UIAlertController.simpleAlert(withTitle: "[DEBUG] ControlNet", message: alertMessage)
-                }
-                #endif
-            }
         }
         let utilizedControlNet = (self.userConfiguration.use_controlnet) ? self.userConfiguration.controlnet : nil
 
