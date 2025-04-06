@@ -57,9 +57,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 	open func action_Synchronize() {
         Task {
             let error = try await synchronize_withSystem()
-            let _ = await refresh_allModels()
+            let refreshError = await refresh_allModels()
 
             await UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
+            await UIAlertController.errorAlert(error: refreshError)
         }
 	}
 
@@ -265,7 +266,25 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 break
         }
 
-        return error
+
+        var refreshError: Error? = error
+        switch T.self {
+            case is SDcodableCheckpoint.Type:
+                if systemCheckpoints.count == 0 {
+                    refreshError = SDError(
+                        domain: "SDEngine",
+                        code: -1,
+                        userInfo: [
+                            NSLocalizedDescriptionKey: "Missing models",
+                            NSLocalizedFailureReasonErrorKey: "Server doesn't have any model.\nAnd once added a model, restart SD server",
+                        ])
+                }
+
+            default:
+                break
+        }
+
+        return refreshError
     }
 
     public func obtain_latestPNGData(folderPath: String, otherFolderPath: String?) async throws -> (Data?, String?, Error?) {
