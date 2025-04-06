@@ -306,7 +306,7 @@ extension SDcodablePayload {
             model_name = filtered.first?.model_name ?? "(unknown)"
         }
 
-        let vae_name: String = override_settings?.sd_vae ?? "(unknown)"
+        let vae_name: String = override_settings?.sd_vae ?? "None"
 
         let essentials: [[String]] = [
             ["MODEL:", model_name],
