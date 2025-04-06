@@ -302,7 +302,10 @@ extension SDcodablePayload {
         var model_name: String = "(unknown)"
         let model_identifier = override_settings?.sd_model_checkpoint ?? ""
         let filtered = checkpoints.filter { ($0.model_name == model_identifier || $0.hash == model_identifier) }
-        if filtered.first != nil {
+        if filtered.count == 0 {
+            model_name = model_identifier.isEmpty ? "(unknown)" : model_identifier
+        }
+        else if filtered.first != nil {
             model_name = filtered.first?.model_name ?? "(unknown)"
         }
 
