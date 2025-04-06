@@ -161,14 +161,14 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 		}
 
 
-		let optionsPayload = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}".processedJSONData()
+		let options = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}"
         let (_, _, error) = await mainSDNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
 			api_endpoint: .SDAPI_V1_OPTIONS,
 			method: nil,
 			query: nil,
-			payload: optionsPayload)
+            payload: options.processedJSONData())
 
         return error
 	}
@@ -180,14 +180,16 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
 
-        let optionsPayload = "{\"sd_vae\" : \"\(vaeName)\"}".processedJSONData()
+        let modules = (vae.filename != nil) ? [vae.filename ?? ""] : []
+
+        let options = "{\"sd_vae\" : \"\(vaeName)\", \"forge_additional_modules\" : \(modules)}"
         let (_, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             request: nil,
             api_endpoint: .SDAPI_V1_OPTIONS,
             method: nil,
             query: nil,
-            payload: optionsPayload)
+            payload: options.processedJSONData())
 
         return error
     }
