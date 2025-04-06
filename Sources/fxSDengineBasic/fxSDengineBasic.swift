@@ -575,11 +575,13 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
     open func continueMonitoring() {
         Task {	@MainActor in
-            let (newProgress, isSystemBusy, _) = await monitor_progress(quiet: true)
+            let (newProgress, isSystemBusy, error) = await monitor_progress(quiet: true)
             if newProgress != nil || (didStartGenerating || isSystemBusy) != self.isSystemBusy {
                 monitoredProgress = newProgress
                 self.isSystemBusy = didStartGenerating || isSystemBusy
             }
+
+            UIAlertController.errorAlert(error: error, message: "\nAlso, check if your server was not started using \"--api\" option")
 
             try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
             continueMonitoring()
