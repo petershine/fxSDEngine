@@ -30,7 +30,7 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
     var hr_resize_y: Int
     var denoising_strength: Double
     var hr_second_pass_steps: Int
-    var hr_upscaler: String
+    public var hr_upscaler: String
     public var hr_sampler_name: String?
     public var hr_scheduler: String?
     var hr_prompt: String

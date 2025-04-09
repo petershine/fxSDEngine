@@ -5,6 +5,7 @@ public enum SDModelType: String, CaseIterable {
     case vaes
     case samplers
     case schedulers
+    case upscalers
 }
 
 public protocol SDprotocolModel: Codable, Hashable, Sendable {
@@ -99,3 +100,10 @@ public struct SDcodableScheduler: SDprotocolModel {
     var need_inner_model: Bool?
 }
 
+public struct SDcodableUpscaler: SDprotocolModel {
+    public var name: String?
+    var model_name: String?
+    var model_path: String?
+    var model_url: String?
+    var scale: Int?
+}

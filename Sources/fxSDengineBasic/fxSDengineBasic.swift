@@ -18,6 +18,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var systemSamplers: [SDcodableSampler] = []
     public var systemSchedulers: [SDcodableScheduler] = []
     public var systemVAEs: [SDcodableVAE] = []
+    public var systemUpscalers: [SDcodableUpscaler] = []
 
 
     public var monitoredProgress: SDcodableProgress? = nil
@@ -213,7 +214,12 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
         let error_3 = await refresh_system(SDcodableVAE.self)
-        return error_3
+        guard error_3 == nil else {
+            return error_3
+        }
+
+        let error_4 = await refresh_system(SDcodableUpscaler.self)
+        return error_4
     }
 
     public func refresh_system<T: SDprotocolModel>(_ modelType: T.Type) async -> Error? {
@@ -228,6 +234,8 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 api_endpoint = .SDAPI_V1_SAMPLERS
             case is SDcodableScheduler.Type:
                 api_endpoint = .SDAPI_V1_SCHEDULERS
+            case is SDcodableUpscaler.Type:
+                api_endpoint = .SDAPI_V1_UPSCALERS
 
             default:
                 break
@@ -261,6 +269,8 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 systemSamplers = models as? Array<SDcodableSampler> ?? []
             case is SDcodableScheduler.Type:
                 systemSchedulers = models as? Array<SDcodableScheduler> ?? []
+            case is SDcodableUpscaler.Type:
+                systemUpscalers = models as? Array<SDcodableUpscaler> ?? []
 
             default:
                 break
