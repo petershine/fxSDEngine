@@ -312,6 +312,8 @@ extension SDcodablePayload {
         let vae_name: String = override_settings?.sd_vae ?? "None"
 
         let essentials: [[String]] = [
+            ["SEED:", String(seed)],
+
             ["MODEL:", model_name],
             ["VAE:", vae_name],
             ["SAMPLER:", sampler_name],
@@ -321,9 +323,9 @@ extension SDcodablePayload {
 
             ["WIDTH:", String(Int(width))],
             ["HEIGHT:", String(Int(height))],
-            ["RESIZED:", "x\(String(format: "%.2f", hr_scale)) (\(String(Int(Double(width)*hr_scale))) by \(String(Int(Double(height)*hr_scale))))"],
 
-            ["SEED:", String(seed)],
+            ["UPSCALER:", hr_upscaler],
+            ["RESIZED:", "x\(String(format: "%.2f", hr_scale)) (\(String(Int(Double(width)*hr_scale))) by \(String(Int(Double(height)*hr_scale))))"],
         ]
 
         return essentials
