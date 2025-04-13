@@ -612,7 +612,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 self.isSystemBusy = didStartGenerating || isSystemBusy
             }
 
-            UIAlertController.errorAlert(error: error, message: "\nAlso, check if your server was not started using \"--api\" option")
+            UIAlertController.errorAlert(error: error, message: "\nAlso, check if your server was not started using \"--api\" AND \"--listen\" options")
 
             try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
             continueMonitoring()
