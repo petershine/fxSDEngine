@@ -5,9 +5,12 @@ import UniformTypeIdentifiers
 
 
 @Observable
-open class SDStorage: NSObject, @unchecked Sendable {
-    public static let shared: SDStorage = SDStorage()
-	public var latestImageURLs: [URL]? = FileManager.default.fileURLs(contentType: .png)
+open class SDStorage: @unchecked Sendable {
+	public var latestImageURLs: [URL]? = nil
+
+    public init(latestImageURLs: [URL]? = FileManager.default.fileURLs(contentType: .png)) {
+        self.latestImageURLs = latestImageURLs
+    }
 }
 
 

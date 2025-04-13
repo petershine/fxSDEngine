@@ -8,8 +8,10 @@ import fXDKit
 @Observable
 open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var mainSDNetworking: any SDNetworking
-	required public init(mainSDNetworking: SDNetworking) {
+    public var mainSDStorage: SDStorage
+	required public init(mainSDNetworking: SDNetworking, mainSDStorage: SDStorage) {
         self.mainSDNetworking = mainSDNetworking
+        self.mainSDStorage = mainSDStorage
 	}
 
 
@@ -413,7 +415,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         let payloadData = payload.encoded()
         let controlnetData = payload.userConfiguration.controlnet.encoded()
-        let imageURL = try await SDStorage.shared.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: 0)
+        let imageURL = try await mainSDStorage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: 0)
 
         fxd_log()
         return (imageURL, error)
@@ -595,7 +597,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let controlnetData = (extractedPayload?.userConfiguration.use_controlnet ?? false) ? utilizedControlNet?.encoded() : nil
 
         for (index, pngData) in pngDataArray.enumerated() {
-            newImageURL = try await SDStorage.shared.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
+            newImageURL = try await mainSDStorage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
 		}
 
 		return (newImageURL, extractedPayload)
