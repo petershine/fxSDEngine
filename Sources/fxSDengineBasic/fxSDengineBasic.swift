@@ -35,6 +35,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             isSystemBusy = (isSystemBusy || !didInterrupt)
         }
     }
+    public var shouldAttemptRetrieving: Bool = false
 
 
 	public var displayedImage: UIImage? = nil
@@ -523,6 +524,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
         guard error == nil else {
+            if !didInterrupt && isSystemBusy {
+                shouldAttemptRetrieving = true
+            }
+
             let disconnectedError = SDError(
                 domain: "SDEngine",
                 code: -1,
@@ -610,6 +615,14 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             if newProgress != nil || (didStartGenerating || isSystemBusy) != self.isSystemBusy {
                 monitoredProgress = newProgress
                 self.isSystemBusy = didStartGenerating || isSystemBusy
+
+                //TODO: reorganize into own function for reacting to end of last (remote) generating
+                if !self.isSystemBusy
+                    && self.shouldAttemptRetrieving {
+                    self.shouldAttemptRetrieving = false
+
+                    self.action_Synchronize()
+                }
             }
 
             UIAlertController.errorAlert(error: error, message: "\nAlso, check if your server was not started using \"--api\" AND \"--listen\" options")

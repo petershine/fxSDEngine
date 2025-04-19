@@ -20,6 +20,7 @@ public protocol SDEngine: Sendable {
 	var isSystemBusy: Bool { get set }
     var didStartGenerating: Bool { get set }
     var didInterrupt: Bool { get set }
+    var shouldAttemptRetrieving: Bool { get set }
 
 	var displayedImage: UIImage? { get set }
 
