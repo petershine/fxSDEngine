@@ -58,13 +58,21 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
     public var lastHTTPURLResponses: [HTTPURLResponse] = []
 
+    @MainActor public var nonInteractiveObservable: FXDobservableOverlay? = nil
+
+
 	open func action_Synchronize() {
-        Task {
+        Task {    @MainActor in
+            nonInteractiveObservable = FXDobservableOverlay()
+            defer {
+                nonInteractiveObservable = nil
+            }
+
             let error = try await synchronize_withSystem()
             let refreshError = await refresh_allModels()
 
-            await UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
-            await UIAlertController.errorAlert(error: refreshError)
+            UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
+            UIAlertController.errorAlert(error: refreshError)
         }
 	}
 
@@ -126,34 +134,61 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     }
 
 	open func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint) {
-        Task {
+        Task {    @MainActor in
+            nonInteractiveObservable = FXDobservableOverlay()
+            defer {
+                nonInteractiveObservable = nil
+            }
+
+
             let error_0 = await change_systemCheckpoints(checkpoint: checkpoint)
-
-			guard error_0 == nil else {
-                await UIAlertController.errorAlert(error: error_0)
-				return
-			}
-
-
-            let error_1 = await refresh_systemInfo()
-
-            await UIAlertController.errorAlert(error: error_1)
-        }
-	}
-
-    open func action_ChangeVAE(_ vae: SDcodableVAE) {
-        Task {
-            let error_0 = await change_systemVAE(vae: vae)
-
             guard error_0 == nil else {
-                await UIAlertController.errorAlert(error: error_0)
+                UIAlertController.errorAlert(error: error_0)
                 return
             }
 
 
             let error_1 = await refresh_systemInfo()
+            guard error_1 == nil else {
+                UIAlertController.errorAlert(error: error_1)
+                return
+            }
 
-            await UIAlertController.errorAlert(error: error_1)
+
+            try nextPayload?.update(with: checkpoint)
+
+            UIAlertController.simpleAlert(
+                withTitle: "APPLIED System Model for Next Image Generation",
+                message: checkpoint.model_name)
+        }
+	}
+
+    open func action_ChangeVAE(_ vae: SDcodableVAE) {
+        Task {    @MainActor in
+            nonInteractiveObservable = FXDobservableOverlay()
+            defer {
+                nonInteractiveObservable = nil
+            }
+
+
+            let error_0 = await change_systemVAE(vae: vae)
+
+            guard error_0 == nil else {
+                UIAlertController.errorAlert(error: error_0)
+                return
+            }
+
+
+            let error_1 = await refresh_systemInfo()
+            guard error_1 == nil else {
+                UIAlertController.errorAlert(error: error_1)
+                return
+            }
+
+
+            UIAlertController.simpleAlert(
+                withTitle: "CHANGED System VAE for Next Image Generation",
+                message: systemInfo?.Config?.sd_vae)
         }
     }
 
@@ -493,6 +528,12 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         didStartGenerating = true
         
         Task {	@MainActor in
+            nonInteractiveObservable = FXDobservableOverlay()
+            defer {
+                nonInteractiveObservable = nil
+            }
+
+            
             let error = try await execute_txt2img(payload: payload)
             didStartGenerating = false
             
@@ -604,6 +645,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         for (index, pngData) in pngDataArray.enumerated() {
             newImageURL = try await mainSDStorage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
 		}
+
 
 		return (newImageURL, extractedPayload)
 	}
