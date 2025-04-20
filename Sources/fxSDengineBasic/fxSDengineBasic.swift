@@ -61,7 +61,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     @MainActor public var nonInteractiveObservable: FXDobservableOverlay? = nil
 
 
-	open func action_Synchronize() {
+	public func action_Synchronize() {
         Task {    @MainActor in
             nonInteractiveObservable = FXDobservableOverlay()
             defer {
@@ -125,7 +125,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         return error
     }
 
-    open func checkpoint(for model_identifier: String?) -> SDcodableCheckpoint? {
+    public func checkpoint(for model_identifier: String?) -> SDcodableCheckpoint? {
         return systemCheckpoints.filter({
             let matching_hash: Bool = ($0.hash?.isEmpty ?? true) ? false : (model_identifier ?? "").contains(($0.hash)!)
             let matching_name: Bool = ($0.model_name?.isEmpty ?? true) ? false : (model_identifier ?? "") == (($0.model_name)!)
@@ -133,7 +133,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }).first
     }
 
-	open func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint) {
+	public func action_ChangeCheckpoint(_ checkpoint: SDcodableCheckpoint) {
         Task {    @MainActor in
             nonInteractiveObservable = FXDobservableOverlay()
             defer {
@@ -163,7 +163,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 	}
 
-    open func action_ChangeVAE(_ vae: SDcodableVAE) {
+    public func action_ChangeVAE(_ vae: SDcodableVAE) {
         Task {    @MainActor in
             nonInteractiveObservable = FXDobservableOverlay()
             defer {
@@ -519,7 +519,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         return payload
 	}
 
-	open func action_Generate(payload: SDcodablePayload) {
+	public func action_Generate(payload: SDcodablePayload) {
         guard !didStartGenerating else {
             return
         }
@@ -651,7 +651,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 	}
 
 
-    open func continueMonitoring() {
+    public func continueMonitoring() {
         Task {	@MainActor in
             let (newProgress, isSystemBusy, error) = await monitor_progress(quiet: true)
             if newProgress != nil || (didStartGenerating || isSystemBusy) != self.isSystemBusy {
