@@ -558,25 +558,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             }
         }
 
-        guard error == nil else {
-            if !didInterrupt && isSystemBusy {
-                shouldAttemptRecovering = true
-                #if DEBUG
-                await UIAlertController.errorAlert(error: error)
-                #endif
-            }
-
-            let disconnectedError = SDError(
-                domain: "SDEngine",
-                code: -1,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Disconnected",
-                    NSLocalizedFailureReasonErrorKey: "For the app is not actively opened, generated image will need to be manually recovered. Please \"synchronize\" when you re-open this app, to obtain latest image from server",
-                ])
-            return disconnectedError
-        }
-
-
         guard !didInterrupt else {
             didInterrupt = false
 
@@ -588,6 +569,22 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                     NSLocalizedFailureReasonErrorKey: "Image generating is canceled",
                 ])
             return interruptedError
+        }
+
+
+        guard error == nil else {
+            if !didInterrupt && isSystemBusy {
+                shouldAttemptRecovering = true
+            }
+
+            let disconnectedError = SDError(
+                domain: "SDEngine",
+                code: -1,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "Disconnected",
+                    NSLocalizedFailureReasonErrorKey: "For the app is not actively opened, generated image will be manually recovered. (Assuming latest image from server is ours.)",
+                ])
+            return disconnectedError
         }
 
 
@@ -703,6 +700,11 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
 
     public func interrupt() async -> Error? {
+        didInterrupt = true
+        defer {
+            didInterrupt = false
+        }
+
         let (_, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             request: nil,
@@ -711,14 +713,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             query: nil,
             payload: nil)
 
-        didInterrupt = true
-
         guard !didStartGenerating else {
             return error
         }
 
-
-        didInterrupt = false
 
         let interruptedError = SDError(
             domain: "SDEngine",
@@ -727,8 +725,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 NSLocalizedDescriptionKey: "Interrupted",
                 NSLocalizedFailureReasonErrorKey: "Server's image generating is canceled",
             ])
-
-        await UIAlertController.errorAlert(error: interruptedError)
 
         return interruptedError
     }
