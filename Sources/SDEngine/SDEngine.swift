@@ -20,7 +20,7 @@ public protocol SDEngine: Sendable {
 	var isSystemBusy: Bool { get set }
     var didStartGenerating: Bool { get set }
     var didInterrupt: Bool { get set }
-    var shouldAttemptRetrieving: Bool { get set }
+    var shouldAttemptRecovering: Bool { get set }
 
 	var displayedImage: UIImage? { get set }
 
@@ -49,6 +49,7 @@ public protocol SDEngine: Sendable {
 	func action_Generate(payload: SDcodablePayload)
     func execute_txt2img(payload: SDcodablePayload) async throws -> Error?
     func finish_txt2img(generated: SDcodableGenerated?, utilizedControlNet: SDextensionControlNet?) async throws -> (URL?, SDcodablePayload?)
+    func recover_disconnectedTxt2Img() async throws -> Error?
 
     func continueMonitoring()
     func monitor_progress(quiet: Bool) async -> (SDcodableProgress?, Bool, Error?)

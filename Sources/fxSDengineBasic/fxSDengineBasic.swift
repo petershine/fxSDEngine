@@ -35,7 +35,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             isSystemBusy = (isSystemBusy || !didInterrupt)
         }
     }
-    public var shouldAttemptRetrieving: Bool = false
+    public var shouldAttemptRecovering: Bool = false
 
 
 	public var displayedImage: UIImage? = nil
@@ -527,13 +527,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         
         didStartGenerating = true
         
-        Task {	@MainActor in
-            nonInteractiveObservable = FXDobservableOverlay()
-            defer {
-                nonInteractiveObservable = nil
-            }
-
-            
+        Task {	@MainActor in            
             let error = try await execute_txt2img(payload: payload)
             didStartGenerating = false
             
@@ -566,7 +560,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         guard error == nil else {
             if !didInterrupt && isSystemBusy {
-                shouldAttemptRetrieving = true
+                shouldAttemptRecovering = true
+                #if DEBUG
+                await UIAlertController.errorAlert(error: error)
+                #endif
             }
 
             let disconnectedError = SDError(
@@ -574,7 +571,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 code: -1,
                 userInfo: [
                     NSLocalizedDescriptionKey: "Disconnected",
-                    NSLocalizedFailureReasonErrorKey: "For the app is not actively opened, generated image will need to be manually retrieved. Please \"synchronize\" when you re-open this app, to obtain latest image from server",
+                    NSLocalizedFailureReasonErrorKey: "For the app is not actively opened, generated image will need to be manually recovered. Please \"synchronize\" when you re-open this app, to obtain latest image from server",
                 ])
             return disconnectedError
         }
@@ -620,11 +617,15 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         let decodedDataArray: [Data] = base64EncodedImages.map { Data(base64Encoded: $0) ?? Data() }
         guard decodedDataArray.count > 0 else {
-			return (nil, nil)
-		}
+            return (nil, nil)
+        }
 
 
-		let infotext = generated?.infotext ?? ""
+        Task {    @MainActor in
+            nonInteractiveObservable = FXDobservableOverlay()
+        }
+
+        let infotext = generated?.infotext ?? ""
         let extractedPayload = extract_fromInfotext(infotext: infotext)
         if (utilizedControlNet != nil) {
             extractedPayload?.userConfiguration.use_controlnet = true
@@ -644,12 +645,19 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         for (index, pngData) in pngDataArray.enumerated() {
             newImageURL = try await mainSDStorage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
-		}
+        }
 
+        Task {    @MainActor in
+            nonInteractiveObservable = nil
+        }
 
 		return (newImageURL, extractedPayload)
 	}
 
+    open func recover_disconnectedTxt2Img() async throws -> Error? {
+        return try await synchronize_withSystem()
+    }
+    
 
     public func continueMonitoring() {
         Task {	@MainActor in
@@ -658,12 +666,11 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 monitoredProgress = newProgress
                 self.isSystemBusy = didStartGenerating || isSystemBusy
 
-                //TODO: reorganize into own function for reacting to end of last (remote) generating
                 if !self.isSystemBusy
-                    && self.shouldAttemptRetrieving {
-                    self.shouldAttemptRetrieving = false
+                    && self.shouldAttemptRecovering {
+                    self.shouldAttemptRecovering = false
 
-                    self.action_Synchronize()
+                    let _ = try await recover_disconnectedTxt2Img()
                 }
             }
 
