@@ -703,6 +703,8 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
 
     public func interrupt() async -> Error? {
+        didInterrupt = true
+
         let (_, _, error) = await mainSDNetworking.requestToSDServer(
             quiet: false,
             request: nil,
@@ -710,8 +712,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             method: "POST",
             query: nil,
             payload: nil)
-
-        didInterrupt = true
 
         guard !didStartGenerating else {
             return error
