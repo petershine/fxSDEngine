@@ -93,7 +93,7 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 
         self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength) ?? 0.4
 		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps) ?? 10
-		self.hr_upscaler = try container.decodeIfPresent(String.self, forKey: .hr_upscaler) ?? "R-ESRGAN 4x+"
+		self.hr_upscaler = try container.decodeIfPresent(String.self, forKey: .hr_upscaler) ?? ""
 
         self.hr_sampler_name = try container.decodeIfPresent(String.self, forKey: .hr_sampler_name)
         if self.hr_sampler_name == nil {

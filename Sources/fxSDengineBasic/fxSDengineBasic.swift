@@ -9,9 +9,11 @@ import fXDKit
 open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var mainSDNetworking: any SDNetworking
     public var mainSDStorage: SDStorage
-	required public init(mainSDNetworking: SDNetworking, mainSDStorage: SDStorage) {
+    public var mainSDRemoteConfig: SDRemoteConfig
+	required public init(mainSDNetworking: SDNetworking, mainSDStorage: SDStorage, mainSDRemoteConfig: SDRemoteConfig) {
         self.mainSDNetworking = mainSDNetworking
         self.mainSDStorage = mainSDStorage
+        self.mainSDRemoteConfig = mainSDRemoteConfig
 	}
 
 
@@ -98,6 +100,11 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
         let loadedPayload = try SDcodablePayload.loaded(from: fileURL.jsonURL, withControlNet: true)
+
+        if (loadedPayload?.hr_upscaler ?? "").isEmpty,
+           let hr_upscaler = mainSDRemoteConfig.hr_upscaler {
+            loadedPayload?.hr_upscaler = hr_upscaler
+        }
 
         Task {	@MainActor in
             nextPayload = loadedPayload
@@ -514,6 +521,11 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
            !(controlnet.image?.isEmpty ?? true) {
             payload?.userConfiguration.use_controlnet = true
             payload?.userConfiguration.controlnet = controlnet
+        }
+
+        if (payload?.hr_upscaler ?? "").isEmpty,
+           let hr_upscaler = mainSDRemoteConfig.hr_upscaler {
+            payload?.hr_upscaler = hr_upscaler
         }
 
         return payload
