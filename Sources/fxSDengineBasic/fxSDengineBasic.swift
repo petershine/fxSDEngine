@@ -99,15 +99,20 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             return error_2
         }
 
-        let loadedPayload = try SDcodablePayload.loaded(from: fileURL.jsonURL, withControlNet: true)
+        let payload = try SDcodablePayload.loaded(from: fileURL.jsonURL, withControlNet: true)
 
-        if (loadedPayload?.hr_upscaler ?? "").isEmpty,
+        if (payload?.prompt ?? "").isEmpty,
+           let prompt = mainSDRemoteConfig.prompt {
+            payload?.prompt = prompt
+        }
+
+        if (payload?.hr_upscaler ?? "").isEmpty,
            let hr_upscaler = mainSDRemoteConfig.hr_upscaler {
-            loadedPayload?.hr_upscaler = hr_upscaler
+            payload?.hr_upscaler = hr_upscaler
         }
 
         Task {	@MainActor in
-            nextPayload = loadedPayload
+            nextPayload = payload
             selectedImageURL = fileURL
         }
 
@@ -504,6 +509,17 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
 		let payload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
 
+        if (payload?.prompt ?? "").isEmpty,
+           let prompt = mainSDRemoteConfig.prompt {
+            payload?.prompt = prompt
+        }
+
+        if (payload?.hr_upscaler ?? "").isEmpty,
+           let hr_upscaler = mainSDRemoteConfig.hr_upscaler {
+            payload?.hr_upscaler = hr_upscaler
+        }
+        
+
         if let adetailer = SDextensionADetailer.decoded(using: &payloadDictionary) {
             payload?.userConfiguration.use_adetailer = true
             payload?.userConfiguration.adetailer = adetailer
@@ -521,11 +537,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
            !(controlnet.image?.isEmpty ?? true) {
             payload?.userConfiguration.use_controlnet = true
             payload?.userConfiguration.controlnet = controlnet
-        }
-
-        if (payload?.hr_upscaler ?? "").isEmpty,
-           let hr_upscaler = mainSDRemoteConfig.hr_upscaler {
-            payload?.hr_upscaler = hr_upscaler
         }
 
         return payload
