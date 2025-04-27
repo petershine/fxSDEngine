@@ -294,6 +294,20 @@ extension SDcodablePayload {
             self.override_settings?.sd_model_checkpoint = decoded.sd_model_checkpoint
         }
     }
+
+    public func applyRemoteConfig(remoteConfig: SDRemoteConfig) {
+        if self.prompt.isEmpty,
+           let prompt = remoteConfig.prompt,
+           !prompt.isEmpty {
+            self.prompt = prompt
+        }
+        
+        if self.hr_upscaler.isEmpty,
+           let hr_upscaler = remoteConfig.hr_upscaler,
+           !hr_upscaler.isEmpty {
+            self.hr_upscaler = hr_upscaler
+        }
+    }
 }
 
 

@@ -99,17 +99,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             return error_2
         }
 
+
         let payload = try SDcodablePayload.loaded(from: fileURL.jsonURL, withControlNet: true)
+        payload?.applyRemoteConfig(remoteConfig: self.mainSDRemoteConfig)
 
-        if (payload?.prompt ?? "").isEmpty,
-           let prompt = mainSDRemoteConfig.prompt {
-            payload?.prompt = prompt
-        }
-
-        if (payload?.hr_upscaler ?? "").isEmpty,
-           let hr_upscaler = mainSDRemoteConfig.hr_upscaler {
-            payload?.hr_upscaler = hr_upscaler
-        }
 
         Task {	@MainActor in
             nextPayload = payload
@@ -509,16 +502,8 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
 		let payload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
 
-        if (payload?.prompt ?? "").isEmpty,
-           let prompt = mainSDRemoteConfig.prompt {
-            payload?.prompt = prompt
-        }
+        payload?.applyRemoteConfig(remoteConfig: self.mainSDRemoteConfig)
 
-        if (payload?.hr_upscaler ?? "").isEmpty,
-           let hr_upscaler = mainSDRemoteConfig.hr_upscaler {
-            payload?.hr_upscaler = hr_upscaler
-        }
-        
 
         if let adetailer = SDextensionADetailer.decoded(using: &payloadDictionary) {
             payload?.userConfiguration.use_adetailer = true
