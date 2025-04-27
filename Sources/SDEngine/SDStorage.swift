@@ -3,18 +3,26 @@ import Foundation
 import UIKit
 import UniformTypeIdentifiers
 
+import fXDKit
+
+
+extension URL {
+    public var controlnetURL: URL {
+        let controlnet = self.pairedFileURL(inSubPath: "_controlnet", contentType: .json)
+
+        return controlnet
+    }
+}
+
 
 @Observable
 open class SDStorage: @unchecked Sendable {
-	public var latestImageURLs: [URL]? = nil
+    public var latestImageURLs: [URL]? = nil
 
     public init(latestImageURLs: [URL]? = FileManager.default.fileURLs(contentType: .png)) {
         self.latestImageURLs = latestImageURLs
     }
 }
-
-
-import fXDKit
 
 extension SDStorage {
     func saveGenerated(pngData: Data, payloadData: Data?, controlnetData: Data?, index: Int = 0) async throws -> URL? {
@@ -137,14 +145,5 @@ extension SDStorage {
 
         latestImageURLs = FileManager.default.fileURLs(contentType: .png)
         return didDelete ?? false
-    }
-}
-
-
-extension URL {
-    public var controlnetURL: URL {
-        let controlnet = self.pairedFileURL(inSubPath: "_controlnet", contentType: .json)
-
-        return controlnet
     }
 }
