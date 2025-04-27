@@ -302,6 +302,12 @@ extension SDcodablePayload {
             self.prompt = prompt
         }
         
+        if self.negative_prompt.isEmpty,
+           let negative_prompt = remoteConfig.negative_prompt,
+           !negative_prompt.isEmpty {
+            self.negative_prompt = negative_prompt
+        }
+
         if self.hr_upscaler.isEmpty,
            let hr_upscaler = remoteConfig.hr_upscaler,
            !hr_upscaler.isEmpty {
