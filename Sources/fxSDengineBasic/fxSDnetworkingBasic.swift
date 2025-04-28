@@ -22,7 +22,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
         return (savedHostname as? String) ?? ""
     }()
 
-    public func evaluateServerHostname(serverHostname: String?) async -> Bool {    fxd_log()
+    public func evaluateServerHostname(serverHostname: String?, reAttemptLimit: Int) async -> Bool {    fxd_log()
         fxdPrint("serverHostname:", serverHostname)
 
         guard let serverHostname, !serverHostname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -49,9 +49,21 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
               (response as? HTTPURLResponse)?.statusCode == 200,
               error == nil
         else {
-            await UIAlertController.errorAlert(error: error, title: ALERT_TITLE_SERVER_HOSTNAME, message: ALERT_MESSAGE_SERVER_HOSTNAME)
+            if reAttemptLimit > 0 {
+                fxdPrint("reAttemptLimit: \(reAttemptLimit)")
+                do {
+                    try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
+                }
+                catch {
+                    
+                }
+                return await evaluateServerHostname(serverHostname: serverHostname, reAttemptLimit: (reAttemptLimit-1))
+            }
+            else {
+                await UIAlertController.errorAlert(error: error, title: ALERT_TITLE_SERVER_HOSTNAME, message: ALERT_MESSAGE_SERVER_HOSTNAME)
 
-            return false
+                return false
+            }
         }
 
 
