@@ -10,7 +10,7 @@ public let ALERT_TITLE_ENTER_HOSTNAME: String = "Enter your SD Forge WebUI serve
 public let ALERT_FIELD_PLACEHOLDER_HOSTNAME: String = "http://myserver.local:7860"
 
 fileprivate let ALERT_TITLE_SERVER_HOSTNAME: String = "Possibly, you entered wrong hostname, or server is not operating"
-fileprivate let ALERT_MESSAGE_SERVER_HOSTNAME: String = "Make sure your server was started using \"--api\" AND \"--listen\" options\n\ne.g. \"webui.sh --listen --api\""
+fileprivate let ALERT_MESSAGE_SERVER_HOSTNAME: String = "Make sure your server was started using \"--api\" AND \"--listen\" options\n\ne.g. \"webui.sh --listen --api\"\n and use computer name like \"myserver.local:7860\" instead of 127.0.0.1:7860"
 
 
 open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
