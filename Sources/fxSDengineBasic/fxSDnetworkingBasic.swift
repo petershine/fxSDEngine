@@ -8,9 +8,15 @@ import fXDKit
 
 public let ALERT_TITLE_ENTER_HOSTNAME: String = "Enter your SD Forge WebUI server hostname"
 public let ALERT_FIELD_PLACEHOLDER_HOSTNAME: String = "http://myserver.local:7860"
+public let ALERT_MESSAGE_GUIDE_HOSTNAME: String = 
+"""
+Make sure your server was started using \"--api\" AND \"--listen\" options.
 
-fileprivate let ALERT_TITLE_SERVER_HOSTNAME: String = "Possibly, you entered wrong hostname, or server is not operating"
-fileprivate let ALERT_MESSAGE_SERVER_HOSTNAME: String = "Make sure your server was started using \"--api\" AND \"--listen\" options\n\ne.g. \"webui.sh --listen --api\"\n and use computer name like \"myserver.local:7860\" instead of 127.0.0.1:7860"
+and use computer name like \"myserver.local:7860\"
+instead of 127.0.0.1:7860
+"""
+
+fileprivate let ERROR_WRONG_HOSTNAME: String = "Possibly, you entered wrong hostname, or server is not operating"
 
 
 open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
@@ -60,7 +66,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
                 return await evaluateServerHostname(serverHostname: serverHostname, reAttemptLimit: (reAttemptLimit-1))
             }
             else {
-                await UIAlertController.errorAlert(error: error, title: ALERT_TITLE_SERVER_HOSTNAME, message: ALERT_MESSAGE_SERVER_HOSTNAME)
+                await UIAlertController.errorAlert(error: error, title: ERROR_WRONG_HOSTNAME, message: ALERT_MESSAGE_GUIDE_HOSTNAME)
 
                 return false
             }
