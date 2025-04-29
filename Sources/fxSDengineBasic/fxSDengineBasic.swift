@@ -9,8 +9,8 @@ import fXDKit
 open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var mainSDNetworking: any SDNetworking
     public var mainSDStorage: SDStorage
-    public var mainSDRemoteConfig: SDRemoteConfig
-	required public init(mainSDNetworking: SDNetworking, mainSDStorage: SDStorage, mainSDRemoteConfig: SDRemoteConfig) {
+    public var mainSDRemoteConfig: SDDefaultConfig
+	required public init(mainSDNetworking: SDNetworking, mainSDStorage: SDStorage, mainSDRemoteConfig: SDDefaultConfig) {
         self.mainSDNetworking = mainSDNetworking
         self.mainSDStorage = mainSDStorage
         self.mainSDRemoteConfig = mainSDRemoteConfig

@@ -7,8 +7,8 @@ import UIKit
 public protocol SDEngine: Sendable {
 	var mainSDNetworking: SDNetworking { get set }
     var mainSDStorage: SDStorage { get set }
-    var mainSDRemoteConfig: SDRemoteConfig { get set }
-    init(mainSDNetworking: SDNetworking, mainSDStorage: SDStorage, mainSDRemoteConfig: SDRemoteConfig)
+    var mainSDRemoteConfig: SDDefaultConfig { get set }
+    init(mainSDNetworking: SDNetworking, mainSDStorage: SDStorage, mainSDRemoteConfig: SDDefaultConfig)
 
 
 	var systemInfo: SDcodableSysInfo? { get set }

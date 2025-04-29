@@ -295,7 +295,7 @@ extension SDcodablePayload {
         }
     }
 
-    public func applyRemoteConfig(remoteConfig: SDRemoteConfig) {
+    public func applyRemoteConfig(remoteConfig: SDDefaultConfig) {
         if self.prompt.isEmpty,
            let prompt = remoteConfig.prompt,
            !prompt.isEmpty {
