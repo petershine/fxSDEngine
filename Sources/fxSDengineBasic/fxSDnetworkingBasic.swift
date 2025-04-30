@@ -12,8 +12,10 @@ public let ALERT_MESSAGE_GUIDE_HOSTNAME: String =
 """
 Make sure your server was started using \"--api\" AND \"--listen\" options.
 
-and use computer name like \"myserver.local:7860\"
-instead of 127.0.0.1:7860
+and use YOUR computer name: 
+e.g. http://myserver.local:7860
+
+instead of numerical IP address
 """
 
 fileprivate let ERROR_WRONG_HOSTNAME: String = "Possibly, you entered wrong hostname, or server is not operating"
