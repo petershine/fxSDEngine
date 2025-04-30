@@ -46,11 +46,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
         let (data, response, error) = await requestToSDServer(
             quiet: false,
             request: httpRequest)
-#if DEBUG
-        if let jsonDictionary = data?.jsonDictionary(quiet: true) {
-            fxdPrint(name: "INTERNAL_PING", dictionary: jsonDictionary)
-        }
-#endif
+
         guard data != nil,
               (response as? HTTPURLResponse)?.statusCode == 200,
               error == nil

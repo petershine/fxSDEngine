@@ -569,9 +569,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         guard error == nil else {
             if !didInterrupt && isSystemBusy {
                 shouldAttemptRecovering = true
-                #if DEBUG
-                await UIAlertController.errorAlert(error: error)
-                #endif
             }
 
             let disconnectedError = SDError(
