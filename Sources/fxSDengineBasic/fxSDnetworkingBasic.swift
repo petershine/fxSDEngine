@@ -17,6 +17,7 @@ instead of 127.0.0.1:7860
 """
 
 fileprivate let ERROR_WRONG_HOSTNAME: String = "Possibly, you entered wrong hostname, or server is not operating"
+public let ERROR_NOT_OPERATING: String = "Possibly, your Stable Diffusion server is not operating."
 
 
 open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {

@@ -73,7 +73,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             let error = try await synchronize_withSystem()
             let refreshError = await refresh_allModels()
 
-            UIAlertController.errorAlert(error: error, title: "Possibly, your Stable Diffusion server is not operating.")
+            UIAlertController.errorAlert(error: error, title: ERROR_NOT_OPERATING)
             UIAlertController.errorAlert(error: refreshError)
         }
 	}
@@ -678,8 +678,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                     let _ = try await recover_disconnectedTxt2Img()
                 }
             }
-
-            UIAlertController.errorAlert(error: error)
 
             try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
             continueMonitoring()
