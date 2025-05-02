@@ -501,7 +501,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 		fxdPrint("[infotext]", infotext)
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
 		let payload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
-
         payload?.applyDefaultConfig(remoteConfig: self.mainDefaultConfig)
 
 
