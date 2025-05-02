@@ -7,13 +7,13 @@ import fXDKit
 
 @Observable
 open class fxSDengineBasic: SDEngine, @unchecked Sendable {
-    public var mainSDNetworking: any SDNetworking
-    public var mainSDStorage: SDStorage
-    public var mainSDRemoteConfig: SDDefaultConfig
-	required public init(mainSDNetworking: SDNetworking, mainSDStorage: SDStorage, mainSDRemoteConfig: SDDefaultConfig) {
-        self.mainSDNetworking = mainSDNetworking
-        self.mainSDStorage = mainSDStorage
-        self.mainSDRemoteConfig = mainSDRemoteConfig
+    public var mainNetworking: any SDNetworking
+    public var mainStorage: SDStorage
+    public var mainDefaultConfig: SDDefaultConfig
+	required public init(mainNetworking: SDNetworking, mainStorage: SDStorage, mainDefaultConfig: SDDefaultConfig) {
+        self.mainNetworking = mainNetworking
+        self.mainStorage = mainStorage
+        self.mainDefaultConfig = mainDefaultConfig
 	}
 
 
@@ -101,7 +101,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
 
         let payload = try SDcodablePayload.loaded(from: fileURL.jsonURL, withControlNet: true)
-        payload?.applyRemoteConfig(remoteConfig: self.mainSDRemoteConfig)
+        payload?.applyDefaultConfig(remoteConfig: self.mainDefaultConfig)
 
 
         Task {	@MainActor in
@@ -113,7 +113,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     }
 
     public func refresh_systemInfo() async -> Error? {
-        let (data, _, error) = await mainSDNetworking.requestToSDServer(
+        let (data, _, error) = await mainNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
 			api_endpoint: .INTERNAL_SYSINFO,
@@ -207,7 +207,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
 
 		let options = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}"
-        let (_, _, error) = await mainSDNetworking.requestToSDServer(
+        let (_, _, error) = await mainNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
 			api_endpoint: .SDAPI_V1_OPTIONS,
@@ -228,7 +228,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let modules = (vae.filename != nil) ? [vae.filename ?? ""] : []
 
         let options = "{\"sd_vae\" : \"\(vaeName)\", \"forge_additional_modules\" : \(modules)}"
-        let (_, _, error) = await mainSDNetworking.requestToSDServer(
+        let (_, _, error) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
             api_endpoint: .SDAPI_V1_OPTIONS,
@@ -289,7 +289,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
 
-        let (data, _, error) = await mainSDNetworking.requestToSDServer(
+        let (data, _, error) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
             api_endpoint: api_endpoint,
@@ -363,7 +363,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
 
-        let (pngData, _, obtainingError) = await mainSDNetworking.requestToSDServer(
+        let (pngData, _, obtainingError) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
             api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
@@ -375,7 +375,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     }
 
     public func obtain_latestFilePath(folderPath: String) async throws -> (String?, Date?, Error?) {
-        let (data, response, error) = await mainSDNetworking.requestToSDServer(
+        let (data, response, error) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
             api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
@@ -429,7 +429,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     }
 
     public func prepare_nextPayload(pngData: Data, imagePath: String) async throws -> (URL?, Error?) {
-        let (data, _, error) = await mainSDNetworking.requestToSDServer(
+        let (data, _, error) = await mainNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
@@ -456,7 +456,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         let payloadData = payload.encoded()
         let controlnetData = payload.userConfiguration.controlnet.encoded()
-        let imageURL = try await mainSDStorage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: 0)
+        let imageURL = try await mainStorage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: 0)
 
         fxd_log()
         return (imageURL, error)
@@ -502,7 +502,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
 		let payload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
 
-        payload?.applyRemoteConfig(remoteConfig: self.mainSDRemoteConfig)
+        payload?.applyDefaultConfig(remoteConfig: self.mainDefaultConfig)
 
 
         if let adetailer = SDextensionADetailer.decoded(using: &payloadDictionary) {
@@ -546,7 +546,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 	public func execute_txt2img(payload: SDcodablePayload) async throws -> Error? {	fxd_log()
 		let (payloadData, utilizedControlNet) = payload.submissablePayload(mainSDEngine: self)
 
-        let (data, urlResponse, error) = await mainSDNetworking.requestToSDServer(
+        let (data, urlResponse, error) = await mainNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
 			api_endpoint: .SDAPI_V1_TXT2IMG,
@@ -649,7 +649,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let controlnetData = (extractedPayload?.userConfiguration.use_controlnet ?? false) ? utilizedControlNet?.encoded() : nil
 
         for (index, pngData) in pngDataArray.enumerated() {
-            newImageURL = try await mainSDStorage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
+            newImageURL = try await mainStorage.saveGenerated(pngData: pngData, payloadData: payloadData, controlnetData: controlnetData, index: index)
         }
 
         Task {    @MainActor in
@@ -685,7 +685,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     }
 
     public func monitor_progress(quiet: Bool) async -> (SDcodableProgress?, Bool, Error?) {
-        let (data, _, error) = await mainSDNetworking.requestToSDServer(
+        let (data, _, error) = await mainNetworking.requestToSDServer(
             quiet: quiet,
             request: nil,
             api_endpoint: .SDAPI_V1_PROGRESS,
@@ -708,7 +708,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public func interrupt() async -> Error? {
         didInterrupt = true
 
-        let (_, _, error) = await mainSDNetworking.requestToSDServer(
+        let (_, _, error) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
             api_endpoint: .SDAPI_V1_INTERRUPT,
