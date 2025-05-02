@@ -12,6 +12,7 @@ public enum SDDefaultConfigKey: String, CaseIterable {
 }
 
 
+@Observable
 open class SDDefaultConfig: @unchecked Sendable {
     public var hr_upscaler: String? = nil
     public var prompt: String? = nil

@@ -296,22 +296,25 @@ extension SDcodablePayload {
     }
 
     public func applyDefaultConfig(remoteConfig: SDDefaultConfig) {
+        if self.hr_upscaler.isEmpty,
+           let hr_upscaler = remoteConfig.hr_upscaler,
+           !hr_upscaler.isEmpty {
+            self.hr_upscaler = hr_upscaler
+            fxdPrint("PAYLOAD: hr_upscaler: \(self.hr_upscaler)")
+        }
+
         if self.prompt.isEmpty,
            let prompt = remoteConfig.prompt,
            !prompt.isEmpty {
             self.prompt = prompt
+            fxdPrint("PAYLOAD: prompt: \(self.prompt)")
         }
         
         if self.negative_prompt.isEmpty,
            let negative_prompt = remoteConfig.negative_prompt,
            !negative_prompt.isEmpty {
             self.negative_prompt = negative_prompt
-        }
-
-        if self.hr_upscaler.isEmpty,
-           let hr_upscaler = remoteConfig.hr_upscaler,
-           !hr_upscaler.isEmpty {
-            self.hr_upscaler = hr_upscaler
+            fxdPrint("PAYLOAD: negative_prompt: \(self.negative_prompt)")
         }
     }
 }
