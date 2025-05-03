@@ -23,10 +23,10 @@ public protocol SDEngine: Sendable {
     var didInterrupt: Bool { get set }
     var shouldAttemptRecovering: Bool { get set }
 
-	var displayedImage: UIImage? { get set }
+	@MainActor var displayedImage: UIImage? { get set }
 
-	var nextPayload: SDcodablePayload? { get set }
-	var selectedImageURL: URL? { get set }
+	@MainActor var nextPayload: SDcodablePayload? { get set }
+	@MainActor var selectedImageURL: URL? { get set }
 
 
 	func action_Synchronize()

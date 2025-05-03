@@ -40,10 +40,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var shouldAttemptRecovering: Bool = false
 
 
-	public var displayedImage: UIImage? = nil
+	@MainActor public var displayedImage: UIImage? = nil
 
-    public var nextPayload: SDcodablePayload? = nil
-    public var selectedImageURL: URL? = nil {
+    @MainActor public var nextPayload: SDcodablePayload? = nil
+    @MainActor public var selectedImageURL: URL? = nil {
         willSet {
             if let imageURL = newValue {
                 Task {	@MainActor in
@@ -52,7 +52,9 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             }
         }
     }
-    public var controlnetImageBase64: String? = nil {
+
+
+    @MainActor public var controlnetImageBase64: String? = nil {
         didSet {
             nextPayload?.userConfiguration.controlnet.image = controlnetImageBase64
         }
