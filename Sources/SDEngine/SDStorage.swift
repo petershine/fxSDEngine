@@ -147,3 +147,40 @@ extension SDStorage {
         return didDelete ?? false
     }
 }
+
+
+#if DEBUG
+extension SDStorage {
+    func collectJSONdata(fileName: String, jsonData: Data?) {
+        guard !fileName.isEmpty else {
+            return
+        }
+
+
+        do {
+            let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            let collectedDirectory = documentDirectory?.appending(path: "_collected")
+            if let collectedDirectory {
+                try FileManager.default.createDirectory(at: collectedDirectory, withIntermediateDirectories: true)
+            }
+
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd_HH_mm_ss"
+
+            let datePart = dateFormatter.string(from: Date.now)
+
+
+            let fileExtension = UTType.json.preferredFilenameExtension ?? "json"
+            let filePath = "DEMO_\(fileName)_\(datePart).\(fileExtension)"
+            let fileURL = collectedDirectory?.appendingPathComponent(filePath)
+            if let fileURL {
+                try jsonData?.write(to: fileURL)
+                fxdPrint("[DEMO JSON SAVED]: ", jsonData, fileURL)
+            }
+        }
+        catch {
+            fxdPrint(error)
+        }
+    }
+}
+#endif
