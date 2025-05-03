@@ -35,6 +35,9 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var didInterrupt: Bool = false {
         didSet {
             isSystemBusy = (isSystemBusy || !didInterrupt)
+            #if DEBUG
+            continuousGenerating = false
+            #endif
         }
     }
     public var shouldAttemptRecovering: Bool = false
@@ -63,6 +66,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var lastHTTPURLResponses: [HTTPURLResponse] = []
 
     @MainActor public var nonInteractiveObservable: FXDobservableOverlay? = nil
+
+    #if DEBUG
+    public var continuousGenerating: Bool = false
+    #endif
 
 
 	public func action_Synchronize() {
@@ -614,6 +621,12 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             nextPayload?.userConfiguration.controlnet = utilizedControlNet ?? SDextensionControlNet.minimum()!
             selectedImageURL = newImageURL
         }
+
+        #if DEBUG
+        if continuousGenerating {
+            return try await execute_txt2img(payload: payload)
+        }
+        #endif
 
         return error
     }
