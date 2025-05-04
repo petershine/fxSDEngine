@@ -22,6 +22,14 @@ fileprivate let ERROR_WRONG_HOSTNAME: String = "Possibly, you entered wrong host
 
 
 open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
+    public weak var defaultConfig: SDDefaultConfig? = nil
+
+    public convenience init(defaultConfig: SDDefaultConfig?) {
+        self.init()
+
+        self.defaultConfig = defaultConfig
+    }
+
     open var serverHostname: String = {
         guard let savedHostname = UserDefaults.standard.value(forKey: USER_DEFAULT_HOSTNAME) else {
             return ""
