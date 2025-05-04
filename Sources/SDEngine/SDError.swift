@@ -4,6 +4,8 @@ import Foundation
 import fXDKit
 
 
+public let ERROR_NOT_OPERATING: String = "Possibly, your Stable Diffusion server is not operating."
+
 public class SDError: NSError, @unchecked Sendable {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -34,7 +36,7 @@ public class SDError: NSError, @unchecked Sendable {
         var assumedFailureReason = ""
         switch errorStatusCode {
             case 404:
-                assumedFailureReason = "Possibly, your Stable Diffusion server is not operating."
+                assumedFailureReason = ERROR_NOT_OPERATING
             default:
                 break
         }
