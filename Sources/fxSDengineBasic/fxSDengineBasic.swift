@@ -75,15 +75,17 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 	open func action_Synchronize() {
         Task {    @MainActor in
             nonInteractiveObservable = FXDobservableOverlay()
-            defer {
-                nonInteractiveObservable = nil
+
+            let refreshError = await refresh_allModels()
+            UIAlertController.errorAlert(error: refreshError)
+
+            do {
+                let synchronizeError = try await synchronize_withSystem()
+                UIAlertController.errorAlert(error: synchronizeError, title: ERROR_NOT_OPERATING)
+            } catch {
             }
 
-            let error = try await synchronize_withSystem()
-            let refreshError = await refresh_allModels()
-
-            UIAlertController.errorAlert(error: error, title: ERROR_NOT_OPERATING)
-            UIAlertController.errorAlert(error: refreshError)
+            nonInteractiveObservable = nil
         }
 	}
 
