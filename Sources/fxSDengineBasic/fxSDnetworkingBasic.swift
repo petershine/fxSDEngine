@@ -23,11 +23,14 @@ fileprivate let ERROR_WRONG_HOSTNAME: String = "Possibly, you entered wrong host
 
 open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
     public weak var defaultConfig: SDDefaultConfig? = nil
+    public weak var defaultStorage: SDStorage? = nil
 
-    public convenience init(defaultConfig: SDDefaultConfig?) {
+    public convenience init(defaultConfig: SDDefaultConfig?,
+                            defaultStorage: SDStorage?) {
         self.init()
 
         self.defaultConfig = defaultConfig
+        self.defaultStorage = defaultStorage
     }
 
     open var serverHostname: String = {
@@ -118,7 +121,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
             return httpRequest
     }
 
-    public func requestToSDServer(
+    open func requestToSDServer(
         quiet: Bool = false,
         request: URLRequest? = nil,
         api_endpoint: SDAPIendpoint? = nil,
