@@ -72,7 +72,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     #endif
 
 
-	public func action_Synchronize() {
+	open func action_Synchronize() {
         Task {    @MainActor in
             nonInteractiveObservable = FXDobservableOverlay()
             defer {
