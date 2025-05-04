@@ -43,10 +43,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var shouldAttemptRecovering: Bool = false
 
 
-	@MainActor public var displayedImage: UIImage? = nil
+	public var displayedImage: UIImage? = nil
 
-    @MainActor public var nextPayload: SDcodablePayload? = nil
-    @MainActor public var selectedImageURL: URL? = nil {
+    public var nextPayload: SDcodablePayload? = nil
+    public var selectedImageURL: URL? = nil {
         willSet {
             if let imageURL = newValue {
                 Task {	@MainActor in
@@ -57,7 +57,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     }
 
 
-    @MainActor public var controlnetImageBase64: String? = nil {
+    public var controlnetImageBase64: String? = nil {
         didSet {
             nextPayload?.userConfiguration.controlnet.image = controlnetImageBase64
         }
@@ -65,7 +65,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
     public var lastHTTPURLResponses: [HTTPURLResponse] = []
 
-    @MainActor public var nonInteractiveObservable: FXDobservableOverlay? = nil
+    public var nonInteractiveObservable: FXDobservableOverlay? = nil
 
     #if DEBUG
     public var continuousGenerating: Bool = false
