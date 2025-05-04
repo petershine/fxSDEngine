@@ -41,7 +41,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
         return (savedHostname as? String) ?? ""
     }()
 
-    open func evaluateServerHostname(serverHostname: String?, reAttemptLimit: Int) async -> Bool {    fxd_log()
+    open func evaluateServerHostname(serverHostname: String?) async -> Bool {    fxd_log()
         fxdPrint("serverHostname:", serverHostname)
 
         guard let serverHostname, !serverHostname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
@@ -58,27 +58,20 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
 
         let (data, response, error) = await requestToSDServer(
             quiet: false,
-            request: httpRequest)
+            request: httpRequest,
+            reAttemptLimit: 5,
+            api_endpoint: .INTERNAL_PING,
+            method: nil,
+            query: nil,
+            payload: nil)
 
         guard data != nil,
               (response as? HTTPURLResponse)?.statusCode == 200,
               error == nil
         else {
-            if reAttemptLimit > 0 {
-                fxdPrint("reAttemptLimit: \(reAttemptLimit)")
-                do {
-                    try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
-                }
-                catch {
-                    
-                }
-                return await evaluateServerHostname(serverHostname: serverHostname, reAttemptLimit: (reAttemptLimit-1))
-            }
-            else {
-                await UIAlertController.errorAlert(error: error, title: ERROR_WRONG_HOSTNAME, message: ALERT_MESSAGE_GUIDE_HOSTNAME)
+            await UIAlertController.errorAlert(error: error, title: ERROR_WRONG_HOSTNAME, message: ALERT_MESSAGE_GUIDE_HOSTNAME)
 
-                return false
-            }
+            return false
         }
 
 
@@ -122,12 +115,13 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
     }
 
     open func requestToSDServer(
-        quiet: Bool = false,
-        request: URLRequest? = nil,
-        api_endpoint: SDAPIendpoint? = nil,
-        method: String? = nil,
-        query: String? = nil,
-        payload: Data? = nil) async -> (Data?, URLResponse?, Error?) {
+        quiet: Bool,
+        request: URLRequest?,
+        reAttemptLimit: Int,
+        api_endpoint: SDAPIendpoint?,
+        method: String?,
+        query: String?,
+        payload: Data?) async -> (Data?, URLResponse?, Error?) {
 			if !quiet {
 				fxd_log()
 			}
@@ -173,6 +167,27 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
             }
 
             let processedError = SDError.processsed(data, response, error)
+
+            if (error != nil || processedError != nil || statusCode != 200)
+                && reAttemptLimit > 0 {
+                do {
+                    try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
+                }
+                catch {
+                }
+
+                let decrementedLimit = max(0, reAttemptLimit-1)
+
+                return await self.requestToSDServer(
+                    quiet: quiet,
+                    request: request,
+                    reAttemptLimit: decrementedLimit,
+                    api_endpoint: api_endpoint,
+                    method: method,
+                    query: query,
+                    payload: payload)
+            }
+
             return (data, response, processedError)
 		}
 	

@@ -125,6 +125,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let (data, _, error) = await mainNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
+            reAttemptLimit: 0,
 			api_endpoint: .INTERNAL_SYSINFO,
 			method: nil,
 			query: nil,
@@ -220,6 +221,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let (_, _, error) = await mainNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
+            reAttemptLimit: 0,
 			api_endpoint: .SDAPI_V1_OPTIONS,
 			method: nil,
 			query: nil,
@@ -241,6 +243,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let (_, _, error) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
+            reAttemptLimit: 0,
             api_endpoint: .SDAPI_V1_OPTIONS,
             method: nil,
             query: nil,
@@ -302,6 +305,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let (data, _, error) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
+            reAttemptLimit: 0,
             api_endpoint: api_endpoint,
             method: nil,
             query: nil,
@@ -376,6 +380,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let (pngData, _, obtainingError) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
+            reAttemptLimit: 0,
             api_endpoint: .INFINITE_IMAGE_BROWSING_FILE,
             method: nil,
             query: "path=\(imagePath.addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? "")&t=file",
@@ -388,6 +393,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let (data, response, error) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
+            reAttemptLimit: 0,
             api_endpoint: .INFINITE_IMAGE_BROWSING_FILES,
             method: nil,
             query: "folder_path=\(folderPath.addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? "")",
@@ -442,6 +448,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let (data, _, error) = await mainNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
+            reAttemptLimit: 0,
 			api_endpoint: .INFINITE_IMAGE_BROWSING_GENINFO,
 			method: nil,
 			query: "path=\(imagePath.addingPercentEncoding(withAllowedCharacters: .urlQueryValueAllowed) ?? "")",
@@ -558,6 +565,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let (data, urlResponse, error) = await mainNetworking.requestToSDServer(
 			quiet: false,
             request: nil,
+            reAttemptLimit: 0,
 			api_endpoint: .SDAPI_V1_TXT2IMG,
 			method: nil,
 			query: nil,
@@ -704,6 +712,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let (data, _, error) = await mainNetworking.requestToSDServer(
             quiet: quiet,
             request: nil,
+            reAttemptLimit: 0,
             api_endpoint: .SDAPI_V1_PROGRESS,
             method: nil,
             query: nil,
@@ -727,6 +736,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let (_, _, error) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
+            reAttemptLimit: 0,
             api_endpoint: .SDAPI_V1_INTERRUPT,
             method: "POST",
             query: nil,

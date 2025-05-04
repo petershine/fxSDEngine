@@ -28,7 +28,7 @@ public protocol SDNetworking: Sendable {
     static var USER_DEFAULT_HOSTNAME: String { get }
 	var serverHostname: String { get set }
 
-    func evaluateServerHostname(serverHostname: String?, reAttemptLimit: Int) async -> Bool
+    func evaluateServerHostname(serverHostname: String?) async -> Bool
 
     func httpRequest(
         serverHostname: String?,
@@ -40,6 +40,7 @@ public protocol SDNetworking: Sendable {
 	func requestToSDServer(
 		quiet: Bool,
         request: URLRequest?,
+        reAttemptLimit: Int,
 		api_endpoint: SDAPIendpoint?,
 		method: String?,
 		query: String?,
