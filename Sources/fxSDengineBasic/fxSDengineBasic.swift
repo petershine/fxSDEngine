@@ -29,13 +29,14 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var isSystemBusy: Bool = false
     public var didStartGenerating: Bool = false {
         didSet {
-            monitoredProgress = nil
+            if didStartGenerating == false {
+                monitoredProgress = nil
+            }
             isSystemBusy = (isSystemBusy || didStartGenerating)
         }
     }
     public var didInterrupt: Bool = false {
         didSet {
-            monitoredProgress = nil
             isSystemBusy = (isSystemBusy || !didInterrupt)
             #if DEBUG
             continuousGenerating = false
@@ -609,6 +610,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         guard !didInterrupt else {
             didInterrupt = false
 
+            Task {    @MainActor in
+                nonInteractiveObservable = nil
+            }
+
             let interruptedError = SDError(
                 domain: "SDEngine",
                 code: (error as? NSError)?.code ?? -1,
@@ -745,6 +750,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public func interrupt() async -> Error? {
         didInterrupt = true
 
+        Task {    @MainActor in
+            nonInteractiveObservable = FXDobservableOverlay()
+        }
+
         let (_, _, error) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
@@ -754,22 +763,9 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             query: nil,
             payload: nil)
 
-        guard !didStartGenerating else {
-            return error
-        }
+        // resetting will be handled by "execute_txt2img"
 
-
-        didInterrupt = false
-
-        let interruptedError = SDError(
-            domain: "SDEngine",
-            code: (error as? NSError)?.code ?? -1,
-            userInfo: [
-                NSLocalizedDescriptionKey: "Interrupted",
-                NSLocalizedFailureReasonErrorKey: "Server's image generating is canceled",
-            ])
-
-        return interruptedError
+        return error
     }
 }
 
