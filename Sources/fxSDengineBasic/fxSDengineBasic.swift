@@ -38,6 +38,9 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var didInterrupt: Bool = false {
         didSet {
             isSystemBusy = (isSystemBusy || !didInterrupt)
+            if didInterrupt {
+                shouldAttemptRecovering = false
+            }
             #if DEBUG
             continuousGenerating = false
             #endif
@@ -610,10 +613,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         guard !didInterrupt else {
             didInterrupt = false
 
-            Task {    @MainActor in
-                nonInteractiveObservable = nil
-            }
-
             let interruptedError = SDError(
                 domain: "SDEngine",
                 code: (error as? NSError)?.code ?? -1,
@@ -749,10 +748,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
     public func interrupt() async -> Error? {
         didInterrupt = true
-
-        Task {    @MainActor in
-            nonInteractiveObservable = FXDobservableOverlay()
-        }
 
         let (_, _, error) = await mainNetworking.requestToSDServer(
             quiet: false,
