@@ -710,6 +710,11 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 }
             }
 
+            if error != nil,
+               (error as? NSError)?.code ?? -1 == -1004 {
+                fxdPrint(error)
+            }
+
             try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
             continueMonitoring()
         }
