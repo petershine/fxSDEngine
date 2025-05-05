@@ -35,17 +35,20 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             isSystemBusy = (isSystemBusy || didStartGenerating)
         }
     }
-    public var didInterrupt: Bool = false {
+
+    public var interruptedFinish: ((Error?) -> Error?)? = nil {
         didSet {
-            isSystemBusy = (isSystemBusy || !didInterrupt)
-            if didInterrupt {
+            isSystemBusy = (isSystemBusy || !(interruptedFinish != nil))
+            if interruptedFinish == nil {
                 shouldAttemptRecovering = false
             }
+
             #if DEBUG
             continuousGenerating = false
             #endif
         }
     }
+
     public var shouldAttemptRecovering: Bool = false
 
 
@@ -594,7 +597,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         guard error == nil else {
             var disconnectedError = error
-            if !didInterrupt && isSystemBusy && monitoredProgress != nil {
+            if !(interruptedFinish != nil) && isSystemBusy && monitoredProgress != nil {
                 shouldAttemptRecovering = true
 
                 disconnectedError = SDError(
@@ -610,17 +613,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
 
-        guard !didInterrupt else {
-            didInterrupt = false
-
-            let interruptedError = SDError(
-                domain: "SDEngine",
-                code: (error as? NSError)?.code ?? -1,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Interrupted",
-                    NSLocalizedFailureReasonErrorKey: "Image generating is canceled",
-                ])
-            return interruptedError
+        let interrupted = self.interruptedFinish
+        guard interrupted == nil else {
+            self.interruptedFinish = nil
+            return interrupted?(error)
         }
 
 
@@ -747,7 +743,29 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
 
     public func interrupt() async -> Error? {
-        didInterrupt = true
+        Task {    @MainActor in
+            nonInteractiveObservable = FXDobservableOverlay()
+        }
+
+        self.interruptedFinish = {
+            error in
+
+            Task {    @MainActor in
+                self.nonInteractiveObservable = nil
+            }
+
+
+            let interruptedError = SDError(
+                domain: "SDEngine",
+                code: (error as? NSError)?.code ?? -1,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "Interrupted",
+                    NSLocalizedFailureReasonErrorKey: "Image generating is canceled",
+                ])
+            return interruptedError
+        }
+
+
 
         let (_, _, error) = await mainNetworking.requestToSDServer(
             quiet: false,
@@ -758,10 +776,17 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             query: nil,
             payload: nil)
 
-        // resetting will be handled by "execute_txt2img"
+        guard !didStartGenerating else {
+            return error
+        }
 
-        return error
+
+        let interrupted = self.interruptedFinish
+        self.interruptedFinish = nil
+
+        let interruptedError = interrupted?(error)
+        await UIAlertController.errorAlert(error: interruptedError)
+
+        return interruptedError
     }
 }
-
-
