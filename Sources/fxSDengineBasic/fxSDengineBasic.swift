@@ -342,7 +342,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 if systemCheckpoints.count == 0 {
                     refreshError = SDError(
                         domain: "SDEngine",
-                        code: -1,
+                        code: (error as? NSError)?.code ?? -1,
                         userInfo: [
                             NSLocalizedDescriptionKey: "Missing models",
                             NSLocalizedFailureReasonErrorKey: "Server doesn't have any model.\nAnd once added a model, restart SD server",
@@ -607,7 +607,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
             let interruptedError = SDError(
                 domain: "SDEngine",
-                code: -1,
+                code: (error as? NSError)?.code ?? -1,
                 userInfo: [
                     NSLocalizedDescriptionKey: "Interrupted",
                     NSLocalizedFailureReasonErrorKey: "Image generating is canceled",
@@ -753,7 +753,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         let interruptedError = SDError(
             domain: "SDEngine",
-            code: -1,
+            code: (error as? NSError)?.code ?? -1,
             userInfo: [
                 NSLocalizedDescriptionKey: "Interrupted",
                 NSLocalizedFailureReasonErrorKey: "Server's image generating is canceled",

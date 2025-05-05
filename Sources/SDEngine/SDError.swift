@@ -7,6 +7,8 @@ import fXDKit
 public let ERROR_NOT_OPERATING: String = "Possibly, your Stable Diffusion server is not operating."
 
 public class SDError: NSError, @unchecked Sendable {
+    public var httpURLResponse: HTTPURLResponse? = nil
+
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
@@ -26,15 +28,15 @@ public class SDError: NSError, @unchecked Sendable {
             return error as? Self
         }
 
-        let errorStatusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
-        guard errorStatusCode != 200 else {
+        let httpURLResponseStatusCode = (response as? HTTPURLResponse)?.statusCode ?? -1
+        guard httpURLResponseStatusCode != 200 else {
             return error as? Self
         }
 
 
         let assumedDescription = "Problem with server"
         var assumedFailureReason = ""
-        switch errorStatusCode {
+        switch httpURLResponseStatusCode {
             case 404:
                 assumedFailureReason = ERROR_NOT_OPERATING
             default:
@@ -76,8 +78,9 @@ public class SDError: NSError, @unchecked Sendable {
 
         let processed = Self(
             domain: "SDEngine",
-            code: errorStatusCode,
+            code: (error as? NSError)?.code ?? -1,
             userInfo: errorUserInfo)
+        processed.httpURLResponse = response as? HTTPURLResponse
 
 
         fxd_log()
