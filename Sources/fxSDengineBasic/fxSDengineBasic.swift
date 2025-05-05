@@ -29,11 +29,13 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var isSystemBusy: Bool = false
     public var didStartGenerating: Bool = false {
         didSet {
+            monitoredProgress = nil
             isSystemBusy = (isSystemBusy || didStartGenerating)
         }
     }
     public var didInterrupt: Bool = false {
         didSet {
+            monitoredProgress = nil
             isSystemBusy = (isSystemBusy || !didInterrupt)
             #if DEBUG
             continuousGenerating = false
@@ -587,17 +589,19 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
         guard error == nil else {
-            if !didInterrupt && isSystemBusy {
+            var disconnectedError = error
+            if !didInterrupt && isSystemBusy && monitoredProgress != nil {
                 shouldAttemptRecovering = true
+
+                disconnectedError = SDError(
+                    domain: "SDEngine",
+                    code: (error as? NSError)?.code ?? -1,
+                    userInfo: [
+                        NSLocalizedDescriptionKey: "Disconnected",
+                        NSLocalizedFailureReasonErrorKey: "For the app is not actively opened, generated image will need to be manually recovered. Please \"synchronize\" when you re-open this app, to obtain latest image from server",
+                    ])
             }
 
-            let disconnectedError = SDError(
-                domain: "SDEngine",
-                code: -1,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Disconnected",
-                    NSLocalizedFailureReasonErrorKey: "For the app is not actively opened, generated image will need to be manually recovered. Please \"synchronize\" when you re-open this app, to obtain latest image from server",
-                ])
             return disconnectedError
         }
 
@@ -693,6 +697,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public func continueMonitoring() {
         Task {	@MainActor in
             let (newProgress, isSystemBusy, error) = await monitor_progress(quiet: true)
+
             if newProgress != nil || (didStartGenerating || isSystemBusy) != self.isSystemBusy {
                 monitoredProgress = newProgress
                 self.isSystemBusy = didStartGenerating || isSystemBusy
