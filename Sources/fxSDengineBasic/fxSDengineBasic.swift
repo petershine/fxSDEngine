@@ -29,19 +29,21 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     public var isSystemBusy: Bool = false
     public var didStartGenerating: Bool = false {
         didSet {
+            isSystemBusy = (isSystemBusy || didStartGenerating)
             if didStartGenerating == false {
                 monitoredProgress = nil
+
+                #if DEBUG
+                continuousGenerating = false
+                #endif
             }
-            isSystemBusy = (isSystemBusy || didStartGenerating)
         }
     }
 
     public var interruptedFinish: ((Error?) -> Error?)? = nil {
         didSet {
-            isSystemBusy = (isSystemBusy || !(interruptedFinish != nil))
-            if interruptedFinish == nil {
-                shouldAttemptRecovering = false
-            }
+            isSystemBusy = (isSystemBusy || interruptedFinish == nil)
+            shouldAttemptRecovering = false
 
             #if DEBUG
             continuousGenerating = false
@@ -597,7 +599,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         guard error == nil else {
             var disconnectedError = error
-            if !(interruptedFinish != nil) && isSystemBusy && monitoredProgress != nil {
+            if interruptedFinish == nil && isSystemBusy && monitoredProgress != nil {
                 shouldAttemptRecovering = true
 
                 disconnectedError = SDError(
