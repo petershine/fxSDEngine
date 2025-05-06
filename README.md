@@ -3,10 +3,7 @@ Swift package for ForgeUI server utilization
 
 https://github.com/lllyasviel/stable-diffusion-webui-forge
 
-
-
-
-Powering:
+### Powering:
 
 [GenerArt iOS app](https://apps.apple.com/us/app/generart/id6541750756)
 
