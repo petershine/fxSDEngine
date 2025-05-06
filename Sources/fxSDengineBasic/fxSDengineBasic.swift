@@ -598,12 +598,13 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
         guard error == nil else {
-            var disconnectedError = error
             if interruptedFinish == nil && isSystemBusy && monitoredProgress != nil {
                 shouldAttemptRecovering = true
             }
 
-            return disconnectedError
+            // don't need to keep repeating explanation about disconnected for being in background
+            //return disconnectedError
+            return nil
         }
 
 
