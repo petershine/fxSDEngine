@@ -321,7 +321,7 @@ extension SDcodablePayload {
 
 
 extension SDcodablePayload {
-    public func configurations(with checkpoints: [SDcodableCheckpoint]) -> [[String]] {
+    public func model_name(with checkpoints: [SDcodableCheckpoint]) -> String {
         var model_name: String = "(unknown)"
         let model_identifier = override_settings?.sd_model_checkpoint ?? ""
         let filtered = checkpoints.filter { ($0.model_name == model_identifier || $0.hash == model_identifier) }
@@ -332,6 +332,11 @@ extension SDcodablePayload {
             model_name = filtered.first?.model_name ?? "(unknown)"
         }
 
+        return model_name
+    }
+
+    public func configurations(with checkpoints: [SDcodableCheckpoint]) -> [[String]] {
+        let model_name = model_name(with: checkpoints)
         let vae_name: String = override_settings?.sd_vae ?? "None"
 
         let essentials: [[String]] = [
