@@ -4,7 +4,7 @@ import Foundation
 import fXDKit
 
 
-public let ERROR_NOT_OPERATING: String = "Possibly, your Stable Diffusion server is not operating."
+public let ERROR_NOT_OPERATING: String = "Possibly, your ForgeUI server is not operating."
 
 public class SDError: NSError, @unchecked Sendable {
     public var httpURLResponse: HTTPURLResponse? = nil

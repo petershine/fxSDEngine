@@ -1,4 +1,5 @@
 # fxSDEngine
-Swift package for Stable Diffusion server utilization
+Swift package for ForgeUI server utilization
+(https://github.com/lllyasviel/stable-diffusion-webui-forge)
 
 [dev.generart.app](https://dev.generart.app)
