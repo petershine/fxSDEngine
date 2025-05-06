@@ -187,7 +187,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             try nextPayload?.update(with: checkpoint)
 
             UIAlertController.simpleAlert(
-                withTitle: "APPLIED System Model for Next Image Generation",
+                withTitle: "APPLIED System Model for Next Generation",
                 message: checkpoint.model_name)
         }
 	}
@@ -216,7 +216,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
 
             UIAlertController.simpleAlert(
-                withTitle: "CHANGED System VAE for Next Image Generation",
+                withTitle: "CHANGED System VAE for Next Generation",
                 message: systemInfo?.Config?.sd_vae)
         }
     }
@@ -356,7 +356,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                         code: (error as? NSError)?.code ?? -1,
                         userInfo: [
                             NSLocalizedDescriptionKey: "Missing models",
-                            NSLocalizedFailureReasonErrorKey: "Server doesn't have any model.\nAnd once added a model, restart SD server",
+                            NSLocalizedFailureReasonErrorKey: "Server doesn't have any model.\nAnd once added a model, restart ForgeUI server",
                         ])
                 }
 
@@ -754,7 +754,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 code: (error as? NSError)?.code ?? -1,
                 userInfo: [
                     NSLocalizedDescriptionKey: "Interrupted",
-                    NSLocalizedFailureReasonErrorKey: "Image generating is canceled",
+                    NSLocalizedFailureReasonErrorKey: "Generating is canceled",
                 ])
 
             if shouldAlert {
