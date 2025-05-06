@@ -55,4 +55,5 @@ public protocol SDEngine: Sendable {
     func continueMonitoring()
     func monitor_progress(quiet: Bool) async -> (SDcodableProgress?, Bool, Error?)
     func interrupt() async -> Error?
+    func reuse(loadedPayload: SDcodablePayload)
 }

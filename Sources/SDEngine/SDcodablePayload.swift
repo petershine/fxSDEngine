@@ -358,6 +358,18 @@ extension SDcodablePayload {
 
         return essentials
     }
+
+    public func parameters(with checkpoints: [SDcodableCheckpoint]) -> [String: Any] {
+        return [
+            "model_name":self.model_name(with: checkpoints),
+            "sd_vae":self.override_settings?.sd_vae ?? "None",
+            "sampler_name":self.sampler_name,
+            "scheduler":self.scheduler,
+            "steps":self.steps,
+            "cfg_scale":self.cfg_scale,
+            "hr_upscaler":self.hr_upscaler
+        ]
+    }
 }
 
 

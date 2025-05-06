@@ -787,4 +787,21 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let interruptedError = interrupted?(error, true)
         return interruptedError
     }
+
+    open func reuse(loadedPayload: SDcodablePayload) {
+        self.nextPayload = loadedPayload
+        self.nextPayload?.userConfiguration.use_lastSeed = true
+
+        var message = "Reusing same Seed:\n\(self.nextPayload?.seed ?? -1)"
+        if self.nextPayload?.userConfiguration.use_controlnet ?? false,
+           !(self.nextPayload?.userConfiguration.controlnet.image?.isEmpty ?? true) {
+            message += "\nReusing same source image for ControlNet"
+        }
+
+        Task {	@MainActor in
+            UIAlertController.simpleAlert(
+                withTitle: "RELOADED for Next Image Generation",
+                message: message)
+        }
+    }
 }
