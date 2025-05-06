@@ -20,7 +20,7 @@ public protocol SDEngine: Sendable {
 	var monitoredProgress: SDcodableProgress? { get set }
 	var isSystemBusy: Bool { get set }
     var didStartGenerating: Bool { get set }
-    var interruptedFinish: ((Error?) -> Error?)? { get set }
+    var interruptedFinish: ((Error?, Bool) -> Error?)? { get set }
     var shouldAttemptRecovering: Bool { get set }
 
 	var displayedImage: UIImage? { get set }
