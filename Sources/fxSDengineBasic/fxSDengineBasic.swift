@@ -601,14 +601,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             var disconnectedError = error
             if interruptedFinish == nil && isSystemBusy && monitoredProgress != nil {
                 shouldAttemptRecovering = true
-
-                disconnectedError = SDError(
-                    domain: "SDEngine",
-                    code: (error as? NSError)?.code ?? -1,
-                    userInfo: [
-                        NSLocalizedDescriptionKey: "Disconnected",
-                        NSLocalizedFailureReasonErrorKey: "For the app is not actively opened, generated image will need to be manually recovered. Please \"synchronize\" when you re-open this app, to obtain latest image from server",
-                    ])
             }
 
             return disconnectedError
