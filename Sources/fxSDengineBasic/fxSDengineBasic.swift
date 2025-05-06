@@ -736,7 +736,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     }
 
 
-    public func interrupt() async -> Error? {
+    open func interrupt() async -> Error? {
         Task {    @MainActor in
             nonInteractiveObservable = FXDobservableOverlay()
         }
