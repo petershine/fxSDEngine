@@ -1,7 +1,9 @@
 # fxSDEngine
 Swift package for ForgeUI server utilization
 
-(https://github.com/lllyasviel/stable-diffusion-webui-forge)
+https://github.com/lllyasviel/stable-diffusion-webui-forge
+
+
 
 
 Powering:
