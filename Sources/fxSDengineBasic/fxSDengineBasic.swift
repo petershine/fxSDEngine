@@ -93,7 +93,8 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             do {
                 let synchronizeError = try await synchronize_withSystem()
                 UIAlertController.errorAlert(error: synchronizeError, title: ERROR_NOT_OPERATING)
-            } catch {
+            } catch {	fxd_log()
+                fxdPrint(error)
             }
 
             nonInteractiveObservable = nil
@@ -686,7 +687,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     
 
     public func continueMonitoring() {
-        Task {	@MainActor in
+        Task {
             let (newProgress, isProgressing, error) = await monitor_progress(quiet: true)
 
             if newProgress != nil || (didStartGenerating || isProgressing) != isSystemBusy {
