@@ -123,7 +123,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
 
         let payload = try SDcodablePayload.loaded(from: fileURL.jsonURL, withControlNet: true)
-        payload?.applyDefaultConfig(remoteConfig: self.mainDefaultConfig)
+        payload?.applyDefaultConfig(remoteConfig: mainDefaultConfig)
 
 
         Task {	@MainActor in
@@ -531,7 +531,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 		fxdPrint("[infotext]", infotext)
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
 		let payload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
-        payload?.applyDefaultConfig(remoteConfig: self.mainDefaultConfig)
+        payload?.applyDefaultConfig(remoteConfig: mainDefaultConfig)
 
 
         if let adetailer = SDextensionADetailer.decoded(using: &payloadDictionary) {
@@ -608,9 +608,8 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
 
-        let interrupted = self.interruptedFinish
+        let interrupted = interruptedFinish
         guard interrupted == nil else {
-            self.interruptedFinish = nil
             return interrupted?(error, false)
         }
 
@@ -742,7 +741,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             nonInteractiveObservable = FXDobservableOverlay()
         }
 
-        self.interruptedFinish = {
+        interruptedFinish = {
             (error, shouldAlert) in
 
             Task {    @MainActor in
@@ -764,6 +763,8 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 }
             }
 
+            self.interruptedFinish = nil
+
             return interruptedError
         }
 
@@ -782,20 +783,20 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
 
-        let interrupted = self.interruptedFinish
-        self.interruptedFinish = nil
+        let interrupted = interruptedFinish
+        interruptedFinish = nil
 
         let interruptedError = interrupted?(error, true)
         return interruptedError
     }
 
     open func reuse(loadedPayload: SDcodablePayload) {
-        self.nextPayload = loadedPayload
-        self.nextPayload?.userConfiguration.use_lastSeed = true
+        nextPayload = loadedPayload
+        nextPayload?.userConfiguration.use_lastSeed = true
 
-        var message = "Reusing same Seed:\n\(self.nextPayload?.seed ?? -1)"
-        if self.nextPayload?.userConfiguration.use_controlnet ?? false,
-           !(self.nextPayload?.userConfiguration.controlnet.image?.isEmpty ?? true) {
+        var message = "Reusing same Seed:\n\(nextPayload?.seed ?? -1)"
+        if nextPayload?.userConfiguration.use_controlnet ?? false,
+           !(nextPayload?.userConfiguration.controlnet.image?.isEmpty ?? true) {
             message += "\nReusing same source image for ControlNet"
         }
 
