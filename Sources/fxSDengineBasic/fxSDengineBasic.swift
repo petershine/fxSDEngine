@@ -147,7 +147,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         if let jsonDictionary = data?.jsonDictionary(quiet: true) {
             fxdPrint(name: "INTERNAL_SYSINFO", dictionary: jsonDictionary)
         }
-//        mainStorage.collectJSONdata(fileName: #function, jsonData: data)
 #endif
         systemInfo = data?.decode(SDcodableSysInfo.self)
 
@@ -588,7 +587,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             jsonDictionary["images"] = ["<IMAGES ENCODED>"]
             fxdPrint(name: "TXT2IMG", dictionary: jsonDictionary)
         }
-//        mainStorage.collectJSONdata(fileName: #function, jsonData: data)
 #endif
         if let httpURLResponse = urlResponse as? HTTPURLResponse {
             lastHTTPURLResponses.append(httpURLResponse)
