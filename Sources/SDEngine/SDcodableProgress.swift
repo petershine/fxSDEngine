@@ -26,7 +26,7 @@ public struct SDcodableState: Codable, Sendable {
 }
 
 public extension SDcodableState {
-    var isSystemBusy: Bool? {
+    var isProgressing: Bool? {
         return !((job ?? "").isEmpty || interrupted ?? true)
     }
 
