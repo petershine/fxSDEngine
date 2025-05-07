@@ -608,9 +608,8 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
 
-        let interrupted = interruptedFinish
-        guard interrupted == nil else {
-            return interrupted?(error, false)
+        guard interruptedFinish == nil else {
+            return interruptedFinish?(error, false)
         }
 
 
@@ -690,15 +689,15 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
     public func continueMonitoring() {
         Task {	@MainActor in
-            let (newProgress, isSystemBusy, error) = await monitor_progress(quiet: true)
+            let (newProgress, isProgressing, error) = await monitor_progress(quiet: true)
 
-            if newProgress != nil || (didStartGenerating || isSystemBusy) != self.isSystemBusy {
+            if newProgress != nil || (didStartGenerating || isProgressing) != isSystemBusy {
                 monitoredProgress = newProgress
-                self.isSystemBusy = didStartGenerating || isSystemBusy
+                isSystemBusy = didStartGenerating || isProgressing
 
-                if !self.isSystemBusy
-                    && self.shouldAttemptRecovering {
-                    self.shouldAttemptRecovering = false
+                if !isSystemBusy
+                    && shouldAttemptRecovering {
+                    shouldAttemptRecovering = false
 
                     let _ = try await recover_disconnectedTxt2Img()
                 }
@@ -731,8 +730,8 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
 
-        let isSystemBusy = newProgress?.state?.isSystemBusy ?? false
-        return (newProgress, isSystemBusy, error)
+        let isProgressing = newProgress?.state?.isProgressing ?? false
+        return (newProgress, isProgressing, error)
     }
 
 
@@ -783,10 +782,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
 
 
-        let interrupted = interruptedFinish
-        interruptedFinish = nil
-
-        let interruptedError = interrupted?(error, true)
+        let interruptedError = interruptedFinish?(error, true)
         return interruptedError
     }
 
