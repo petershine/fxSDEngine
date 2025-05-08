@@ -530,27 +530,24 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 		fxd_log()
 		fxdPrint("[infotext]", infotext)
 		fxdPrint(name: "payloadDictionary", dictionary: payloadDictionary)
-		let payload: SDcodablePayload? = SDcodablePayload.decoded(using: &payloadDictionary)
-        payload?.applyDefaultConfig(remoteConfig: mainDefaultConfig)
+        guard let payload = SDcodablePayload.decoded(using: &payloadDictionary) else {
+            return nil
+        }
 
+
+        payload.applyDefaultConfig(remoteConfig: mainDefaultConfig)
 
         if let adetailer = SDextensionADetailer.decoded(using: &payloadDictionary) {
-            payload?.userConfiguration.use_adetailer = true
-            payload?.userConfiguration.adetailer = adetailer
-
-            if payload?.userConfiguration.adetailer.ad_cfg_scale == nil {
-                payload?.userConfiguration.adetailer.ad_cfg_scale = Int(payload?.cfg_scale ?? 6.0)
-            }
-
-            if payload?.userConfiguration.adetailer.ad_denoising_strength == nil {
-                payload?.userConfiguration.adetailer.ad_denoising_strength = payload?.denoising_strength ?? 0.4
-            }
+            payload.userConfiguration.use_adetailer = true
+            payload.userConfiguration.adetailer = adetailer
+            payload.userConfiguration.adetailer.ad_cfg_scale = Int(payload.cfg_scale)
+            payload.userConfiguration.adetailer.ad_denoising_strength = payload.denoising_strength
         }
 
         if let controlnet = SDextensionControlNet.decoded(using: &payloadDictionary),
            !(controlnet.image?.isEmpty ?? true) {
-            payload?.userConfiguration.use_controlnet = true
-            payload?.userConfiguration.controlnet = controlnet
+            payload.userConfiguration.use_controlnet = true
+            payload.userConfiguration.controlnet = controlnet
         }
 
         return payload
