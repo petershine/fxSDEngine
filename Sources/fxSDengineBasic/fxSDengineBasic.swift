@@ -605,7 +605,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
 
         guard interruptedFinish == nil else {
-            return interruptedFinish?(error, false)
+            let interrupt = interruptedFinish
+            interruptedFinish = nil
+
+            return interrupt?(error, false)
         }
 
 
@@ -758,8 +761,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 }
             }
 
-            self.interruptedFinish = nil
-
             return interruptedError
         }
 
@@ -779,6 +780,8 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
 
         let interruptedError = interruptedFinish?(error, true)
+        interruptedFinish = nil
+        
         return interruptedError
     }
 
