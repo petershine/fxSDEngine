@@ -80,8 +80,8 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "Euler a"
 		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Polyexponential"
 
-        self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 672
-        self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 1024
+        self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? Int(DIMENSION_OPTIMAL_MIN)
+        self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? Int(DIMENSION_OPTIMAL_MAX)
 
         self.hr_cfg = try container.decodeIfPresent(Double.self, forKey: .hr_cfg) ?? self.cfg_scale
         self.hr_distilled_cfg = try container.decodeIfPresent(Double.self, forKey: .hr_distilled_cfg) ?? 3.5
@@ -223,8 +223,8 @@ extension SDcodablePayload {
 
         if let sizeComponents = (jsonDictionary["size"] as? String)?.components(separatedBy: "x"),
            sizeComponents.count == 2 {
-            jsonDictionary["width"] = Int(sizeComponents.first ?? "672")
-            jsonDictionary["height"] = Int(sizeComponents.last ?? "1024")
+            jsonDictionary["width"] = Int(sizeComponents.first ?? String(Int(DIMENSION_OPTIMAL_MIN)))
+            jsonDictionary["height"] = Int(sizeComponents.last ?? String(Int(DIMENSION_OPTIMAL_MAX)))
         }
 
         let replacingKeyPairs = [

@@ -4,6 +4,8 @@ import UIKit
 
 import fXDKit
 
+public let DIMENSION_OPTIMAL_MIN: Double = 798.0
+public let DIMENSION_OPTIMAL_MAX: Double = 1216.0
 
 public enum SDDefaultConfigKey: String, CaseIterable {
     case allowDemoActivation
