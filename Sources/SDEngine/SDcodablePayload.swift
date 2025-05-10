@@ -340,7 +340,7 @@ extension SDcodablePayload {
         let vae_name: String = override_settings?.sd_vae ?? "None"
 
         let essentials: [[String]] = [
-            ["SEED:", String(seed)],
+//            ["SEED:", String(seed)],
 
             ["MODEL:", model_name],
             ["VAE:", vae_name],
