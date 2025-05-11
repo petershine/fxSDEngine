@@ -22,7 +22,7 @@ public enum SDDefaultConfigKey: String, CaseIterable {
 
 
 @Observable
-open class SDDefaultConfig: @unchecked Sendable {
+open class SDDefaultConfig {
     public var allowDemoActivation: Bool = false
 
     public var optimalMin: Double = DIMENSION_OPTIMAL_MIN
@@ -32,24 +32,6 @@ open class SDDefaultConfig: @unchecked Sendable {
     public var prompt: String? = nil
     public var negative_prompt: String? = nil
 
-    
-    public init(
-        allowDemoActivation: Bool = false,
-
-        optimalMin: Double? = nil,
-        optimalMax: Double? = nil,
-
-        hr_upscaler: String? = nil,
-        prompt: String? = nil,
-        negative_prompt: String? = nil
-    ) {
-        self.allowDemoActivation = allowDemoActivation
-
-        self.optimalMin = optimalMin ?? DIMENSION_OPTIMAL_MIN
-        self.optimalMax = optimalMax ?? DIMENSION_OPTIMAL_MAX
-
-        self.hr_upscaler = hr_upscaler
-        self.prompt = prompt
-        self.negative_prompt = negative_prompt
+    public init() {
     }
 }
