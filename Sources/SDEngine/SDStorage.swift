@@ -90,7 +90,7 @@ extension SDStorage {
 
 
 extension SDStorage {
-    @MainActor public func deleteFileURLs(fileURLs: [URL?]?) async throws -> Bool {
+    public func deleteFileURLs(fileURLs: [URL?]?) async throws -> Bool {
         guard let fileURLs, fileURLs.count > 0 else {
             return false
         }
@@ -131,13 +131,17 @@ extension SDStorage {
                 }
                 catch {    fxd_log()
                     fxdPrint(error)
-                    UIAlertController.errorAlert(error: error)
+                    Task {	@MainActor in
+                        UIAlertController.errorAlert(error: error)
+                    }
                     return (false, error)
                 }
 
 
                 if deletedCount == originalCount {
-                    UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images")
+                    Task {    @MainActor in
+                        UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images")
+                    }
                 }
 
                 return ((deletedCount > 0), nil)
