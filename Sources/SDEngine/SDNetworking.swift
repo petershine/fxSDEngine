@@ -28,7 +28,7 @@ public protocol SDNetworking: Sendable {
     static var USER_DEFAULT_HOSTNAME: String { get }
 	var serverHostname: String { get set }
 
-    func evaluateServerHostname(serverHostname: String?) async -> Bool
+    func validateServerHostname(serverHostname: String?) async -> Bool
 
     func httpRequest(
         serverHostname: String?,
