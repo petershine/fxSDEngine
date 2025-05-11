@@ -80,8 +80,8 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 		self.sampler_name = try container.decodeIfPresent(String.self, forKey: .sampler_name) ?? "Euler a"
 		self.scheduler = try container.decodeIfPresent(String.self, forKey: .scheduler) ?? "Polyexponential"
 
-        self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? Int(DIMENSION_OPTIMAL_MIN)
-        self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? Int(DIMENSION_OPTIMAL_MAX)
+        self.width = try container.decodeIfPresent(Int.self, forKey: .width) ?? 0
+        self.height = try container.decodeIfPresent(Int.self, forKey: .height) ?? 0
 
         self.hr_cfg = try container.decodeIfPresent(Double.self, forKey: .hr_cfg) ?? self.cfg_scale
         self.hr_distilled_cfg = try container.decodeIfPresent(Double.self, forKey: .hr_distilled_cfg) ?? 3.5
@@ -223,8 +223,8 @@ extension SDcodablePayload {
 
         if let sizeComponents = (jsonDictionary["size"] as? String)?.components(separatedBy: "x"),
            sizeComponents.count == 2 {
-            jsonDictionary["width"] = Int(sizeComponents.first ?? String(Int(DIMENSION_OPTIMAL_MIN)))
-            jsonDictionary["height"] = Int(sizeComponents.last ?? String(Int(DIMENSION_OPTIMAL_MAX)))
+            jsonDictionary["width"] = Int(sizeComponents.first ?? String(0))
+            jsonDictionary["height"] = Int(sizeComponents.last ?? String(0))
         }
 
         let replacingKeyPairs = [
@@ -296,6 +296,16 @@ extension SDcodablePayload {
     }
 
     public func applyDefaultConfig(remoteConfig: SDDefaultConfig) {
+        if self.width == 0 {
+            self.width = Int(remoteConfig.optimalMin)
+            fxdPrint("PAYLOAD: width: \(self.width)")
+        }
+
+        if self.height == 0 {
+            self.height = Int(remoteConfig.optimalMax)
+            fxdPrint("PAYLOAD: height: \(self.height)")
+        }
+
         if self.hr_upscaler.isEmpty,
            let hr_upscaler = remoteConfig.hr_upscaler,
            !hr_upscaler.isEmpty {
