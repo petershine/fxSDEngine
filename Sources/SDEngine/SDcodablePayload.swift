@@ -53,9 +53,11 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
     var override_settings_restore_afterwards: Bool
     public var override_settings: SDcodableOverride?
     public struct SDcodableOverride: Codable {
+        public var CLIP_stop_at_last_layers: Int?
         public var sd_model_checkpoint: String?
-        public var sd_vae: String?
-        public var samples_save: Bool?
+        var sd_vae: String?
+
+        var samples_save: Bool?
     }
 
 
@@ -246,7 +248,7 @@ extension SDcodablePayload {
         }
 
 
-        var override_settings: [String:String] = [:]
+        var override_settings: [String:Any] = [:]
 
         if let model_hash = jsonDictionary["model_hash"] as? String, !model_hash.isEmpty {
             override_settings["sd_model_checkpoint"] = model_hash
@@ -259,6 +261,11 @@ extension SDcodablePayload {
         let vae_name: String = jsonDictionary["module 1"] as? String ?? jsonDictionary["vae"] as? String ?? ""
         if !vae_name.isEmpty {
             override_settings["sd_vae"] = vae_name
+        }
+
+        let clip_skip: Double = jsonDictionary["clip skip"] as? Double ?? 1.0
+        if clip_skip > 0.0 {
+            override_settings["CLIP_stop_at_last_layers"] = Int(clip_skip)
         }
 
         jsonDictionary["override_settings"] = override_settings
@@ -326,6 +333,12 @@ extension SDcodablePayload {
             self.negative_prompt = negative_prompt
             fxdPrint("PAYLOAD: negative_prompt: \(self.negative_prompt)")
         }
+
+        if self.override_settings?.CLIP_stop_at_last_layers == nil
+            || self.override_settings?.CLIP_stop_at_last_layers ?? 0 == 0 {
+            self.override_settings?.CLIP_stop_at_last_layers = 1
+            fxdPrint("PAYLOAD: CLIP_stop_at_last_layers: \(String(describing: self.override_settings?.CLIP_stop_at_last_layers))")
+        }
     }
 }
 
@@ -350,7 +363,7 @@ extension SDcodablePayload {
         let vae_name: String = override_settings?.sd_vae ?? "None"
 
         let essentials: [[String]] = [
-//            ["SEED:", String(seed)],
+            ["CLIP SKIP:", String(override_settings?.CLIP_stop_at_last_layers ?? 1)],
 
             ["MODEL:", model_name],
             ["VAE:", vae_name],
@@ -371,6 +384,7 @@ extension SDcodablePayload {
 
     public func parameters(with checkpoints: [SDcodableCheckpoint]) -> [String: Any] {
         return [
+            "CLIP_stop_at_last_layers":self.override_settings?.CLIP_stop_at_last_layers ?? 1,
             "model_name":self.model_name(with: checkpoints),
             "sd_vae":self.override_settings?.sd_vae ?? "None",
             "sampler_name":self.sampler_name,

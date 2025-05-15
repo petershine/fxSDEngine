@@ -8,6 +8,8 @@ public struct SDcodableSysInfo: Codable {
 
 	public var Config: SDcodableConfig? = nil
 	public struct SDcodableConfig: Codable {
+        var CLIP_stop_at_last_layers: Int? = nil
+
 		public var outdir_samples: String? = nil
         public var outdir_txt2img_samples: String? = nil
 
@@ -15,6 +17,8 @@ public struct SDcodableSysInfo: Codable {
 		var sd_model_checkpoint: String? = nil
 
         public var sd_vae: String? = nil
+
+        var quick_setting_list: [String?]? = nil
 	}
 }
 
