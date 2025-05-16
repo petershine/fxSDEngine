@@ -31,8 +31,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         didSet {
             isSystemBusy = (isSystemBusy || didStartGenerating)
             if didStartGenerating == false {
-                monitoredProgress = nil
-
                 #if DEBUG
                 continuousGenerating = false
                 #endif
@@ -690,15 +688,17 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         Task {
             let (newProgress, isProgressing, error) = await monitor_progress(quiet: true)
 
+            monitoredProgress = newProgress
             if newProgress != nil || (didStartGenerating || isProgressing) != isSystemBusy {
-                monitoredProgress = newProgress
                 isSystemBusy = didStartGenerating || isProgressing
 
                 if !isSystemBusy
                     && shouldAttemptRecovering {
                     shouldAttemptRecovering = false
 
-                    let _ = try await recover_disconnectedTxt2Img()
+                    Task {
+                        let _ = try await recover_disconnectedTxt2Img()
+                    }
                 }
             }
 
