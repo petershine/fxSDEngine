@@ -685,12 +685,12 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     
 
     public func continueMonitoring() {
-        Task {
+        Task {	@MainActor in
             let (newProgress, isProgressing, error) = await monitor_progress(quiet: true)
 
-            monitoredProgress = newProgress
             if newProgress != nil || (didStartGenerating || isProgressing) != isSystemBusy {
                 isSystemBusy = didStartGenerating || isProgressing
+                monitoredProgress = newProgress
 
                 if !isSystemBusy
                     && shouldAttemptRecovering {
