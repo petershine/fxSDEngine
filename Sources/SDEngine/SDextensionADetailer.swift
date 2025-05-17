@@ -10,7 +10,7 @@ public struct SDextensionADetailer: SDprotocolCodable {
     var ad_inpaint_only_masked: Bool
     var ad_inpaint_only_masked_padding: Int
     var ad_mask_blur: Int
-    var ad_mask_k: Int
+    public var ad_mask_k: Int
     var ad_mask_k_largest: Int?	//deprecated?
     var ad_mask_filter_method: String
     public var ad_model: String
@@ -165,6 +165,7 @@ extension SDextensionADetailer: SDprotocolExtension {
             ["ad_model:", ad_model],
             ["ad_cfg_scale:", String(ad_cfg_scale)],
             ["ad_denoising_strength:", String(ad_denoising_strength)],
+            ["ad_mask_k:", String(ad_mask_k)],
         ]
 
         return essentials
