@@ -132,6 +132,28 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 	}
 }
 
+public struct SDcodableUserConfiguration: SDprotocolCodable {
+    public var use_lastSeed: Bool
+    public var use_adetailer: Bool
+    public var use_controlnet: Bool
+
+    public var adetailer: SDextensionADetailer
+    public var controlnet: SDextensionControlNet
+
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed) ?? false
+        self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer) ?? false
+        self.use_controlnet = try container.decodeIfPresent(Bool.self, forKey: .use_controlnet) ?? false
+
+        self.adetailer = try container.decodeIfPresent(SDextensionADetailer.self, forKey: .adetailer) ?? SDextensionADetailer.minimum()!
+        self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet) ?? SDextensionControlNet.minimum()!
+    }
+}
+
+
 extension SDcodablePayload {
     public static func loaded(from fileURL: URL?, withControlNet: Bool) throws -> Self? {
         guard let loaded = try Self.loaded(from: fileURL) else {
@@ -397,23 +419,3 @@ extension SDcodablePayload {
 }
 
 
-public struct SDcodableUserConfiguration: SDprotocolCodable {
-    public var use_lastSeed: Bool
-    public var use_adetailer: Bool
-    public var use_controlnet: Bool
-
-    public var adetailer: SDextensionADetailer
-    public var controlnet: SDextensionControlNet
-
-
-    public init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        self.use_lastSeed = try container.decodeIfPresent(Bool.self, forKey: .use_lastSeed) ?? false
-        self.use_adetailer = try container.decodeIfPresent(Bool.self, forKey: .use_adetailer) ?? false
-        self.use_controlnet = try container.decodeIfPresent(Bool.self, forKey: .use_controlnet) ?? false
-
-        self.adetailer = try container.decodeIfPresent(SDextensionADetailer.self, forKey: .adetailer) ?? SDextensionADetailer.minimum()!
-        self.controlnet = try container.decodeIfPresent(SDextensionControlNet.self, forKey: .controlnet) ?? SDextensionControlNet.minimum()!
-    }
-}
