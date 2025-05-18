@@ -785,6 +785,18 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         return interruptedError
     }
 
+    open func reuseSelected() {
+        do {
+            let fileURL = selectedImageURL?.jsonURL
+            if let loadedPayload = try SDcodablePayload.loaded(from: fileURL, withControlNet: true) {
+                self.reuse(loadedPayload: loadedPayload)
+            }
+        }
+        catch {	fxd_log()
+            fxdPrint(error)
+        }
+    }
+
     open func reuse(loadedPayload: SDcodablePayload) {
         nextPayload = loadedPayload
         nextPayload?.userConfiguration.use_lastSeed = true
