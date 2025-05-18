@@ -31,12 +31,12 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
     var denoising_strength: Double
     var hr_second_pass_steps: Int
     public var hr_upscaler: String
-    public var hr_sampler_name: String?
-    public var hr_scheduler: String?
+    public var hr_sampler_name: String
+    public var hr_scheduler: String
     var hr_prompt: String
     var hr_negative_prompt: String
     var highresfix_quick: Bool
-    var hr_additional_modules: [String?]?
+    var hr_additional_modules: [String?]
 
 	public var n_iter: Int
 	var batch_size: Int
@@ -53,11 +53,11 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
     var override_settings_restore_afterwards: Bool
     public var override_settings: SDcodableOverride?
     public struct SDcodableOverride: Codable {
-        public var CLIP_stop_at_last_layers: Int?
-        public var sd_model_checkpoint: String?
+        public var CLIP_stop_at_last_layers: Int
+        public var sd_model_checkpoint: String
         var sd_vae: String?
 
-        var samples_save: Bool?
+        var samples_save: Bool
     }
 
 
@@ -97,13 +97,13 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps) ?? 10
 		self.hr_upscaler = try container.decodeIfPresent(String.self, forKey: .hr_upscaler) ?? ""
 
-        self.hr_sampler_name = try container.decodeIfPresent(String.self, forKey: .hr_sampler_name)
-        if self.hr_sampler_name == nil {
+        self.hr_sampler_name = try container.decodeIfPresent(String.self, forKey: .hr_sampler_name) ?? ""
+        if self.hr_sampler_name.isEmpty {
             self.hr_sampler_name = self.sampler_name
         }
         
-        self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler)
-        if self.hr_scheduler == nil {
+        self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler) ?? ""
+        if self.hr_scheduler.isEmpty {
             self.hr_scheduler = self.scheduler
         }
 
