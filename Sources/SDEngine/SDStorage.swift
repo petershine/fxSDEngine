@@ -17,32 +17,32 @@ extension URL {
 open class SDStorage: @unchecked Sendable {
     public var latestImageURLs: [URL]? = nil
 
-    public init(latestImageURLs: [URL]? = FileManager.default.fileURLs(contentType: .png)) {
+    public init(latestImageURLs: [URL]? = FileManager.default.fileURLs(contentType: .png, directory: .documentDirectory)) {
         self.latestImageURLs = latestImageURLs
     }
 }
 
 extension SDStorage {
     func saveGenerated(pngData: Data, payloadData: Data?, controlnetData: Data?, index: Int = 0) async throws -> URL? {
-        guard let fileURL = URL.newFileURL(prefix: "GenerArt", index: index, contentType: UTType.png) else {
+        guard let pngURL = URL.newFileURL(prefix: "GenerArt", index: index, contentType: UTType.png, directory: .documentDirectory) else {
 			return nil
 		}
 
 
 		fxd_log()
-        try pngData.writeInsideDirectory(to: fileURL)
-        fxdPrint("[IMAGE FILE SAVED]: ", pngData, fileURL)
+        try pngData.writeInsideDirectory(to: pngURL)
+        fxdPrint("[IMAGE FILE SAVED]: ", pngData, pngURL)
 
-        if let jsonURL = fileURL.jsonURL {
+        if let jsonURL = pngURL.jsonURL {
             try payloadData?.writeInsideDirectory(to: jsonURL)
             fxdPrint("[PAYLOAD JSON SAVED]: ", payloadData, jsonURL)
         }
 
-        let _ = try await saveControlnet(fileURL: fileURL, controlnetData: controlnetData)
-        let _ = try await saveThumbnail(fileURL: fileURL, pngData: pngData)
+        let _ = try await saveControlnet(fileURL: pngURL, controlnetData: controlnetData)
+        let _ = try await saveThumbnail(fileURL: pngURL, pngData: pngData)
 
-        latestImageURLs = FileManager.default.fileURLs(contentType: .png)
-        return fileURL
+        latestImageURLs = FileManager.default.fileURLs(contentType: .png, directory: .documentDirectory)
+        return pngURL
 	}
 
     fileprivate func saveControlnet(fileURL: URL, controlnetData: Data?) async throws -> Bool {
@@ -152,7 +152,7 @@ extension SDStorage {
                 return ((deletedCount > 0), nil)
             })
 
-        latestImageURLs = FileManager.default.fileURLs(contentType: .png)
+        latestImageURLs = FileManager.default.fileURLs(contentType: .png, directory: .documentDirectory)
         return didDelete ?? false
     }
 }
