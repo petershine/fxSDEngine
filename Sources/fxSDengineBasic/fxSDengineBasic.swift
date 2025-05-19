@@ -59,7 +59,11 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         willSet {
             if let imageURL = newValue {
                 Task {	@MainActor in
-                    displayedImage = UIImage(contentsOfFile: imageURL.path())
+                    var loadedImage = UIImage(contentsOfFile: imageURL.path(percentEncoded: false))
+                    if loadedImage == nil {
+                        loadedImage = UIImage(contentsOfFile: imageURL.path(percentEncoded: true))
+                    }
+                    displayedImage = loadedImage
                 }
             }
         }
