@@ -7,10 +7,8 @@ import fXDKit
 
 
 extension URL {
-    public var controlnetURL: URL {
-        let controlnet = self.pairedFileURL(inSubPath: "_controlnet", contentType: .json)
-
-        return controlnet
+    public var controlnetURL: URL? {
+        return self.pairedFileURL(inSubPath: "_controlnet", contentType: .json)
     }
 }
 
@@ -32,11 +30,13 @@ extension SDStorage {
 
 
 		fxd_log()
-        try pngData.write(to: fileURL)
+        try pngData.writeInsideDirectory(to: fileURL)
         fxdPrint("[IMAGE FILE SAVED]: ", pngData, fileURL)
 
-        try payloadData?.write(to: fileURL.jsonURL)
-        fxdPrint("[PAYLOAD JSON SAVED]: ", payloadData, fileURL.jsonURL)
+        if let jsonURL = fileURL.jsonURL {
+            try payloadData?.writeInsideDirectory(to: jsonURL)
+            fxdPrint("[PAYLOAD JSON SAVED]: ", payloadData, jsonURL)
+        }
 
         let _ = try await saveControlnet(fileURL: fileURL, controlnetData: controlnetData)
         let _ = try await saveThumbnail(fileURL: fileURL, pngData: pngData)
@@ -50,13 +50,12 @@ extension SDStorage {
             return false
         }
 
+        guard let controlnetURL = fileURL.controlnetURL else {
+            return false
+        }
 
-        let controlnetURL = fileURL.controlnetURL
-
-        let controlnetDirectory = controlnetURL.deletingPathExtension().deletingLastPathComponent()
-        try FileManager.default.createDirectory(at: controlnetDirectory, withIntermediateDirectories: true)
-
-        try controlnetData.write(to: controlnetURL)
+        
+        try controlnetData.writeInsideDirectory(to: controlnetURL)
         fxdPrint("[CONTROLNET JSON SAVED]: ", controlnetData, controlnetURL)
 
         return true
@@ -75,13 +74,13 @@ extension SDStorage {
         }
 
 
+        guard let thumbnailURL = fileURL.thumbnailURL else {
+            return false
+        }
+
+
         let thumbnailData = thumbnail.pngData()
-        let thumbnailURL = fileURL.thumbnailURL
-
-        let thumbnailDirectory = thumbnailURL.deletingPathExtension().deletingLastPathComponent()
-        try FileManager.default.createDirectory(at: thumbnailDirectory, withIntermediateDirectories: true)
-
-        try thumbnailData?.write(to: thumbnailURL)
+        try thumbnailData?.writeInsideDirectory(to: thumbnailURL)
         fxdPrint("[THUMBNAIL SAVED]: ", thumbnailData, thumbnailURL)
 
         return true
@@ -115,11 +114,17 @@ extension SDStorage {
                         }
 
                         try FileManager.default.removeItem(at: imageURL)
-                        try FileManager.default.removeItem(at: imageURL.jsonURL)
+                        if let jsonURL = imageURL.jsonURL {
+                            try FileManager.default.removeItem(at: jsonURL)
+                        }
 
                         do {
-                            try FileManager.default.removeItem(at: imageURL.controlnetURL)
-                            try FileManager.default.removeItem(at: imageURL.thumbnailURL)
+                            if let controlnetURL = imageURL.controlnetURL {
+                                try FileManager.default.removeItem(at: controlnetURL)
+                            }
+                            if let thumbnailURL = imageURL.thumbnailURL {
+                                try FileManager.default.removeItem(at: thumbnailURL)
+                            }
                         }
                         catch {
                             // It's okay. controlnet, or thumbnail, may not always be there
