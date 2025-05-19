@@ -8,7 +8,7 @@ import fXDKit
 
 extension URL {
     public var controlnetURL: URL? {
-        return self.pairedFileURL(inSubPath: "_controlnet", contentType: .json, directory: .applicationSupportDirectory)
+        return self.pairedFileURL(inSubPath: "_controlnet", contentType: .json)
     }
 }
 
@@ -17,14 +17,14 @@ extension URL {
 open class SDStorage: @unchecked Sendable {
     public var latestImageURLs: [URL]? = nil
 
-    public init(latestImageURLs: [URL]? = FileManager.default.fileURLs(contentType: .png, directory: .applicationSupportDirectory)) {
+    public init(latestImageURLs: [URL]? = FileManager.default.fileURLs(contentType: .png)) {
         self.latestImageURLs = latestImageURLs
     }
 }
 
 extension SDStorage {
     func saveGenerated(pngData: Data, payloadData: Data?, controlnetData: Data?, index: Int = 0) async throws -> URL? {
-        guard let fileURL = URL.newFileURL(prefix: "GenerArt", index: index, contentType: UTType.png, directory: .applicationSupportDirectory) else {
+        guard let fileURL = URL.newFileURL(prefix: "GenerArt", index: index, contentType: UTType.png) else {
 			return nil
 		}
 
@@ -41,7 +41,7 @@ extension SDStorage {
         let _ = try await saveControlnet(fileURL: fileURL, controlnetData: controlnetData)
         let _ = try await saveThumbnail(fileURL: fileURL, pngData: pngData)
 
-        latestImageURLs = FileManager.default.fileURLs(contentType: .png, directory: .applicationSupportDirectory)
+        latestImageURLs = FileManager.default.fileURLs(contentType: .png)
         return fileURL
 	}
 
@@ -152,7 +152,7 @@ extension SDStorage {
                 return ((deletedCount > 0), nil)
             })
 
-        latestImageURLs = FileManager.default.fileURLs(contentType: .png, directory: .applicationSupportDirectory)
+        latestImageURLs = FileManager.default.fileURLs(contentType: .png)
         return didDelete ?? false
     }
 }
