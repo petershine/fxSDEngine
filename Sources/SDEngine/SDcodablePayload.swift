@@ -162,7 +162,7 @@ extension SDcodablePayload {
 
 
         if withControlNet,
-           let controlnet = try SDextensionControlNet.loaded(from: fileURL?.controlnetURL) {
+           let controlnet = try SDextensionControlNet.loaded(from: fileURL?.availableControlNetURL) {
             loaded.userConfiguration.controlnet = controlnet
         }
 
@@ -419,3 +419,16 @@ extension SDcodablePayload {
 }
 
 
+fileprivate extension URL {
+    var availableControlNetURL: URL? {
+        var availableURL = self.controlnetURL
+
+        if let availablePath = availableURL?.path(percentEncoded: false) {
+            if !FileManager.default.fileExists(atPath: availablePath) {
+                availableURL = self.pairedFileURL(inSubPath: "_controlnet", contentType: .json, directory: .documentDirectory)
+            }
+        }
+
+        return availableURL
+    }
+}
