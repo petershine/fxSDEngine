@@ -89,14 +89,17 @@ extension SDStorage {
 
 
 extension SDStorage {
-    public func deleteFileURLs(fileURLs: [URL?]?) async throws -> Bool {
+    public func deleteFileURLs(fileURLs: [URL?]?) async throws -> (Bool, Int, Error?) {
         guard let fileURLs, fileURLs.count > 0 else {
-            return false
+            return (false, 0, nil)
         }
 
 
         let message: String = (fileURLs.count > 1) ? "\(fileURLs.count) images" : ((fileURLs.first as? URL)?.absoluteURL.lastPathComponent ?? "")
 
+        var deletedCount: Int = 0
+        var deletingError: Error? = nil
+        
         let didDelete = try await UIAlertController.asyncAlert(
             withTitle: "Do you want to delete?",
             message: message,
@@ -105,8 +108,6 @@ extension SDStorage {
             destructiveHandler: {
                 action in
 
-                let originalCount = fileURLs.count
-                var deletedCount: Int = 0
                 do {
                     for fileURL in fileURLs {
                         guard let imageURL: URL = fileURL else {
@@ -136,23 +137,15 @@ extension SDStorage {
                 }
                 catch {    fxd_log()
                     fxdPrint(error)
-                    Task {	@MainActor in
-                        UIAlertController.errorAlert(error: error)
-                    }
+                    deletingError = error
                     return (false, error)
                 }
 
-
-                if deletedCount == originalCount {
-                    Task {    @MainActor in
-                        UIAlertController.simpleAlert(withTitle: "Deleted \(deletedCount) images")
-                    }
-                }
-
+                
                 return ((deletedCount > 0), nil)
             })
 
         latestImageURLs = FileManager.default.fileURLs(contentType: .png, directory: .documentDirectory)
-        return didDelete ?? false
+        return (didDelete ?? false, deletedCount, deletingError)
     }
 }
