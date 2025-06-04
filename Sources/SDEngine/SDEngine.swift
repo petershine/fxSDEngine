@@ -1,15 +1,11 @@
-
-
 import Foundation
 import UIKit
-
 
 public protocol SDEngine: Sendable {
 	var mainNetworking: SDNetworking { get set }
     var mainStorage: SDStorage { get set }
     var mainDefaultConfig: SDDefaultConfig { get set }
     init(mainNetworking: SDNetworking, mainStorage: SDStorage, mainDefaultConfig: SDDefaultConfig)
-
 
 	var systemInfo: SDcodableSysInfo? { get set }
 	var systemCheckpoints: [SDcodableCheckpoint] { get set }
@@ -27,7 +23,6 @@ public protocol SDEngine: Sendable {
 
 	var nextPayload: SDcodablePayload? { get set }
 	var selectedImageURL: URL? { get set }
-
 
 	func action_Synchronize()
     func synchronize_withSystem() async throws -> Error?

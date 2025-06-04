@@ -6,17 +6,17 @@ import PackageDescription
 let package = Package(
 	name: "fxSDEngine",
 	platforms: [
-		.iOS(.v18),
+		.iOS(.v18)
 	],
 	products: [
 		// Products define the executables and libraries a package produces, making them visible to other packages.
 		.library(
 			name: "fxSDEngine",
-			targets: ["fxSDEngine"]),
+			targets: ["fxSDEngine"])
 	],
 	dependencies: [
 		// Dependencies declare other packages that this package depends on.
-		.package(url: "https://github.com/petershine/fXDKit", branch: "master"),
+		.package(url: "https://github.com/petershine/fXDKit", branch: "master")
 	],
 	targets: [
 		// Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -24,6 +24,6 @@ let package = Package(
 		.target(
 			name: "fxSDEngine",
 			dependencies: ["fXDKit"]
-		),
+		)
 	]
 )

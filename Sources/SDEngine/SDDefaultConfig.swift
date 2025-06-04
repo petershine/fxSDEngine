@@ -1,13 +1,10 @@
-
 import Foundation
 import UIKit
 
 import fXDKit
 
-
-fileprivate let DIMENSION_OPTIMAL_MIN: Double = 672.0
-fileprivate let DIMENSION_OPTIMAL_MAX: Double = 1024.0
-
+private let DIMENSION_OPTIMAL_MIN: Double = 672.0
+private let DIMENSION_OPTIMAL_MAX: Double = 1024.0
 
 public enum SDDefaultConfigKey: String, CaseIterable {
     case allowDemoActivation
@@ -20,7 +17,6 @@ public enum SDDefaultConfigKey: String, CaseIterable {
     case negative_prompt
 }
 
-
 @Observable
 open class SDDefaultConfig {
     public var allowDemoActivation: Bool = false
@@ -28,9 +24,9 @@ open class SDDefaultConfig {
     public var optimalMin: Double = DIMENSION_OPTIMAL_MIN
     public var optimalMax: Double = DIMENSION_OPTIMAL_MAX
 
-    public var hr_upscaler: String? = nil
-    public var prompt: String? = nil
-    public var negative_prompt: String? = nil
+    public var hr_upscaler: String?
+    public var prompt: String?
+    public var negative_prompt: String?
 
     public init() {
     }

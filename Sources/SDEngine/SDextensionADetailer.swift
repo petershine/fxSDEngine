@@ -1,7 +1,4 @@
-
-
 import Foundation
-
 
 public struct SDextensionADetailer: SDprotocolCodable {
     var ad_confidence: Double
@@ -11,7 +8,7 @@ public struct SDextensionADetailer: SDprotocolCodable {
     var ad_inpaint_only_masked_padding: Int
     var ad_mask_blur: Int
     public var ad_mask_k: Int
-    var ad_mask_k_largest: Int?	//deprecated?
+    var ad_mask_k_largest: Int?	// deprecated?
     var ad_mask_filter_method: String
     public var ad_model: String
 
@@ -48,7 +45,7 @@ public struct SDextensionADetailer: SDprotocolCodable {
     var ad_vae: String
     var ad_x_offset: Int
     var ad_y_offset: Int
-    var is_api: Array<Bool?>
+    var is_api: [Bool?]
 
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -101,13 +98,12 @@ public struct SDextensionADetailer: SDprotocolCodable {
     }
 }
 
-
 import fXDKit
 
 extension SDextensionADetailer: SDprotocolExtension {
-    public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
+    public static func decoded(using jsonDictionary: inout [String: Any?]) -> Self? {
 
-        var extractedDictionary: [String:Any?] = [:]
+        var extractedDictionary: [String: Any?] = [:]
         let extractingKeyPairs_adetailer = [
             ("ad_confidence", "adetailer confidence"),
             ("ad_denoising_strength", "adetailer denoising strength"),
@@ -118,7 +114,7 @@ extension SDextensionADetailer: SDprotocolExtension {
             ("ad_mask_k", "adetailer mask only top k"),
             ("ad_mask_k_largest", "adetailer mask only top k largest"),
             ("ad_mask_filter_method", "adetailer method to decide top k masks"),
-            ("ad_model", "adetailer model"),
+            ("ad_model", "adetailer model")
         ]
         for (key, extractedKey) in extractingKeyPairs_adetailer {
             extractedDictionary[key] = jsonDictionary[extractedKey]
@@ -127,14 +123,13 @@ extension SDextensionADetailer: SDprotocolExtension {
 
         fxdPrint(name: "extractedDictionary", dictionary: extractedDictionary)
 
-        var decoded: Self? = nil
+        var decoded: Self?
         if extractedDictionary.count > 0 {
             do {
                 let adetailerData = try JSONSerialization.data(withJSONObject: extractedDictionary)
                 decoded = try JSONDecoder().decode(Self.self, from: adetailerData)
                 fxdPrint(decoded!)
-            }
-            catch {
+            } catch {
                 fxdPrint(error)
             }
         }
@@ -142,18 +137,17 @@ extension SDextensionADetailer: SDprotocolExtension {
         return decoded
     }
 
-    public var args: Dictionary<String, Any?>? {
-        var args: Dictionary<String, Any?>? = nil
+    public var args: [String: Any?]? {
+        var args: [String: Any?]?
         do {
             args = [
-                "args" : [
+                "args": [
                     true,
                     false,
-                    try JSONEncoder().encode(self).jsonDictionary() ?? [:],
+                    try JSONEncoder().encode(self).jsonDictionary() ?? [:]
                 ]
             ]
-        }
-        catch {    fxd_log()
+        } catch {    fxd_log()
             fxdPrint(error)
         }
 
@@ -165,7 +159,7 @@ extension SDextensionADetailer: SDprotocolExtension {
             ["ad_model:", ad_model],
             ["ad_cfg_scale:", String(ad_cfg_scale)],
             ["ad_denoising_strength:", String(ad_denoising_strength)],
-            ["ad_mask_k:", String(ad_mask_k)],
+            ["ad_mask_k:", String(ad_mask_k)]
         ]
 
         return essentials

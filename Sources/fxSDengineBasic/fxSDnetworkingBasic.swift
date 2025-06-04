@@ -1,29 +1,25 @@
-
-
 import Foundation
 import UIKit
 
 import fXDKit
 
-
 public let ALERT_TITLE_ENTER_HOSTNAME: String = "Enter your SD Forge WebUI server hostname"
 public let ALERT_FIELD_PLACEHOLDER_HOSTNAME: String = "http://myserver.local:7860"
-public let ALERT_MESSAGE_GUIDE_HOSTNAME: String = 
+public let ALERT_MESSAGE_GUIDE_HOSTNAME: String =
 """
 Make sure your server was started using \"--api\" AND \"--listen\" options.
 
-and use YOUR computer name: 
+and use YOUR computer name:
 e.g. http://myserver.local:7860
 
 instead of numerical IP address
 """
 
-fileprivate let ERROR_WRONG_HOSTNAME: String = "Possibly, you entered wrong hostname, or server is not operating"
-
+private let ERROR_WRONG_HOSTNAME: String = "Possibly, you entered wrong hostname, or server is not operating"
 
 open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
-    public weak var defaultConfig: SDDefaultConfig? = nil
-    public weak var defaultStorage: SDStorage? = nil
+    public weak var defaultConfig: SDDefaultConfig?
+    public weak var defaultStorage: SDStorage?
 
     public convenience init(defaultConfig: SDDefaultConfig?,
                             defaultStorage: SDStorage?) {
@@ -47,7 +43,6 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
         guard let serverHostname, !serverHostname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return false
         }
-
 
         let httpRequest = httpRequest(
             serverHostname: serverHostname,
@@ -74,7 +69,6 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
             return false
         }
 
-
         self.serverHostname = serverHostname.trimmingCharacters(in: .whitespacesAndNewlines)
         UserDefaults.standard.set(serverHostname, forKey: Self.USER_DEFAULT_HOSTNAME)
 
@@ -88,17 +82,16 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
         query: String? = nil,
         payload: Data? = nil) -> URLRequest? {
             let serverHostname = serverHostname ?? self.serverHostname
-            
+
             var requestPath = "\(serverHostname)/\(api_endpoint.rawValue)"
             if !(query?.isEmpty ?? true),
-               let escapedQuery = query {	//query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
+               let escapedQuery = query {	// query?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) {
                 requestPath += "?\(escapedQuery)"
             }
 
             guard let requestURL = URL(string: requestPath) else {
                 return nil
             }
-
 
             var httpRequest = URLRequest(url: requestURL)
             httpRequest.timeoutInterval = .infinity
@@ -139,23 +132,20 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
                 return (nil, nil, nil)
             }
 
-
-            var data: Data? = nil
-            var response: URLResponse? = nil
-            var error: Error? = nil
+            var data: Data?
+            var response: URLResponse?
+            var error: Error?
 
             do {
                 (data, response) = try await URLSession.shared.data(for: httpRequest)
-            }
-            catch let httpError {
+            } catch let httpError {
                 error = httpError
             }
-            
 
             let statusCode = (response as? HTTPURLResponse)?.statusCode
-            fxdPrint("response.statusCode: ", statusCode, quiet:quiet)
-            fxdPrint("data: ", data, quiet:quiet)
-            fxdPrint("error: ", error, quiet:quiet)
+            fxdPrint("response.statusCode: ", statusCode, quiet: quiet)
+            fxdPrint("data: ", data, quiet: quiet)
+            fxdPrint("error: ", error, quiet: quiet)
 
             if data == nil || statusCode != 200 {
                 fxdPrint("httpURLResponse: ", (response as? HTTPURLResponse))
@@ -172,8 +162,7 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
                 && reAttemptLimit > 0 {
                 do {
                     try await Task.sleep(nanoseconds: UInt64((1.0 * 1_000_000_000).rounded()))
-                }
-                catch {
+                } catch {
                 }
 
                 let decrementedLimit = max(0, reAttemptLimit-1)
@@ -190,11 +179,9 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
 
             return (data, response, processedError)
 		}
-	
 
     public var responseHandler: ((Data?, URLResponse?, (any Error)?) -> Void)?
-	fileprivate var receivedData: Data? = nil
-
+	fileprivate var receivedData: Data?
 
     private lazy var urlSession: URLSession = {
         let config = URLSessionConfiguration.background(withIdentifier: "GenerArt")
@@ -203,7 +190,6 @@ open class fxSDnetworkingBasic: NSObject, SDNetworking, @unchecked Sendable {
         return URLSession(configuration: config, delegate: self, delegateQueue: nil)
     }()
 }
-
 
 extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
     public func execute_backgroundURLtask(api_endpoint: SDAPIendpoint,
@@ -219,7 +205,6 @@ extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
             payload: payload) else {
             return
         }
-
 
         let backgroundTask = urlSession.dataTask(with: httpRequest)
         backgroundTask.earliestBeginDate = Date.now
@@ -258,7 +243,7 @@ extension fxSDnetworkingBasic: URLSessionDelegate, URLSessionDataDelegate {
         Task {    @MainActor in
             if let appDelegate = UIApplication.shared.delegate as? FXDAppDelegate,
                let completionHandler = appDelegate.backgroundCompletionHandler {
-                
+
                 fxdPrint(completionHandler)
             }
         }

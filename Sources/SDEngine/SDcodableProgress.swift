@@ -1,28 +1,25 @@
-
-
 import Foundation
 import UIKit
 
-
 public struct SDcodableProgress: Codable, Sendable {
-	public var progress: Double? = nil
-	var eta_relative: Date? = nil
-	var textinfo: String? = nil
+	public var progress: Double?
+	var eta_relative: Date?
+	var textinfo: String?
 
-	public var current_image: String? = nil
-	public var state: SDcodableState? = nil
+	public var current_image: String?
+	public var state: SDcodableState?
 }
 
 public struct SDcodableState: Codable, Sendable {
-	var interrupted: Bool? = nil
-	public var job: String? = nil
-	public var job_count: Int? = nil
-	public var job_no: Int? = nil
-	public var job_timestamp: String? = nil
-	public var sampling_step: Int? = nil
-	public var sampling_steps: Int? = nil
-	var skipped: Bool? = nil
-	var stopping_generation: Bool? = nil
+	var interrupted: Bool?
+	public var job: String?
+	public var job_count: Int?
+	public var job_no: Int?
+	public var job_timestamp: String?
+	public var sampling_step: Int?
+	public var sampling_steps: Int?
+	var skipped: Bool?
+	var stopping_generation: Bool?
 }
 
 public extension SDcodableState {
@@ -37,7 +34,7 @@ public extension SDcodableState {
 
         let sourceFormatter = DateFormatter()
         sourceFormatter.dateFormat = "yyyyMMddHHmmss"
-        guard let job_date = sourceFormatter.date(from:job_timestamp) else {
+        guard let job_date = sourceFormatter.date(from: job_timestamp) else {
             return nil
         }
 

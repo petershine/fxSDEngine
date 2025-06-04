@@ -1,7 +1,4 @@
-
-
 import Foundation
-
 
 public protocol SDprotocolCodable: Codable {
     static func loaded(from fileURL: URL?) throws -> Self?
@@ -16,8 +13,7 @@ public extension SDprotocolCodable {
 
         do {
             return (try Data(contentsOf: fileURL)).decode(Self.self)
-        }
-        catch {
+        } catch {
             return Self.minimum()
         }
     }
@@ -27,11 +23,10 @@ public extension SDprotocolCodable {
             return nil
         }
 
-        var minimumInstance: Self? = nil
+        var minimumInstance: Self?
         do {
             minimumInstance = try JSONDecoder().decode(Self.self, from: minimumData)
-        }
-        catch {
+        } catch {
         }
 
         return minimumInstance

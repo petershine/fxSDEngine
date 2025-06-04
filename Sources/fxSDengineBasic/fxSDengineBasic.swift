@@ -1,9 +1,7 @@
-
 import Foundation
 import UIKit
 
 import fXDKit
-
 
 @Observable
 open class fxSDengineBasic: SDEngine, @unchecked Sendable {
@@ -16,16 +14,14 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         self.mainDefaultConfig = mainDefaultConfig
 	}
 
-
-	public var systemInfo: SDcodableSysInfo? = nil
+	public var systemInfo: SDcodableSysInfo?
 	public var systemCheckpoints: [SDcodableCheckpoint] = []
     public var systemSamplers: [SDcodableSampler] = []
     public var systemSchedulers: [SDcodableScheduler] = []
     public var systemVAEs: [SDcodableVAE] = []
     public var systemUpscalers: [SDcodableUpscaler] = []
 
-
-    public var monitoredProgress: SDcodableProgress? = nil
+    public var monitoredProgress: SDcodableProgress?
     public var isSystemBusy: Bool = false
     public var didStartGenerating: Bool = false {
         didSet {
@@ -38,7 +34,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
     }
 
-    public var interruptedFinish: ((Error?, Bool) -> Error?)? = nil {
+    public var interruptedFinish: ((Error?, Bool) -> Error?)? {
         didSet {
             isSystemBusy = (isSystemBusy || interruptedFinish == nil)
             shouldAttemptRecovering = false
@@ -51,11 +47,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
     public var shouldAttemptRecovering: Bool = false
 
+	public var displayedImage: UIImage?
 
-	public var displayedImage: UIImage? = nil
-
-    public var nextPayload: SDcodablePayload? = nil
-    public var selectedImageURL: URL? = nil {
+    public var nextPayload: SDcodablePayload?
+    public var selectedImageURL: URL? {
         willSet {
             if let imageURL = newValue {
                 Task {	@MainActor in
@@ -69,8 +64,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         }
     }
 
-
-    public var controlnetImageBase64: String? = nil {
+    public var controlnetImageBase64: String? {
         didSet {
             nextPayload?.userConfiguration.controlnet.image = controlnetImageBase64
         }
@@ -78,12 +72,11 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
     public var lastHTTPURLResponses: [HTTPURLResponse] = []
 
-    public var nonInteractiveObservable: FXDobservableOverlay? = nil
+    public var nonInteractiveObservable: FXDobservableOverlay?
 
     #if DEBUG
     public var continuousGenerating: Bool = false
     #endif
-
 
 	open func action_Synchronize() {
         Task {    @MainActor in
@@ -112,22 +105,18 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             return error_0
         }
 
-
         let (pngData, imagePath, error_1) = try await obtain_latestPNGData(folderPath: folderPath, otherFolderPath: systemInfo?.Config?.outdir_txt2img_samples)
         guard let pngData, let imagePath else {
             return error_1
         }
-
 
         let (fileURL, error_2) = try await prepare_nextPayload(pngData: pngData, imagePath: imagePath)
         guard let fileURL else {
             return error_2
         }
 
-
         let payload = try SDcodablePayload.loaded(from: fileURL.jsonURL, withControlNet: true)
         payload?.applyDefaultConfig(remoteConfig: mainDefaultConfig)
-
 
         Task {	@MainActor in
             nextPayload = payload
@@ -171,20 +160,17 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 nonInteractiveObservable = nil
             }
 
-
             let error_0 = await change_systemCheckpoints(checkpoint: checkpoint)
             guard error_0 == nil else {
                 UIAlertController.errorAlert(error: error_0)
                 return
             }
 
-
             let error_1 = await refresh_systemInfo()
             guard error_1 == nil else {
                 UIAlertController.errorAlert(error: error_1)
                 return
             }
-
 
             try nextPayload?.update(with: checkpoint)
 
@@ -201,7 +187,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 nonInteractiveObservable = nil
             }
 
-
             let error_0 = await change_systemVAE(vae: vae)
 
             guard error_0 == nil else {
@@ -209,13 +194,11 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 return
             }
 
-
             let error_1 = await refresh_systemInfo()
             guard error_1 == nil else {
                 UIAlertController.errorAlert(error: error_1)
                 return
             }
-
 
             UIAlertController.simpleAlert(
                 withTitle: "CHANGED System VAE for Next Generation",
@@ -224,13 +207,12 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     }
 
     public func change_systemCheckpoints(checkpoint: SDcodableCheckpoint) async -> Error? {
-		//https://github.com/AUTOMATIC1111/stable-diffusion-webui/discussions/7839
+		// https://github.com/AUTOMATIC1111/stable-diffusion-webui/discussions/7839
 
         let checkpointTitle = checkpoint.title ?? ""
 		guard !(checkpointTitle.isEmpty) else {
 			return nil
 		}
-
 
 		let options = "{\"sd_model_checkpoint\" : \"\(checkpointTitle)\"}"
         let (_, _, error) = await mainNetworking.requestToSDServer(
@@ -251,7 +233,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             return nil
         }
 
-
         let modules = (vae.filename != nil) ? [vae.filename ?? ""] : []
 
         let options = "{\"sd_vae\" : \"\(vaeName)\", \"forge_additional_modules\" : \(modules)}"
@@ -266,7 +247,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
         return error
     }
-
 
     public func refresh_allModels() async -> Error? {
         let error_0 = await refresh_system(SDcodableCheckpoint.self)
@@ -295,7 +275,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
     public func refresh_system<T: SDprotocolModel>(_ modelType: T.Type) async -> Error? {
 
-        var api_endpoint: SDAPIendpoint? = nil
+        var api_endpoint: SDAPIendpoint?
         switch T.self {
             case is SDcodableCheckpoint.Type:
                 api_endpoint = .SDAPI_V1_MODELS
@@ -316,7 +296,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             return nil
         }
 
-
         let (data, _, error) = await mainNetworking.requestToSDServer(
             quiet: false,
             request: nil,
@@ -327,27 +306,26 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             payload: nil)
 #if DEBUG
         if let jsonObject = data?.jsonObject(quiet: true) {
-            fxdPrint("\(String(describing: T.self))", (jsonObject as? Array<Any>)?.count)
+            fxdPrint("\(String(describing: T.self))", (jsonObject as? [Any])?.count)
         }
 #endif
         let models = data?.decode(Array<T>.self) ?? []
 
         switch T.self {
             case is SDcodableCheckpoint.Type:
-                systemCheckpoints = models as? Array<SDcodableCheckpoint> ?? []
+                systemCheckpoints = models as? [SDcodableCheckpoint] ?? []
             case is SDcodableVAE.Type:
-                systemVAEs = SDcodableVAE.defaultArray() + (models as? Array<SDcodableVAE> ?? [])
+                systemVAEs = SDcodableVAE.defaultArray() + (models as? [SDcodableVAE] ?? [])
             case is SDcodableSampler.Type:
-                systemSamplers = models as? Array<SDcodableSampler> ?? []
+                systemSamplers = models as? [SDcodableSampler] ?? []
             case is SDcodableScheduler.Type:
-                systemSchedulers = models as? Array<SDcodableScheduler> ?? []
+                systemSchedulers = models as? [SDcodableScheduler] ?? []
             case is SDcodableUpscaler.Type:
-                systemUpscalers = models as? Array<SDcodableUpscaler> ?? []
+                systemUpscalers = models as? [SDcodableUpscaler] ?? []
 
             default:
                 break
         }
-
 
         var refreshError: Error? = error
         switch T.self {
@@ -358,7 +336,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                         code: (error as? NSError)?.code ?? -1,
                         userInfo: [
                             NSLocalizedDescriptionKey: "Missing models",
-                            NSLocalizedFailureReasonErrorKey: "Server doesn't have any model.\nAnd once added a model, restart ForgeUI server",
+                            NSLocalizedFailureReasonErrorKey: "Server doesn't have any model.\nAnd once added a model, restart ForgeUI server"
                         ])
                 }
 
@@ -377,7 +355,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             return (nil, nil, error)
         }
 
-
         var imagePath = filePath
 
         if let otherFolderPath {
@@ -390,7 +367,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 imagePath = otherFilePath
             }
         }
-
 
         let (pngData, _, obtainingError) = await mainNetworking.requestToSDServer(
             quiet: false,
@@ -434,17 +410,15 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 !($0?.fullpath?.contains("DS_Store") ?? false)
             }
 
-
         let latestFileORfolder = sortedFilesORfolders.first as? SDcodableFile
         fxdPrint("latestFileORfolder?.updated_time(): ", latestFileORfolder?.updated_time)
         fxdPrint("latestFileORfolder?.fullpath: ", latestFileORfolder?.fullpath)
         guard let latestFileORfolder,
               let filePath = latestFileORfolder.fullpath
         else {
-            //TODO: error can be nil here. Prepare an error for alerting
+            // TODO: error can be nil here. Prepare an error for alerting
             return (nil, nil, error)
         }
-
 
         fxdPrint("latestFileORfolder?.type: ", latestFileORfolder.type)
         guard let type = latestFileORfolder.type,
@@ -453,7 +427,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             let nextFolderPath = filePath
             return try await obtain_latestFilePath(folderPath: nextFolderPath)
         }
-
 
         let updated_time = latestFileORfolder.updated_time
         return (filePath, updated_time, error)
@@ -475,7 +448,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             return (nil, error)
         }
 
-
         guard !infotext.isEmpty, error == nil else {
             return (nil, error)
         }
@@ -484,7 +456,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         guard let payload else {
             return (nil, error)
         }
-
 
         let payloadData = payload.encoded()
         let controlnetData = payload.userConfiguration.controlnet.encoded()
@@ -501,7 +472,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 			fxdPrint("[infotext]", infotext)
 			return nil
 		}
-
 
 		let infoComponents = infotext.lineReBroken().components(separatedBy: "Steps:")
 		let promptPair = infoComponents.first?.components(separatedBy: "Negative prompt:")
@@ -521,13 +491,11 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 			return nil
 		}
 
-
 		let parametersString = "Steps: \(infoComponents.last?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "")"
 
-		var payloadDictionary: [String:Any?] = parametersString.jsonDictionary() ?? [:]
+		var payloadDictionary: [String: Any?] = parametersString.jsonDictionary() ?? [:]
 		payloadDictionary["prompt"] = prompt
 		payloadDictionary["negative_prompt"] = negative_prompt
-
 
 		fxd_log()
 		fxdPrint("[infotext]", infotext)
@@ -535,7 +503,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         guard let payload = SDcodablePayload.decoded(using: &payloadDictionary) else {
             return nil
         }
-
 
         payload.applyDefaultConfig(remoteConfig: mainDefaultConfig)
 
@@ -559,14 +526,13 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         guard !didStartGenerating else {
             return
         }
-        
-        
+
         didStartGenerating = true
-        
-        Task {	@MainActor in            
+
+        Task {	@MainActor in
             let error = try await execute_txt2img(payload: payload)
             didStartGenerating = false
-            
+
             UIAlertController.errorAlert(error: error)
         }
     }
@@ -601,10 +567,9 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             }
 
             // don't need to keep repeating explanation about disconnected for being in background
-            //return disconnectedError
+            // return disconnectedError
             return nil
         }
-
 
         guard interruptedFinish == nil else {
             let interrupt = interruptedFinish
@@ -613,12 +578,10 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             return interrupt?(error, false)
         }
 
-
         let generated = data?.decode(SDcodableGenerated.self)
         guard (generated?.images?.count ?? 0) > 0 else {
             return error
         }
-
 
         let (newImageURL, newPayload) = try await finish_txt2img(
             generated: generated,
@@ -649,25 +612,24 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             return (nil, nil)
         }
 
-
         Task {    @MainActor in
             nonInteractiveObservable = FXDobservableOverlay()
         }
 
         let infotext = generated?.infotext ?? ""
         let extractedPayload = extract_fromInfotext(infotext: infotext)
-        if (utilizedControlNet != nil) {
+        if utilizedControlNet != nil {
             extractedPayload?.userConfiguration.use_controlnet = true
             extractedPayload?.userConfiguration.controlnet = utilizedControlNet ?? SDextensionControlNet.minimum()!
         }
 
         var pngDataArray = decodedDataArray
-        if (extractedPayload?.userConfiguration.use_controlnet ?? false),
+        if extractedPayload?.userConfiguration.use_controlnet ?? false,
            let firstPNGdata = decodedDataArray.first {
             pngDataArray = [firstPNGdata]
         }
 
-        var newImageURL: URL? = nil
+        var newImageURL: URL?
 
         let payloadData = extractedPayload.encoded()
         let controlnetData = (extractedPayload?.userConfiguration.use_controlnet ?? false) ? utilizedControlNet?.encoded() : nil
@@ -686,7 +648,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     open func recover_disconnectedTxt2Img() async throws -> Error? {
         return try await synchronize_withSystem()
     }
-    
 
     public func continueMonitoring() {
         Task {	@MainActor in
@@ -701,7 +662,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                     shouldAttemptRecovering = false
 
                     Task {
-                        let _ = try await recover_disconnectedTxt2Img()
+                        _ = try await recover_disconnectedTxt2Img()
                     }
                 }
             }
@@ -732,11 +693,9 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             return (nil, false, error)
         }
 
-
         let isProgressing = newProgress?.state?.isProgressing ?? false
         return (newProgress, isProgressing, error)
     }
-
 
     open func interrupt() async -> Error? {
         Task {    @MainActor in
@@ -750,13 +709,12 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 self.nonInteractiveObservable = nil
             }
 
-
             let interruptedError = SDError(
                 domain: "SDEngine",
                 code: (error as? NSError)?.code ?? -1,
                 userInfo: [
                     NSLocalizedDescriptionKey: "Interrupted",
-                    NSLocalizedFailureReasonErrorKey: "Generating is canceled",
+                    NSLocalizedFailureReasonErrorKey: "Generating is canceled"
                 ])
 
             if shouldAlert {
@@ -767,7 +725,6 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
 
             return interruptedError
         }
-
 
         let (_, _, error) = await mainNetworking.requestToSDServer(
             quiet: false,
@@ -782,10 +739,9 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             return error
         }
 
-
         let interruptedError = interruptedFinish?(error, true)
         interruptedFinish = nil
-        
+
         return interruptedError
     }
 
@@ -795,8 +751,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
             if let loadedPayload = try SDcodablePayload.loaded(from: fileURL, withControlNet: true) {
                 self.reuse(loadedPayload: loadedPayload)
             }
-        }
-        catch {	fxd_log()
+        } catch {	fxd_log()
             fxdPrint(error)
         }
     }

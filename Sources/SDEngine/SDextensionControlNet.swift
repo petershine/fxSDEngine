@@ -1,9 +1,6 @@
-
-
 import Foundation
 
-
-fileprivate enum SDcontrolnetMode: String, CaseIterable {
+private enum SDcontrolnetMode: String, CaseIterable {
     case balanced = "Balanced"
     case myPrompt = "My prompt is more important"
     case controlNet = "ControlNet is more important"
@@ -52,7 +49,6 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
     var mask_image: String?
     var mask_image_fg: String?
 
-
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -100,12 +96,11 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
     }
 }
 
-
 import fXDKit
 
 extension SDextensionControlNet: SDprotocolExtension {
-    public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
-        var extractedDictionary: [String:Any?] = [:]
+    public static func decoded(using jsonDictionary: inout [String: Any?]) -> Self? {
+        var extractedDictionary: [String: Any?] = [:]
         let extractingKeyPairs_controlnet = [
             ("control_mode", "control mode"),
             ("module", "controlnet 0"),
@@ -116,32 +111,30 @@ extension SDextensionControlNet: SDprotocolExtension {
             ("processor_res", "processor res"),
             ("resize_mode", "resize mode"),
             ("threshold_a", "threshold a"),
-            ("threshold_b", "threshold b"),
+            ("threshold_b", "threshold b")
         ]
         for (key, extractedKey) in extractingKeyPairs_controlnet {
             extractedDictionary[key] = jsonDictionary[extractedKey]
             jsonDictionary[extractedKey] = nil
         }
 
-
         let control_mode = extractedDictionary["control_mode"] as? String
         for controlMode in SDcontrolnetMode.allCases {
-            if (control_mode?.contains(controlMode.rawValue) ?? false) {
+            if control_mode?.contains(controlMode.rawValue) ?? false {
                 extractedDictionary["control_mode"] = controlMode.rawValue
             }
         }
 
         fxdPrint(name: "extractedDictionary", dictionary: extractedDictionary)
 
-        var decoded: Self? = nil
+        var decoded: Self?
         if extractedDictionary.count > 0,
            let _ = extractedDictionary["module"] {
             do {
                 let controlnetData = try JSONSerialization.data(withJSONObject: extractedDictionary)
                 decoded = try JSONDecoder().decode(Self.self, from: controlnetData)
                 fxdPrint(decoded!)
-            }
-            catch {
+            } catch {
                 fxdPrint(error)
             }
         }
@@ -150,28 +143,27 @@ extension SDextensionControlNet: SDprotocolExtension {
         return decoded
     }
 
-    public var args: Dictionary<String, Any?>? {
-        var args: Dictionary<String, Any?>? = nil
+    public var args: [String: Any?]? {
+        var args: [String: Any?]?
         do {
             args = [
-                "args" : [
-                    try JSONEncoder().encode(self).jsonDictionary() ?? [:],
+                "args": [
+                    try JSONEncoder().encode(self).jsonDictionary() ?? [:]
                 ]
             ]
-        }
-        catch {    fxd_log()
+        } catch {    fxd_log()
             fxdPrint(error)
         }
 
         return args
     }
-    
+
     public func configurations() -> [[String]] {
         let essentials: [[String]] = [
             ["module:", module],
             ["model:", model],
             ["control mode:", control_mode],
-            ["resize mode:", resize_mode],
+            ["resize mode:", resize_mode]
         ]
 
         return essentials

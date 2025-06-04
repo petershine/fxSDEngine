@@ -1,7 +1,5 @@
-
 import Foundation
 import UIKit
-
 
 public enum SDAPIendpoint: String, CaseIterable {
 	case INTERNAL_SYSINFO = "internal/sysinfo"
@@ -17,12 +15,10 @@ public enum SDAPIendpoint: String, CaseIterable {
     case SDAPI_V1_MODULES = "sdapi/v1/sd-modules"
     case SDAPI_V1_UPSCALERS = "sdapi/v1/upscalers"
 
-
 	case INFINITE_IMAGE_BROWSING_FILES = "infinite_image_browsing/files"
 	case INFINITE_IMAGE_BROWSING_FILE = "infinite_image_browsing/file"
 	case INFINITE_IMAGE_BROWSING_GENINFO = "infinite_image_browsing/image_geninfo"
 }
-
 
 public protocol SDNetworking: Sendable {
     static var USER_DEFAULT_HOSTNAME: String { get }

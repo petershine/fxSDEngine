@@ -1,20 +1,17 @@
-
-
 import Foundation
 
-
 public struct SDcodableFiles: Codable {
-	public var files: [SDcodableFile?]? = nil
+	public var files: [SDcodableFile?]?
 }
 
 public struct SDcodableFile: Codable {
-	public var type: String? = nil
-	var size: String? = nil
-	var name: String? = nil
-	public var fullpath: String? = nil
-	var is_under_scanned_path: Bool? = nil
-	var date: String? = nil
-	var created_time: String? = nil
+	public var type: String?
+	var size: String?
+	var name: String?
+	public var fullpath: String?
+	var is_under_scanned_path: Bool?
+	var date: String?
+	var created_time: String?
 }
 
 extension SDcodableFile {
@@ -25,6 +22,6 @@ extension SDcodableFile {
 
         let targetFormatter = DateFormatter()
         targetFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        return targetFormatter.date(from:date!)
+        return targetFormatter.date(from: date!)
     }
 }

@@ -1,12 +1,9 @@
-
-
 import Foundation
 import UIKit
 
-
 public struct SDcodableGenerated: Codable {
-    public var images: [String?]? = nil
-    var info: String? = nil
+    public var images: [String?]?
+    var info: String?
 }
 
 extension SDcodableGenerated {
@@ -17,14 +14,12 @@ extension SDcodableGenerated {
             return nil
         }
 
-
         do {
-            let infoDictionary = try JSONSerialization.jsonObject(with: infoData) as? Dictionary<String, Any?>
+            let infoDictionary = try JSONSerialization.jsonObject(with: infoData) as? [String: Any?]
 
-            let infotext = (infoDictionary?["infotexts"] as? Array<Any>)?.first
+            let infotext = (infoDictionary?["infotexts"] as? [Any])?.first
             return infotext as? String
-        }
-        catch {
+        } catch {
         }
 
         return nil

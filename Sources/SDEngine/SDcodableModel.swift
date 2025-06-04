@@ -1,5 +1,3 @@
-
-
 public enum SDModelType: String, CaseIterable {
     case checkpoints
     case vaes
@@ -11,7 +9,6 @@ public enum SDModelType: String, CaseIterable {
 public protocol SDprotocolModel: Codable, Hashable, Sendable {
     var name: String? { get set }
 }
-
 
 public struct SDcodableCheckpoint: SDprotocolModel {
     public var name: String? {
@@ -75,8 +72,7 @@ public struct SDcodableSampler: SDprotocolModel {
                 self.brownian_noise = try container.decodeIfPresent(Bool.self, otherType: String.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.brownian_noise)
                 self.discard_next_to_last_sigma = try container.decodeIfPresent(Bool.self, otherType: String.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.discard_next_to_last_sigma)
                 self.uses_ensd = try container.decodeIfPresent(Bool.self, otherType: String.self, forKey: SDcodableSampler.SDcodableSamplerOption.CodingKeys.uses_ensd)
-            }
-            catch {
+            } catch {
                 // For they are optional, they don't need to fail whole decoding
             }
         }

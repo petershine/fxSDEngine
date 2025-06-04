@@ -1,8 +1,5 @@
-
-
 import Foundation
 import UIKit
-
 
 public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable {
     public static func == (lhs: SDcodablePayload, rhs: SDcodablePayload) -> Bool {
@@ -17,7 +14,6 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
     public var distilled_cfg_scale: Double
 	public var sampler_name: String
 	public var scheduler: String
-
 
 	public var width: Int
 	public var height: Int
@@ -60,7 +56,6 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
         var samples_save: Bool?
     }
 
-
     public var userConfiguration: SDcodableUserConfiguration
 
     /*
@@ -68,7 +63,6 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
      disable_extra_networks: Bool
      restore_faces: Bool
      */
-
 
 	required public init(from decoder: any Decoder) throws {
 		let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -101,7 +95,7 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
         if self.hr_sampler_name == nil {
             self.hr_sampler_name = self.sampler_name
         }
-        
+
         self.hr_scheduler = try container.decodeIfPresent(String.self, forKey: .hr_scheduler)
         if self.hr_scheduler == nil {
             self.hr_scheduler = self.scheduler
@@ -124,7 +118,6 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
 		self.do_not_save_samples = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_samples) ?? false
 		self.do_not_save_grid = try container.decodeIfPresent(Bool.self, forKey: .do_not_save_grid) ?? false
 
-
         self.override_settings_restore_afterwards = try container.decodeIfPresent(Bool.self, forKey: .override_settings_restore_afterwards) ?? true
         self.override_settings = try container.decodeIfPresent(SDcodableOverride.self, forKey: .override_settings)
 
@@ -140,7 +133,6 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
     public var adetailer: SDextensionADetailer
     public var controlnet: SDextensionControlNet
 
-
     public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
@@ -153,13 +145,11 @@ public struct SDcodableUserConfiguration: SDprotocolCodable {
     }
 }
 
-
 extension SDcodablePayload {
     public static func loaded(from fileURL: URL?, withControlNet: Bool) throws -> Self? {
         guard let loaded = try Self.loaded(from: fileURL) else {
             return nil
         }
-
 
         if withControlNet,
            let controlnet = try SDextensionControlNet.loaded(from: fileURL?.availableControlNetURL) {
@@ -170,7 +160,6 @@ extension SDcodablePayload {
     }
 }
 
-
 import fXDKit
 
 extension SDcodablePayload {
@@ -179,12 +168,10 @@ extension SDcodablePayload {
 			return (nil, nil)
 		}
 
-
-		var submissable: Dictionary<String, Any?>? = nil
+		var submissable: [String: Any?]?
 		do {
-			submissable = try JSONSerialization.jsonObject(with: payload) as? Dictionary<String, Any?>
-		}
-		catch {	fxd_log()
+			submissable = try JSONSerialization.jsonObject(with: payload) as? [String: Any?]
+		} catch {	fxd_log()
 			fxdPrint(error)
 		}
 
@@ -192,15 +179,13 @@ extension SDcodablePayload {
 			return (nil, nil)
 		}
 
-
         if !(self.userConfiguration.use_lastSeed) {
 			submissable["seed"] = -1
 		}
 
+        var alwayson_scripts: [String: Any?] = [:]
 
-        var alwayson_scripts: [String:Any?] = [:]
-
-        if (self.userConfiguration.use_adetailer),
+        if self.userConfiguration.use_adetailer,
            mainSDEngine.systemInfo?.isEnabled(.adetailer) ?? false {
 
             self.userConfiguration.adetailer.ad_cfg_scale = Int(self.cfg_scale)
@@ -208,7 +193,7 @@ extension SDcodablePayload {
             alwayson_scripts[SDExtensionName.adetailer.rawValue] = self.userConfiguration.adetailer.args
         }
 
-        if (self.userConfiguration.use_controlnet) {
+        if self.userConfiguration.use_controlnet {
             if let sourceImageBase64 = self.userConfiguration.controlnet.image,
                !(sourceImageBase64.isEmpty) {
                 alwayson_scripts[SDExtensionName.controlnet.rawValue] = self.userConfiguration.controlnet.args
@@ -220,21 +205,17 @@ extension SDcodablePayload {
             submissable["alwayson_scripts"] = alwayson_scripts
         }
 
-
-        var override_settings: [String:Any?]? = submissable["override_settings"] as? [String:Any?]
+        var override_settings: [String: Any?]? = submissable["override_settings"] as? [String: Any?]
         override_settings?["samples_save"] = true
         submissable["override_settings"] = override_settings
-
 
         // clean userConfiguration, not for submission
         submissable["userConfiguration"] = nil
 
-
         var submissablePayload: Data = payload
         do {
             submissablePayload = try JSONSerialization.data(withJSONObject: submissable)
-        }
-        catch {    fxd_log()
+        } catch {    fxd_log()
             fxdPrint(error)
         }
 
@@ -243,7 +224,7 @@ extension SDcodablePayload {
 }
 
 extension SDcodablePayload {
-    public static func decoded(using jsonDictionary: inout Dictionary<String, Any?>) -> Self? {
+    public static func decoded(using jsonDictionary: inout [String: Any?]) -> Self? {
 
         if let sizeComponents = (jsonDictionary["size"] as? String)?.components(separatedBy: "x"),
            sizeComponents.count == 2 {
@@ -261,7 +242,7 @@ extension SDcodablePayload {
             ("hr_second_pass_steps", "hires steps"),
             ("hr_upscaler", "hires upscaler"),
 
-            ("model_hash", "model hash"),
+            ("model_hash", "model hash")
         ]
 
         for (key, replacedKey) in replacingKeyPairs {
@@ -269,16 +250,13 @@ extension SDcodablePayload {
             jsonDictionary[replacedKey] = nil
         }
 
-
-        var override_settings: [String:Any] = [:]
+        var override_settings: [String: Any] = [:]
 
         if let model_hash = jsonDictionary["model_hash"] as? String, !model_hash.isEmpty {
             override_settings["sd_model_checkpoint"] = model_hash
-        }
-        else if let model_name = jsonDictionary["model"] as? String, !model_name.isEmpty {
+        } else if let model_name = jsonDictionary["model"] as? String, !model_name.isEmpty {
             override_settings["sd_model_checkpoint"] = model_name
         }
-
 
         let vae_name: String = jsonDictionary["module 1"] as? String ?? jsonDictionary["vae"] as? String ?? ""
         if !vae_name.isEmpty {
@@ -292,14 +270,12 @@ extension SDcodablePayload {
 
         jsonDictionary["override_settings"] = override_settings
 
-
-        var decoded: Self? = nil
+        var decoded: Self?
         do {
             let payloadData = try JSONSerialization.data(withJSONObject: jsonDictionary)
             decoded = try JSONDecoder().decode(Self.self, from: payloadData)
             fxdPrint(decoded!)
-        }
-        catch {
+        } catch {
             fxdPrint(error)
         }
 
@@ -314,12 +290,10 @@ extension SDcodablePayload {
             return
         }
 
-
         let decoded = try JSONDecoder().decode(SDcodableOverride.self, from: overrideSettings)
         if self.override_settings == nil {
             self.override_settings = decoded
-        }
-        else {
+        } else {
             self.override_settings?.sd_model_checkpoint = decoded.sd_model_checkpoint
         }
     }
@@ -348,7 +322,7 @@ extension SDcodablePayload {
             self.prompt = prompt
             fxdPrint("PAYLOAD: prompt: \(self.prompt)")
         }
-        
+
         if self.negative_prompt.isEmpty,
            let negative_prompt = remoteConfig.negative_prompt,
            !negative_prompt.isEmpty {
@@ -364,7 +338,6 @@ extension SDcodablePayload {
     }
 }
 
-
 extension SDcodablePayload {
     public func model_name(with checkpoints: [SDcodableCheckpoint]) -> String {
         var model_name: String = "(unknown)"
@@ -372,8 +345,7 @@ extension SDcodablePayload {
         let filtered = checkpoints.filter { ($0.model_name == model_identifier || $0.hash == model_identifier) }
         if filtered.count == 0 {
             model_name = model_identifier.isEmpty ? "(unknown)" : model_identifier
-        }
-        else if filtered.first != nil {
+        } else if filtered.first != nil {
             model_name = filtered.first?.model_name ?? "(unknown)"
         }
 
@@ -398,7 +370,7 @@ extension SDcodablePayload {
             ["HEIGHT:", String(Int(height))],
 
             ["UPSCALER:", hr_upscaler],
-            ["RESIZED:", "x\(String(format: "%.2f", hr_scale)) (\(String(Int(Double(width)*hr_scale))) by \(String(Int(Double(height)*hr_scale))))"],
+            ["RESIZED:", "x\(String(format: "%.2f", hr_scale)) (\(String(Int(Double(width)*hr_scale))) by \(String(Int(Double(height)*hr_scale))))"]
         ]
 
         return essentials
@@ -406,18 +378,17 @@ extension SDcodablePayload {
 
     public func parameters(with checkpoints: [SDcodableCheckpoint]) -> [String: Any] {
         return [
-            "CLIP_stop_at_last_layers":self.override_settings?.CLIP_stop_at_last_layers ?? 1,
-            "model_name":self.model_name(with: checkpoints),
-            "sd_vae":self.override_settings?.sd_vae ?? "None",
-            "sampler_name":self.sampler_name,
-            "scheduler":self.scheduler,
-            "steps":self.steps,
-            "cfg_scale":self.cfg_scale,
-            "hr_upscaler":self.hr_upscaler
+            "CLIP_stop_at_last_layers": self.override_settings?.CLIP_stop_at_last_layers ?? 1,
+            "model_name": self.model_name(with: checkpoints),
+            "sd_vae": self.override_settings?.sd_vae ?? "None",
+            "sampler_name": self.sampler_name,
+            "scheduler": self.scheduler,
+            "steps": self.steps,
+            "cfg_scale": self.cfg_scale,
+            "hr_upscaler": self.hr_upscaler
         ]
     }
 }
-
 
 fileprivate extension URL {
     var availableControlNetURL: URL? {

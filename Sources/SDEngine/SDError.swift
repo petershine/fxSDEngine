@@ -1,19 +1,17 @@
-
 import Foundation
 
 import fXDKit
 
-
 public let ERROR_NOT_OPERATING: String = "Possibly, your ForgeUI server is not operating."
 
 public class SDError: NSError, @unchecked Sendable {
-    public var httpURLResponse: HTTPURLResponse? = nil
+    public var httpURLResponse: HTTPURLResponse?
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
 
-    required override init(domain: String, code: Int, userInfo dict: [String : Any]? = nil) {
+    required override init(domain: String, code: Int, userInfo dict: [String: Any]? = nil) {
         super.init(domain: domain, code: code, userInfo: dict)
     }
 
@@ -33,7 +31,6 @@ public class SDError: NSError, @unchecked Sendable {
             return error as? Self
         }
 
-
         let assumedDescription = "Problem with server"
         var assumedFailureReason = ""
         switch httpURLResponseStatusCode {
@@ -43,8 +40,7 @@ public class SDError: NSError, @unchecked Sendable {
                 break
         }
 
-
-        let jsonDictionary: [String:Any?]? = data?.jsonDictionary()
+        let jsonDictionary: [String: Any?]? = data?.jsonDictionary()
 
         var errorDescription = (error as? NSError)?.localizedDescription ?? assumedDescription
         errorDescription += "\n\(jsonDictionary?["error"] as? String ?? "")"
@@ -55,13 +51,12 @@ public class SDError: NSError, @unchecked Sendable {
         }
         errorDescription = errorDescription.trimmingCharacters(in: .whitespacesAndNewlines)
 
-
         var errorFailureReason = (error as? NSError)?.localizedFailureReason ?? assumedFailureReason
         errorFailureReason += "\n\(jsonDictionary?["errors"] as? String ?? "")"
 
         var receivedMSG = "\n\(jsonDictionary?["msg"] as? String ?? "")"
         if receivedMSG.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            if let detail = jsonDictionary?["detail"] as? Array<Dictionary<String, Any>> {
+            if let detail = jsonDictionary?["detail"] as? [[String: Any]] {
                 receivedMSG = "\n\(detail.first?["msg"] as? String ?? "")"
             }
         }
@@ -70,10 +65,9 @@ public class SDError: NSError, @unchecked Sendable {
         }
         errorFailureReason = errorFailureReason.trimmingCharacters(in: .whitespacesAndNewlines)
 
-
         let errorUserInfo = [
-            NSLocalizedDescriptionKey : errorDescription,
-            NSLocalizedFailureReasonErrorKey : errorFailureReason
+            NSLocalizedDescriptionKey: errorDescription,
+            NSLocalizedFailureReasonErrorKey: errorFailureReason
         ]
 
         let processed = Self(
@@ -81,7 +75,6 @@ public class SDError: NSError, @unchecked Sendable {
             code: (error as? NSError)?.code ?? -1,
             userInfo: errorUserInfo)
         processed.httpURLResponse = response as? HTTPURLResponse
-
 
         fxd_log()
         fxdPrint(name: "DATA", dictionary: jsonDictionary)
@@ -92,4 +85,3 @@ public class SDError: NSError, @unchecked Sendable {
         return processed
     }
 }
-

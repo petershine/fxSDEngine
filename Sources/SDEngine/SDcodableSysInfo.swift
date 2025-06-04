@@ -1,27 +1,23 @@
-
-
 import Foundation
 
-
 public struct SDcodableSysInfo: Codable {
-	var Extensions: [SDcodableExtension]? = nil
+	var Extensions: [SDcodableExtension]?
 
-	public var Config: SDcodableConfig? = nil
+	public var Config: SDcodableConfig?
 	public struct SDcodableConfig: Codable {
-        var CLIP_stop_at_last_layers: Int? = nil
+        var CLIP_stop_at_last_layers: Int?
 
-		public var outdir_samples: String? = nil
-        public var outdir_txt2img_samples: String? = nil
+		public var outdir_samples: String?
+        public var outdir_txt2img_samples: String?
 
-		public var sd_checkpoint_hash: String? = nil
-		var sd_model_checkpoint: String? = nil
+		public var sd_checkpoint_hash: String?
+		var sd_model_checkpoint: String?
 
-        public var sd_vae: String? = nil
+        public var sd_vae: String?
 
-        var quick_setting_list: [String?]? = nil
+        var quick_setting_list: [String?]?
 	}
 }
-
 
 extension SDcodableSysInfo {
 	public func isEnabled(_ extensionCase: SDExtensionName) -> Bool {
