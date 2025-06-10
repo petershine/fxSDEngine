@@ -80,16 +80,28 @@ extension SDStorage {
 }
 
 extension SDStorage {
+    fileprivate actor DeletingResult {
+        var deletedCount: Int = 0
+        var deletingError: Error? = nil
+
+        func setDeleteCount(_ count: Int) async {
+            deletedCount = count
+        }
+
+        func setDeletingError(_ error: Error?) async {
+            deletingError = error
+        }
+    }
+
+
     public func deleteFileURLs(fileURLs: [URL?]?) async throws -> (Bool, Int, Error?) {
         guard let fileURLs, fileURLs.count > 0 else {
             return (false, 0, nil)
         }
 
+        let deletingActor = DeletingResult()
+
         let message: String = (fileURLs.count > 1) ? "\(fileURLs.count) images" : ((fileURLs.first as? URL)?.absoluteURL.lastPathComponent ?? "")
-
-        var deletedCount: Int = 0
-        var deletingError: Error?
-
         let didDelete = try await UIAlertController.asyncAlert(
             withTitle: "Do you want to delete?",
             message: message,
@@ -97,6 +109,9 @@ extension SDStorage {
             destructiveText: "DELETE",
             destructiveHandler: {
                 _ in
+
+                var deletedCount: Int = 0
+                var deletingError: Error? = nil
 
                 do {
                     for fileURL in fileURLs {
@@ -126,13 +141,17 @@ extension SDStorage {
                 } catch {    fxd_log()
                     fxdPrint(error)
                     deletingError = error
-                    return (false, error)
                 }
 
-                return ((deletedCount > 0), nil)
+                Task {
+                    await deletingActor.setDeleteCount(deletedCount)
+                    await deletingActor.setDeletingError(deletingError)
+                }
+
+                return ((deletedCount > 0), deletingError)
             })
 
         latestImageURLs = FileManager.default.fileURLs(contentType: .png, directory: .documentDirectory)
-        return (didDelete ?? false, deletedCount, deletingError)
+        return (didDelete ?? false, await deletingActor.deletedCount, await deletingActor.deletingError)
     }
 }
