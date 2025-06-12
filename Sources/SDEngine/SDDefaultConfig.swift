@@ -12,7 +12,9 @@ public enum SDDefaultConfigKey: String, CaseIterable {
     case optimalMin
     case optimalMax
 
+    case hr_second_pass_steps
     case hr_upscaler
+
     case prompt
     case negative_prompt
 }
@@ -24,7 +26,9 @@ open class SDDefaultConfig {
     public var optimalMin: Double = DIMENSION_OPTIMAL_MIN
     public var optimalMax: Double = DIMENSION_OPTIMAL_MAX
 
+    public var hr_second_pass_steps: Int = 5
     public var hr_upscaler: String?
+    
     public var prompt: String?
     public var negative_prompt: String?
 

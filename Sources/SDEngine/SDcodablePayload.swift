@@ -88,7 +88,7 @@ public class SDcodablePayload: SDprotocolCodable, Equatable, @unchecked Sendable
         self.hr_resize_y = try container.decodeIfPresent(Int.self, forKey: .hr_resize_y) ?? 0
 
         self.denoising_strength = try container.decodeIfPresent(Double.self, forKey: .denoising_strength) ?? 0.4
-		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps) ?? 10
+		self.hr_second_pass_steps = try container.decodeIfPresent(Int.self, forKey: .hr_second_pass_steps) ?? 0
 		self.hr_upscaler = try container.decodeIfPresent(String.self, forKey: .hr_upscaler) ?? ""
 
         self.hr_sampler_name = try container.decodeIfPresent(String.self, forKey: .hr_sampler_name)
@@ -309,6 +309,11 @@ extension SDcodablePayload {
             fxdPrint("PAYLOAD: height: \(self.height)")
         }
 
+        if self.hr_second_pass_steps == 0 {
+            self.hr_second_pass_steps = remoteConfig.hr_second_pass_steps
+            fxdPrint("PAYLOAD: hr_second_pass_steps: \(self.hr_second_pass_steps)")
+        }
+
         if self.hr_upscaler.isEmpty,
            let hr_upscaler = remoteConfig.hr_upscaler,
            !hr_upscaler.isEmpty {
@@ -370,7 +375,8 @@ extension SDcodablePayload {
             ["HEIGHT:", String(Int(height))],
 
             ["UPSCALER:", hr_upscaler],
-            ["RESIZED:", "x\(String(format: "%.2f", hr_scale)) (\(String(Int(Double(width)*hr_scale))) by \(String(Int(Double(height)*hr_scale))))"]
+            ["RESIZED:", "x\(String(format: "%.2f", hr_scale)) (\(String(Int(Double(width)*hr_scale))) by \(String(Int(Double(height)*hr_scale))))"],
+            ["HR STEPS:", String(hr_second_pass_steps)]
         ]
 
         return essentials
@@ -385,7 +391,8 @@ extension SDcodablePayload {
             "scheduler": self.scheduler,
             "steps": self.steps,
             "cfg_scale": self.cfg_scale,
-            "hr_upscaler": self.hr_upscaler
+            "hr_upscaler": self.hr_upscaler,
+            "hr_second_pass_steps": self.hr_second_pass_steps
         ]
     }
 }
