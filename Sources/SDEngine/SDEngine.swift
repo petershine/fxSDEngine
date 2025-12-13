@@ -18,6 +18,7 @@ public protocol SDEngine: Sendable {
     var didStartGenerating: Bool { get set }
     var interruptedFinish: ((Error?, Bool) -> Error?)? { get set }
     var shouldAttemptRecovering: Bool { get set }
+    var lastMonitoredError: SDError? { get set }
 
 	var displayedImage: UIImage? { get set }
 

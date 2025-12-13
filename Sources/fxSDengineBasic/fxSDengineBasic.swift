@@ -46,6 +46,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
     }
 
     public var shouldAttemptRecovering: Bool = false
+    public var lastMonitoredError: SDError? = nil
 
 	public var displayedImage: UIImage?
 
@@ -667,6 +668,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
                 }
             }
 
+            lastMonitoredError = error as? SDError
             if error != nil,
                (error as? NSError)?.code ?? -1 == -1004 {
                 fxdPrint(error)
