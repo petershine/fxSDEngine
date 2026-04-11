@@ -12,12 +12,16 @@ public enum SDAPIendpoint: String, CaseIterable {
 	case SDAPI_V1_MODELS = "sdapi/v1/sd-models"
     case SDAPI_V1_SAMPLERS = "sdapi/v1/samplers"
     case SDAPI_V1_SCHEDULERS = "sdapi/v1/schedulers"
-    case SDAPI_V1_MODULES = "sdapi/v1/sd-modules"
+    case SDAPI_V1_VAE = "sdapi/v1/sd-vae"
     case SDAPI_V1_UPSCALERS = "sdapi/v1/upscalers"
 
 	case INFINITE_IMAGE_BROWSING_FILES = "infinite_image_browsing/files"
 	case INFINITE_IMAGE_BROWSING_FILE = "infinite_image_browsing/file"
 	case INFINITE_IMAGE_BROWSING_GENINFO = "infinite_image_browsing/image_geninfo"
+
+
+    //deprecated
+    case SDAPI_V1_MODULES = "sdapi/v1/sd-modules"
 }
 
 public protocol SDNetworking: Sendable {

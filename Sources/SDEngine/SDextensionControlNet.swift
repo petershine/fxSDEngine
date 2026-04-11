@@ -2,8 +2,10 @@ import Foundation
 
 private enum SDcontrolnetMode: String, CaseIterable {
     case balanced = "Balanced"
-    case myPrompt = "My prompt is more important"
-    case controlNet = "ControlNet is more important"
+    case preferPrompt = "Prefer Prompt"
+    case preferControlNet = "Prefer ControlNet"
+//    case myPrompt = "My prompt is more important"
+//    case controlNet = "ControlNet is more important"
 }
 
 public struct SDextensionControlNet: SDprotocolCodable, Equatable {
@@ -62,7 +64,7 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
         self.batch_mask_dir = try container.decodeIfPresent(String.self, forKey: .batch_mask_dir) ?? nil
         self.batch_mask_gallery = try container.decodeIfPresent(String.self, forKey: .batch_mask_gallery) ?? nil
         self.batch_modifiers = try container.decodeIfPresent([String?].self, forKey: .batch_modifiers) ?? nil
-        self.control_mode = try container.decodeIfPresent(String.self, forKey: .control_mode) ?? SDcontrolnetMode.myPrompt.rawValue
+        self.control_mode = try container.decodeIfPresent(String.self, forKey: .control_mode) ?? SDcontrolnetMode.preferPrompt.rawValue
         self.effective_region_mask = try container.decodeIfPresent(String.self, forKey: .effective_region_mask) ?? nil
         self.enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? true
         self.generated_image = try container.decodeIfPresent(String.self, forKey: .generated_image) ?? nil
@@ -84,8 +86,8 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
         self.pulid_mode = try container.decodeIfPresent(String.self, forKey: .pulid_mode) ?? "Fidelity"
         self.resize_mode = try container.decodeIfPresent(String.self, forKey: .resize_mode) ?? "Resize and Fill"
         self.save_detected_map = try container.decodeIfPresent(Bool.self, forKey: .save_detected_map) ?? true
-        self.threshold_a = try container.decodeIfPresent(Double.self, forKey: .threshold_a) ?? 0.5
-        self.threshold_b = try container.decodeIfPresent(Double.self, forKey: .threshold_b) ?? 0.5
+        self.threshold_a = try container.decodeIfPresent(Double.self, forKey: .threshold_a) ?? 128.0 //256.0*0.5
+        self.threshold_b = try container.decodeIfPresent(Double.self, forKey: .threshold_b) ?? 128.0 //256.0*0.5
         self.use_preview_as_input = try container.decodeIfPresent(Bool.self, forKey: .use_preview_as_input) ?? false
         self.weight = try container.decodeIfPresent(Double.self, forKey: .weight) ?? 1.0
 
