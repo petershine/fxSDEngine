@@ -258,10 +258,6 @@ extension SDcodablePayload {
             override_settings["sd_model_checkpoint"] = model_name
         }
 
-        let vae_name: String = jsonDictionary["module 1"] as? String ?? jsonDictionary["vae"] as? String ?? ""
-        if !vae_name.isEmpty {
-            override_settings["sd_vae"] = vae_name
-        }
 
         let clip_skip: Double = jsonDictionary["clip skip"] as? Double ?? 1.0
         if clip_skip > 0.0 {
