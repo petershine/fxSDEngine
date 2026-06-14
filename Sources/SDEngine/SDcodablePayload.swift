@@ -207,6 +207,8 @@ extension SDcodablePayload {
 
         var override_settings: [String: Any?]? = submissable["override_settings"] as? [String: Any?]
         override_settings?["samples_save"] = true
+        override_settings?["CLIP_stop_at_last_layers"] = mainSDEngine.systemInfo?.Config?.CLIP_stop_at_last_layers ?? 1
+
         submissable["override_settings"] = override_settings
 
         // clean userConfiguration, not for submission
@@ -258,11 +260,8 @@ extension SDcodablePayload {
             override_settings["sd_model_checkpoint"] = model_name
         }
 
-
-        let clip_skip: Double = jsonDictionary["clip skip"] as? Double ?? 1.0
-        if clip_skip > 0.0 {
-            override_settings["CLIP_stop_at_last_layers"] = Int(clip_skip)
-        }
+        let clip_skip: Double = jsonDictionary["clip_skip"] as? Double ?? jsonDictionary["clip skip"] as? Double ?? 1.0
+        override_settings["CLIP_stop_at_last_layers"] = Int(clip_skip)
 
         jsonDictionary["override_settings"] = override_settings
 
@@ -329,12 +328,6 @@ extension SDcodablePayload {
            !negative_prompt.isEmpty {
             self.negative_prompt = negative_prompt
             fxdPrint("PAYLOAD: negative_prompt: \(self.negative_prompt)")
-        }
-
-        if self.override_settings?.CLIP_stop_at_last_layers == nil
-            || self.override_settings?.CLIP_stop_at_last_layers ?? 0 == 0 {
-            self.override_settings?.CLIP_stop_at_last_layers = 1
-            fxdPrint("PAYLOAD: CLIP_stop_at_last_layers: \(String(describing: self.override_settings?.CLIP_stop_at_last_layers))")
         }
     }
 }
