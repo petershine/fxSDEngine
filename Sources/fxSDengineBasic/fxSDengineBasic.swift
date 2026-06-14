@@ -101,7 +101,7 @@ open class fxSDengineBasic: SDEngine, @unchecked Sendable {
         let error_0 = await refresh_systemInfo()
 
         guard error_0 == nil,
-              let folderPath = systemInfo?.Config?.outdir_samples
+              let folderPath = (systemInfo?.Config?.outdir_samples?.isEmpty ?? true) ? systemInfo?.Config?.outdir_txt2img_samples : systemInfo?.Config?.outdir_samples
         else {
             return error_0
         }
