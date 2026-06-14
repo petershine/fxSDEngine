@@ -76,7 +76,7 @@ public struct SDextensionControlNet: SDprotocolCodable, Equatable {
         self.loopback = try container.decodeIfPresent(Bool.self, forKey: .loopback) ?? false
         self.low_vram = try container.decodeIfPresent(Bool.self, forKey: .low_vram) ?? false
         self.mask = try container.decodeIfPresent(String.self, forKey: .mask) ?? nil
-        self.model = try container.decodeIfPresent(String.self, forKey: .model) ?? "diffusers_xl_canny_full [2b69fca4]"
+        self.model = try container.decodeIfPresent(String.self, forKey: .model) ?? "diffusers_xl_canny_full"
         self.module = try container.decodeIfPresent(String.self, forKey: .module) ?? "canny"
         self.output_dir = try container.decodeIfPresent(String.self, forKey: .output_dir) ?? ""
         self.pixel_perfect = try container.decodeIfPresent(Bool.self, forKey: .pixel_perfect) ?? true
@@ -124,6 +124,9 @@ extension SDextensionControlNet: SDprotocolExtension {
                 extractedDictionary["control_mode"] = controlMode.rawValue
             }
         }
+
+        let revisedModelName = (extractedDictionary["model"] as? String)?.components(separatedBy: "[").first?.trimmingCharacters(in: .whitespacesAndNewlines)
+        extractedDictionary["model"] = revisedModelName
 
         fxdPrint(name: "extractedDictionary", dictionary: extractedDictionary)
 
